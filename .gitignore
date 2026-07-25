@@ -1,0 +1,27 @@
+# Error files directory
+errors/
+
+# Team identity (local only)
+team.md
+
+# Build output
+target/
+
+# Runtime data (H2 database)
+data/
+
+# Coverage artifacts
+coverage/
+
+# Node.js
+node_modules/
+
+# Task planning (local only)
+next_task.md
+
+# IDE files
+.idea/
+
+# Working dir
+.DS_Store
+.claude
