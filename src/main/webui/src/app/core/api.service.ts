@@ -19,6 +19,8 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
   Appointment,
+  BackupFile,
+  BackupSettings,
   Company,
   Contact,
   CreateUserRequest,
@@ -27,6 +29,7 @@ import {
   Deal,
   DealStage,
   Interaction,
+  RestoreResult,
   UpdateUserRequest,
   User,
 } from './models';
@@ -251,5 +254,37 @@ export class ApiService {
 
   deleteUser(id: number): Promise<void> {
     return firstValueFrom(this.http.delete<void>(`/api/users/${id}`));
+  }
+
+  // --- backups -----------------------------------------------------------------
+
+  listBackups(): Promise<BackupFile[]> {
+    return firstValueFrom(this.http.get<BackupFile[]>('/api/backups'));
+  }
+
+  createBackup(): Promise<BackupFile> {
+    return firstValueFrom(this.http.post<BackupFile>('/api/backups', null));
+  }
+
+  restoreBackup(name: string): Promise<RestoreResult> {
+    return firstValueFrom(
+      this.http.post<RestoreResult>(`/api/backups/${encodeURIComponent(name)}/restore`, null),
+    );
+  }
+
+  restoreBackupUpload(file: File): Promise<RestoreResult> {
+    const body = new FormData();
+    body.append('file', file, file.name);
+    return firstValueFrom(this.http.post<RestoreResult>('/api/backups/restore-upload', body));
+  }
+
+  backupSettings(): Promise<BackupSettings> {
+    return firstValueFrom(this.http.get<BackupSettings>('/api/backups/settings'));
+  }
+
+  updateBackupSettings(retentionDays: number): Promise<BackupSettings> {
+    return firstValueFrom(
+      this.http.put<BackupSettings>('/api/backups/settings', { retentionDays }),
+    );
   }
 }

@@ -33,6 +33,7 @@ export const EN = {
   'nav.tasks': 'To-dos',
   'nav.calendar': 'Calendar',
   'nav.users': 'Users',
+  'nav.backups': 'Backups',
   'nav.signOut': 'Sign out',
   'nav.signedInAs': 'Signed in as',
   'nav.language': 'Language',
@@ -206,6 +207,48 @@ export const EN = {
   'users.mustChange': 'Must change password',
   'users.you': 'you',
 
+  'backup.heading': 'Backups',
+  'backup.explain':
+    'Every change is saved to an XML file in the folder below. Older files are removed automatically after the retention period.',
+  'backup.folder': 'Folder',
+  'backup.createNow': 'Create backup now',
+  'backup.created': 'Backup created.',
+  'backup.retention': 'Keep backups for',
+  'backup.retentionUnit': 'days',
+  'backup.retentionHint': 'Anything older is deleted automatically. Between {min} and {max} days.',
+  'backup.retentionSaved': 'The retention period has been changed.',
+  'backup.files': 'Available backups',
+  'backup.fileName': 'File',
+  'backup.fileSize': 'Size',
+  'backup.fileDate': 'Created',
+  'backup.empty': 'No backups yet.',
+  'backup.download': 'Download',
+  'backup.restore': 'Restore',
+  'backup.beforeRestore': 'Before a restore',
+  'backup.restoreFromFolder': 'Restore from the folder',
+  'backup.chooseFile': 'Choose a backup',
+  'backup.restoreFromUpload': 'Restore from a file on your computer',
+  'backup.uploadHint': 'Pick an XML file that was created by Small CRM.',
+  'backup.upload': 'Upload and restore',
+  'backup.restoreWarningTitle': 'Replace all data?',
+  'backup.restoreWarning':
+    'Restoring “{name}” deletes all contacts, companies, deals, activities, to-dos and appointments, and puts back what the file contains. User accounts are not affected.',
+  'backup.restoreWarningUpload':
+    'Restoring this file deletes all contacts, companies, deals, activities, to-dos and appointments, and puts back what the file contains. User accounts are not affected.',
+  'backup.restoreSafetyHint':
+    'The current data is saved to a “before-restore” file first, so this can be undone.',
+  'backup.restoreConfirm': 'Replace the data',
+  'backup.restored': '{count} records restored. The previous data is in {file}.',
+  'backup.noAccountsHint':
+    'A backup contains your business data. User accounts and passwords are not included.',
+
+  'error.BACKUP_EMPTY': 'The backup file is empty.',
+  'error.BACKUP_TOO_LARGE': 'The backup file is too large.',
+  'error.BACKUP_UNREADABLE': 'This file is not a Small CRM backup.',
+  'error.BACKUP_VERSION_UNSUPPORTED':
+    'This backup was written by a newer version of Small CRM and cannot be read.',
+  'error.RETENTION_OUT_OF_RANGE': 'Please enter a retention period within the allowed range.',
+
   'error.title': 'Something went wrong',
   'error.network': 'The server cannot be reached. Please check your connection and try again.',
   'error.unexpected': 'An unexpected error occurred. Nothing was saved.',
@@ -245,6 +288,7 @@ export const DE: Record<TranslationKey, string> = {
   'nav.tasks': 'Aufgaben',
   'nav.calendar': 'Kalender',
   'nav.users': 'Benutzer',
+  'nav.backups': 'Sicherungen',
   'nav.signOut': 'Abmelden',
   'nav.signedInAs': 'Angemeldet als',
   'nav.language': 'Sprache',
@@ -418,6 +462,50 @@ export const DE: Record<TranslationKey, string> = {
   'users.resetPasswordFor': 'Neues Passwort für {name}',
   'users.mustChange': 'Muss Passwort ändern',
   'users.you': 'Sie',
+
+  'backup.heading': 'Sicherungen',
+  'backup.explain':
+    'Jede Änderung wird als XML-Datei im unten genannten Ordner gesichert. Ältere Dateien werden nach Ablauf der Aufbewahrungsfrist automatisch entfernt.',
+  'backup.folder': 'Ordner',
+  'backup.createNow': 'Jetzt sichern',
+  'backup.created': 'Sicherung erstellt.',
+  'backup.retention': 'Sicherungen aufbewahren für',
+  'backup.retentionUnit': 'Tage',
+  'backup.retentionHint':
+    'Ältere Dateien werden automatisch gelöscht. Zwischen {min} und {max} Tagen.',
+  'backup.retentionSaved': 'Die Aufbewahrungsfrist wurde geändert.',
+  'backup.files': 'Vorhandene Sicherungen',
+  'backup.fileName': 'Datei',
+  'backup.fileSize': 'Größe',
+  'backup.fileDate': 'Erstellt',
+  'backup.empty': 'Noch keine Sicherungen.',
+  'backup.download': 'Herunterladen',
+  'backup.restore': 'Wiederherstellen',
+  'backup.beforeRestore': 'Vor einer Wiederherstellung',
+  'backup.restoreFromFolder': 'Aus dem Ordner wiederherstellen',
+  'backup.chooseFile': 'Sicherung auswählen',
+  'backup.restoreFromUpload': 'Aus einer Datei auf Ihrem Rechner wiederherstellen',
+  'backup.uploadHint': 'Wählen Sie eine XML-Datei, die von Small CRM erstellt wurde.',
+  'backup.upload': 'Hochladen und wiederherstellen',
+  'backup.restoreWarningTitle': 'Alle Daten ersetzen?',
+  'backup.restoreWarning':
+    'Beim Wiederherstellen von „{name}“ werden alle Kontakte, Firmen, Geschäfte, Aktivitäten, Aufgaben und Termine gelöscht und durch den Inhalt der Datei ersetzt. Benutzerkonten bleiben unverändert.',
+  'backup.restoreWarningUpload':
+    'Beim Wiederherstellen dieser Datei werden alle Kontakte, Firmen, Geschäfte, Aktivitäten, Aufgaben und Termine gelöscht und durch den Inhalt der Datei ersetzt. Benutzerkonten bleiben unverändert.',
+  'backup.restoreSafetyHint':
+    'Der aktuelle Stand wird vorher in einer „before-restore“-Datei gesichert und kann damit zurückgeholt werden.',
+  'backup.restoreConfirm': 'Daten ersetzen',
+  'backup.restored': '{count} Datensätze wiederhergestellt. Der vorherige Stand liegt in {file}.',
+  'backup.noAccountsHint':
+    'Eine Sicherung enthält Ihre Geschäftsdaten. Benutzerkonten und Passwörter sind nicht enthalten.',
+
+  'error.BACKUP_EMPTY': 'Die Sicherungsdatei ist leer.',
+  'error.BACKUP_TOO_LARGE': 'Die Sicherungsdatei ist zu groß.',
+  'error.BACKUP_UNREADABLE': 'Diese Datei ist keine Small-CRM-Sicherung.',
+  'error.BACKUP_VERSION_UNSUPPORTED':
+    'Diese Sicherung stammt aus einer neueren Version von Small CRM und kann nicht gelesen werden.',
+  'error.RETENTION_OUT_OF_RANGE':
+    'Bitte geben Sie eine Aufbewahrungsfrist im erlaubten Bereich an.',
 
   'error.title': 'Da ist etwas schiefgelaufen',
   'error.network':

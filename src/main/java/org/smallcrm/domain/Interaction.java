@@ -25,13 +25,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /** A single logged touchpoint: a call, an e-mail, a meeting or a free form note. */
 @Entity
 @Table(name = "interaction")
 public class Interaction extends BaseEntity {
 
+  // Stored as plain text rather than a native H2 ENUM, so adding a constant later needs
+  // no schema migration and the column stays portable.
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false, length = 20)
   public InteractionType type;
 

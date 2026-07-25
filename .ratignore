@@ -26,6 +26,9 @@ e2e/assets/**
 
 # Runtime data and local state
 **/data/**
+# Only the runtime folder beside the application, not the Java package of the same name.
+/backup/**
+e2e/backup/**
 **/.auth/**
 **/*.mv.db
 **/*.trace.db

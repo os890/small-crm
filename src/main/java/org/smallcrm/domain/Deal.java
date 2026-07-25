@@ -26,6 +26,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /** A piece of potential business tracked through the pipeline. */
 @Entity
@@ -50,7 +52,10 @@ public class Deal extends BaseEntity {
   @Column(nullable = false, length = 3)
   public String currency = "EUR";
 
+  // Stored as plain text rather than a native H2 ENUM, so adding a constant later needs
+  // no schema migration and the column stays portable.
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false, length = 20)
   public DealStage stage = DealStage.LEAD;
 

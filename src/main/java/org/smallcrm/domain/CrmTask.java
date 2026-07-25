@@ -26,6 +26,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.time.LocalDate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * A follow-up to do, optionally attached to a contact or a deal.
@@ -50,7 +52,10 @@ public class CrmTask extends BaseEntity {
 
   public Instant completedAt;
 
+  // Stored as plain text rather than a native H2 ENUM, so adding a constant later needs
+  // no schema migration and the column stays portable.
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false, length = 10)
   public TaskPriority priority = TaskPriority.NORMAL;
 

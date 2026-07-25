@@ -102,6 +102,7 @@ export default defineConfig({
         env: {
           QUARKUS_HTTP_PORT: String(PORT),
           SMALLCRM_DATA_DIR: dataDir,
+          SMALLCRM_BACKUP_DIR: join(dataDir, 'backup'),
           SMALLCRM_BOOTSTRAP_ADMIN_USERNAME: 'admin',
           SMALLCRM_BOOTSTRAP_ADMIN_PASSWORD: INITIAL_PASSWORD,
           SMALLCRM_SESSION_KEY: 'end-to-end-session-key-at-least-16-chars',

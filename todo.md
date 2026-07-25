@@ -5,12 +5,14 @@ without it.
 
 ## Before this is used on real customer data
 
-- **Versioned database migrations.** Hibernate currently runs with
-  `quarkus.hibernate-orm.schema-management.strategy=update`, which quietly alters the schema and
-  never removes anything. Add Flyway, generate a baseline from the current schema and switch the
-  strategy to `validate`.
-- **Backups.** The whole database is `data/smallcrm.mv.db`. There is no export, no scheduled copy
-  and no restore path. At minimum: a "download a backup" button and a documented restore.
+- **Off-site backups.** Backups land in a folder next to the database, which survives a mistaken
+  delete but not a lost or stolen machine. Copying them somewhere else is still manual.
+- **Backups do not include accounts.** After a restore onto a fresh installation there are no
+  users, so the bootstrap administrator has to recreate them. A separate, clearly marked
+  account export would close that gap.
+- **Nothing verifies a backup can be restored.** The files are written and never read back until
+  someone needs them. A periodic "restore into a scratch database" check would turn a silent
+  corruption into a warning.
 - **A real session secret.** `quarkus.http.auth.session.encryption-key` falls back to a value
   committed to the repository. The application should refuse to start in production unless
   `SMALLCRM_SESSION_KEY` is set.

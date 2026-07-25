@@ -95,6 +95,11 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-jdbc-h2</artifactId>
     </dependency>
+    <!-- Owns the schema; Hibernate only validates that it matches the entities. -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-flyway</artifactId>
+    </dependency>
 
     <!-- Security: form based authentication backed by the AppUser table -->
     <dependency>
@@ -104,6 +109,12 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-elytron-security-common</artifactId>
+    </dependency>
+
+    <!-- XML binding for the backup files -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-xml</artifactId>
     </dependency>
 
     <!-- Serves the Angular frontend from the Quarkus application -->
@@ -152,6 +163,12 @@
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Waits for the background backup writer without sleeping for a fixed time. -->
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

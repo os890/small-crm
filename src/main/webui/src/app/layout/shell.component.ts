@@ -36,6 +36,7 @@ const NAV: NavItem[] = [
   { path: '/tasks', labelKey: 'nav.tasks', icon: '✓' },
   { path: '/calendar', labelKey: 'nav.calendar', icon: '📅' },
   { path: '/users', labelKey: 'nav.users', icon: '⚙', adminOnly: true },
+  { path: '/backups', labelKey: 'nav.backups', icon: '🗄', adminOnly: true },
 ];
 
 /** Frame around every signed-in page: header, navigation and the routed content. */

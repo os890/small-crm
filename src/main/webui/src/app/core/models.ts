@@ -162,6 +162,28 @@ export interface UpdateUserRequest {
   active: boolean;
 }
 
+export interface BackupFile {
+  name: string;
+  sizeBytes: number;
+  createdAt: string;
+  /** A safety copy taken just before a restore; the file to pick when undoing one. */
+  beforeRestore: boolean;
+}
+
+export interface BackupSettings {
+  retentionDays: number;
+  minRetentionDays: number;
+  maxRetentionDays: number;
+  /** Absolute path of the backup folder, shown so the user knows where the files are. */
+  directory: string;
+}
+
+export interface RestoreResult {
+  recordCount: number;
+  /** Name of the before-restore file holding the state that was replaced. */
+  safetyCopy: string;
+}
+
 /** The single error shape every failing endpoint returns. */
 export interface ApiError {
   code: string;

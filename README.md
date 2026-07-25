@@ -40,11 +40,20 @@ reload on save. Everything stays on <http://localhost:8080>.
 | --- | --- | --- |
 | HTTP port | `QUARKUS_HTTP_PORT` | `8080` |
 | Database directory | `SMALLCRM_DATA_DIR` | `./data` |
+| Backup folder | `SMALLCRM_BACKUP_DIR` | `./backup` |
 | Session encryption key | `SMALLCRM_SESSION_KEY` | a placeholder — **set this in production** |
 | Bootstrap administrator | `SMALLCRM_BOOTSTRAP_ADMIN_USERNAME` / `..._PASSWORD` | `admin` / `changeit` |
 
 The bootstrap account is only created while the user table is empty; afterwards these settings
-do nothing.
+do nothing. How long backups are kept is not a file setting: it lives in the database and is
+changed from the Backup screen.
+
+### Schema changes
+
+Flyway owns the schema. Migrations are plain SQL in `src/main/resources/db/migration`, applied at
+startup, and Hibernate is set to `validate` so a mismatch between the entities and the database
+fails the start rather than being silently patched. An installation that predates Flyway is
+baselined at V1 and keeps its data.
 
 ---
 
@@ -63,6 +72,12 @@ do nothing.
   deliberate click.
 - **Users**: an administrator adds accounts, each of which must choose its own password at the
   first sign-in. All users share one workspace and see the same records.
+- **Backups**: every change writes the whole dataset to a timestamped XML file in a `backup`
+  folder beside the database, and files older than the retention period (14 days by default) are
+  removed automatically. The Backup screen creates one on demand, downloads any file, restores
+  either from the folder or from an upload, and changes the retention period. A restore always
+  writes a `before-restore-<timestamp>.xml` first, so it can itself be undone. Backups carry
+  business data only, never accounts or password hashes.
 - **English and German**, switched at any time from the header without a reload. Dates, times and
   currency follow the choice (`25/07/2026` and `€1,234.50` against `25.7.2026` and `€ 1.234,50`),
   and server-side validation messages come back translated too.
@@ -73,16 +88,16 @@ do nothing.
 
 | Suite | Command | Covers |
 | --- | --- | --- |
-| Backend | `mvn test` | 92 JUnit tests: REST, services, domain rules, the real login flow |
-| Frontend | `cd src/main/webui && pnpm test` | 160 Vitest tests: services, guards, i18n and every page |
-| End to end | `mvn verify -Pe2e` | 18 Playwright tests through the packaged application |
+| Backend | `mvn test` | 132 JUnit tests: REST, services, domain rules, backup round trips, the real login flow |
+| Frontend | `cd src/main/webui && pnpm test` | 174 Vitest tests: services, guards, i18n and every page |
+| End to end | `mvn verify -Pe2e` | 23 Playwright tests through the packaged application |
 
 Coverage is enforced, not just reported — each build fails below its floor:
 
 | Suite | Tool | Lines | Branches |
 | --- | --- | --- | --- |
-| Backend | JaCoCo (`quarkus-jacoco`) | 97% (floor 80%) | 84% (floor 70%) |
-| Frontend | Vitest with `@vitest/coverage-v8` | 93.5% (floor 80%) | 78% (floor 75%) |
+| Backend | JaCoCo (`quarkus-jacoco`) | 91% (floor 80%) | 80% (floor 70%) |
+| Frontend | Vitest with `@vitest/coverage-v8` | 94% (floor 80%) | 78% (floor 75%) |
 | End to end | monocart-reporter (V8) | 74% | 63% |
 
 Reports land in `target/site/jacoco/`, `src/main/webui/coverage/` and `e2e/coverage/`.
@@ -105,10 +120,12 @@ pom.xml                     the only build file; Quinoa builds the frontend into
 config/checkstyle/          Java style rules
 src/main/java/org/smallcrm/
   domain/                   JPA entities and the rules that belong on them
+  backup/                   XML export and import, the rolling folder, the change trigger
   service/                  business logic, one service per aggregate
   api/                      REST resources, DTOs and the single error shape
   security/                 bootstrap administrator, current user, account state
 src/main/resources/         application.properties
+  db/migration/             Flyway migrations, applied at startup
 src/main/webui/             Angular 22 application
   src/app/core/             API client, auth, i18n, formatting, error handling
   src/app/features/         one folder per screen
