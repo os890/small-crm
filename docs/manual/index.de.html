@@ -1,0 +1,867 @@
+<!doctype html>
+<!--
+  Copyright 2026 the Small CRM authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <title>Small CRM — Benutzerhandbuch</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Small CRM bedienen: Kontakte, Geschäfte, Aufgaben, Kalender und Sicherungen." />
+    <style>
+      :root {
+        --ink: #16202c;
+        --ink-soft: #55636f;
+        --ink-faint: #6f7c88;
+        --line: #dde3ea;
+        --surface: #ffffff;
+        --canvas: #f4f6f9;
+        --accent: #1f6feb;
+        --accent-dark: #1858bd;
+        --accent-soft: #e8f0fe;
+        --warning-soft: #fff4d6;
+        --warning-line: #f0d494;
+        --warning-ink: #6b4700;
+        --danger-soft: #fdecea;
+        --danger-line: #f3c2bc;
+        --danger-ink: #8c2c20;
+        --radius: 10px;
+        color-scheme: light;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-size: 17px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 250px minmax(0, 1fr);
+        gap: 40px;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 24px 96px;
+      }
+
+      /* --- table of contents --- */
+
+      nav {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        max-height: 100vh;
+        overflow-y: auto;
+        padding: 40px 0;
+      }
+
+      nav p {
+        margin: 0 0 12px;
+        font-size: 0.8125rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--ink-faint);
+        font-weight: 700;
+      }
+
+      nav ol {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        counter-reset: section;
+      }
+
+      nav a {
+        display: block;
+        padding: 6px 10px;
+        border-radius: 6px;
+        color: var(--ink-soft);
+        text-decoration: none;
+        font-size: 0.9375rem;
+      }
+
+      nav a:hover {
+        background: var(--surface);
+        color: var(--ink);
+      }
+
+      main {
+        padding-top: 40px;
+        min-width: 0;
+      }
+
+      /* --- headings and text --- */
+
+      h1 {
+        font-size: 2.2rem;
+        line-height: 1.15;
+        margin: 0 0 8px;
+        letter-spacing: -0.02em;
+      }
+
+      .lede {
+        font-size: 1.15rem;
+        color: var(--ink-soft);
+        margin: 0 0 8px;
+        max-width: 62ch;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        margin: 64px 0 12px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+        letter-spacing: -0.01em;
+      }
+
+      h3 {
+        font-size: 1.1rem;
+        margin: 32px 0 8px;
+      }
+
+      p,
+      li {
+        max-width: 68ch;
+      }
+
+      p {
+        margin: 0 0 14px;
+      }
+
+      ul,
+      ol.steps {
+        margin: 0 0 14px;
+        padding-inline-start: 24px;
+      }
+
+      li {
+        margin-bottom: 6px;
+      }
+
+      code {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-size: 0.875em;
+      }
+
+      kbd {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-bottom-width: 2px;
+        border-radius: 5px;
+        padding: 1px 7px;
+        font-size: 0.85em;
+        font-family: inherit;
+        font-weight: 600;
+      }
+
+      /* --- figures --- */
+
+      figure {
+        margin: 24px 0 28px;
+      }
+
+      figure img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: 0 1px 2px rgb(16 24 40 / 6%), 0 6px 20px rgb(16 24 40 / 8%);
+        background: var(--surface);
+      }
+
+      figcaption {
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: var(--ink-faint);
+      }
+
+      /* --- callouts --- */
+
+      .note,
+      .warn,
+      .tip {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px 18px;
+        margin: 20px 0;
+        background: var(--surface);
+        max-width: 68ch;
+      }
+
+      .note strong,
+      .warn strong,
+      .tip strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .tip {
+        background: var(--accent-soft);
+        border-color: transparent;
+      }
+
+      .warn {
+        background: var(--warning-soft);
+        border-color: var(--warning-line);
+        color: var(--warning-ink);
+      }
+
+      .danger {
+        background: var(--danger-soft);
+        border-color: var(--danger-line);
+        color: var(--danger-ink);
+      }
+
+      .note p:last-child,
+      .warn p:last-child,
+      .tip p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* --- tables --- */
+
+      .table-wrap {
+        overflow-x: auto;
+        margin: 20px 0;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.9375rem;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        text-align: start;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--canvas);
+        font-size: 0.8125rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--ink-soft);
+        white-space: nowrap;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      footer {
+        margin-top: 72px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        color: var(--ink-faint);
+        font-size: 0.9rem;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0;
+        }
+
+        nav {
+          position: static;
+          max-height: none;
+          padding: 32px 0 0;
+        }
+
+        main {
+          padding-top: 24px;
+        }
+      }
+
+      @media print {
+        nav {
+          display: none;
+        }
+
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        body {
+          background: #fff;
+        }
+      }
+
+      .lang-switch {
+        text-transform: none !important;
+        letter-spacing: normal !important;
+        font-weight: 400 !important;
+        color: var(--ink-soft) !important;
+        margin-bottom: 24px !important;
+        font-size: 0.9375rem !important;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <nav aria-label="Inhalt">
+        <p class="lang-switch"><a href="index.html">English</a> · <strong>Deutsch</strong></p>
+        <p>Inhalt</p>
+        <ol>
+          <li><a href="#start">1. Der erste Start</a></li>
+          <li><a href="#around">2. Aufbau der Oberfläche</a></li>
+          <li><a href="#overview">3. Die Übersicht</a></li>
+          <li><a href="#contacts">4. Kontakte</a></li>
+          <li><a href="#companies">5. Firmen</a></li>
+          <li><a href="#deals">6. Geschäfte</a></li>
+          <li><a href="#todos">7. Aufgaben</a></li>
+          <li><a href="#calendar">8. Kalender</a></li>
+          <li><a href="#language">9. Sprache umstellen</a></li>
+          <li><a href="#users">10. Benutzer</a></li>
+          <li><a href="#backups">11. Sicherungen</a></li>
+          <li><a href="#faq">12. Häufige Fragen</a></li>
+        </ol>
+      </nav>
+
+      <main>
+        <h1>Small CRM — Benutzerhandbuch</h1>
+        <p class="lede">
+          Small CRM behält im Blick, mit wem Sie Geschäfte machen, was Sie vereinbart haben, was
+          noch offen ist und wann Sie sich treffen. Dieses Handbuch geht jeden Bildschirm durch.
+          Lesezeit rund zehn Minuten.
+        </p>
+        <p class="lede">
+          Alle Daten liegen auf Ihrem eigenen Rechner, in einer einzigen Datei. Sie müssen sich
+          nirgends registrieren, und es wird nichts verschickt.
+        </p>
+
+        <!-- ================================================================= -->
+        <h2 id="start">1. Der erste Start</h2>
+
+        <p>
+          Öffnen Sie <code>http://localhost:8080</code> im Browser. Sie werden zur Anmeldung
+          aufgefordert. Beim allerersten Mal lautet der Benutzername <code>admin</code>, das
+          Passwort steht in der Konfiguration — <code>changeit</code>, sofern es niemand für Sie
+          geändert hat.
+        </p>
+
+        <figure>
+          <img src="images/de/01-login.png" alt="Die Anmeldemaske mit Feldern für Benutzername und Passwort." />
+          <figcaption>Die Anmeldung. Die Sprache lässt sich schon hier umstellen, vor dem Anmelden.</figcaption>
+        </figure>
+
+        <p>
+          Small CRM verlangt sofort ein eigenes Passwort. Das lässt sich nicht überspringen, und
+          das ist Absicht: Das Startpasswort steht in einer Konfigurationsdatei, die
+          möglicherweise auch andere lesen können.
+        </p>
+
+        <figure>
+          <img src="images/de/02-first-password.png" alt="Die Maske für das aktuelle Passwort und das neue, zweimal einzugeben." />
+          <figcaption>Wählen Sie etwas, das nur Sie kennen — mindestens acht Zeichen.</figcaption>
+        </figure>
+
+        <div class="tip">
+          <strong>Passwort vergessen</strong>
+          <p>
+            Ein anderer Administrator kann Ihnen unter „Benutzer“ ein neues setzen. Sind Sie der
+            einzige Administrator, wenden Sie sich an die Person, die Small CRM installiert hat.
+          </p>
+        </div>
+
+        <!-- ================================================================= -->
+        <h2 id="around">2. Aufbau der Oberfläche</h2>
+
+        <p>Jeder Bildschirm hat denselben Rahmen:</p>
+
+        <ul>
+          <li>
+            Oben die Leiste mit dem Namen der Anwendung, der Sprache, der angemeldeten Person und
+            der Schaltfläche <strong>Abmelden</strong>.
+          </li>
+          <li>
+            Links das Hauptmenü. <strong>Benutzer</strong> und <strong>Sicherungen</strong>
+            erscheinen nur, wenn Sie Administrator sind.
+          </li>
+          <li>Der Rest ist der Bildschirm, auf dem Sie gerade sind.</li>
+        </ul>
+
+        <p>
+          Drei Dinge gelten überall. Die blaue Schaltfläche ist die, die speichert. Alles, was
+          löscht, ist rot umrandet und fragt immer nach. Und nichts wird gespeichert, bevor Sie
+          auf <strong>Speichern</strong> drücken — <strong>Abbrechen</strong> verwirft die
+          Eingabe.
+        </p>
+
+        <!-- ================================================================= -->
+        <h2 id="overview">3. Die Übersicht</h2>
+
+        <p>
+          Die Übersicht sehen Sie direkt nach dem Anmelden. Sie soll eine Frage beantworten: Was
+          braucht mich heute?
+        </p>
+
+        <figure>
+          <img src="images/de/03-dashboard.png" alt="Die Übersicht mit vier Kennzahlen und Feldern für überfällige Aufgaben, die nächsten sieben Tage und die letzten Aktivitäten." />
+          <figcaption>Die Übersicht nach einigen Wochen Nutzung.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Bereich</th><th>Zeigt</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Die vier Kacheln</td><td>Wie viele Kontakte und Firmen Sie haben, wie viele Geschäfte offen sind und was sie zusammen wert sind. Jede Kachel führt zum passenden Bildschirm.</td></tr>
+              <tr><td>Überfällige Aufgaben</td><td>Alles, dessen Fälligkeit vorbei ist und was noch nicht erledigt ist. Das rote Datum zeigt, wie lange es schon wartet.</td></tr>
+              <tr><td>Heute fällig</td><td>Aufgaben mit heutigem Datum, damit sie nicht überfällig werden.</td></tr>
+              <tr><td>Nächste 7 Tage</td><td>Ihre Termine der kommenden Woche.</td></tr>
+              <tr><td>Letzte Aktivitäten</td><td>Was Sie zuletzt erfasst haben: Anrufe, E-Mails, Besprechungen und Notizen.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Wenn nichts überfällig und nichts für heute fällig ist, verschwinden diese beiden Felder
+          und stattdessen erscheint eine grüne Zeile. Eine leere Übersicht ist eine gute
+          Nachricht.
+        </p>
+
+        <!-- ================================================================= -->
+        <h2 id="contacts">4. Kontakte</h2>
+
+        <p>
+          Ein Kontakt ist eine Person. Kontakte sind der Mittelpunkt von Small CRM: Geschäfte,
+          Aufgaben, Termine und erfasste Aktivitäten hängen an ihnen.
+        </p>
+
+        <figure>
+          <img src="images/de/04-contacts.png" alt="Die Kontaktliste mit Spalten für Name, Firma, E-Mail, Telefon und Schlagwörter." />
+          <figcaption>Die Kontaktliste, nach Nachnamen sortiert.</figcaption>
+        </figure>
+
+        <h3>Jemanden anlegen</h3>
+
+        <ol class="steps">
+          <li>Auf <strong>+ Neuer Kontakt</strong> drücken.</li>
+          <li>Vor- und Nachname sind Pflicht, alles andere ist freiwillig.</li>
+          <li>Eine Firma auswählen, falls die Person für eine arbeitet. Steht sie noch nicht in der Liste, legen Sie sie zuerst unter „Firmen“ an.</li>
+          <li>Auf <strong>Speichern</strong> drücken.</li>
+        </ol>
+
+        <figure>
+          <img src="images/de/05-contact-dialog.png" alt="Der Dialog für einen neuen Kontakt mit Feldern für Name, E-Mail, Telefon, Funktion, Firma und Schlagwörter." />
+          <figcaption>Felder mit * müssen ausgefüllt werden. Der Rest kann warten.</figcaption>
+        </figure>
+
+        <div class="tip">
+          <strong>Schlagwörter</strong>
+          <p>
+            Schlagwörter sind Ihre eigenen Etiketten — <em>Schlüsselkunde</em>,
+            <em>Interessent</em>, <em>zahlt spät</em>, was immer Ihnen hilft. Mehrere durch Komma
+            trennen. Sie erscheinen in der Liste, damit Sie eine Gruppe auf einen Blick erkennen.
+          </p>
+        </div>
+
+        <h3>Suchen</h3>
+
+        <p>
+          Das Suchfeld über der Liste durchsucht Namen, E-Mail-Adressen und Telefonnummern. Tippen
+          Sie ein paar Buchstaben, und die Liste wird enger; leeren Sie das Feld, um wieder alle
+          zu sehen.
+        </p>
+
+        <h3>Ein Kontakt im Detail</h3>
+
+        <p>
+          Ein Klick auf den Namen öffnet die Seite dieser Person. Dort steht alles zusammen, was
+          Sie über sie wissen.
+        </p>
+
+        <figure>
+          <img src="images/de/06-contact-detail.png" alt="Eine Kontaktseite mit Kontaktdaten, Aktivitäten, Geschäften und offenen Aufgaben." />
+          <figcaption>Marias Seite: ihre Daten, was passiert ist, was verkauft wird und was noch zu tun ist.</figcaption>
+        </figure>
+
+        <p>
+          Der Bereich <strong>Aktivitäten</strong> ist das Tagebuch Ihrer Beziehung. Auf
+          <strong>+ Neu</strong> drücken, auswählen, ob es ein Anruf, eine E-Mail, eine
+          Besprechung oder nur eine Notiz war, einen Betreff vergeben und so viel dazuschreiben,
+          wie Sie möchten. Beim nächsten Anruf sehen Sie, was zuletzt vereinbart wurde.
+        </p>
+
+        <div class="note">
+          <strong>Aktivitäten sind für Vergangenes</strong>
+          <p>
+            Eine Aktivität lässt sich nicht in der Zukunft erfassen — das ist fast immer ein
+            Tippfehler. Für Kommendes ist der Kalender da.
+          </p>
+        </div>
+
+        <h3>Einen Kontakt löschen</h3>
+
+        <p>
+          Wird eine Person gelöscht, verschwinden auch ihre Aktivitäten, denn eine Aktivität ohne
+          Person ergibt keinen Sinn. Geschäfte, Aufgaben und Termine bleiben erhalten und
+          verlieren nur die Zuordnung. Sie werden gefragt, und die Rückfrage nennt den Namen.
+        </p>
+
+        <!-- ================================================================= -->
+        <h2 id="companies">5. Firmen</h2>
+
+        <p>
+          Eine Firma ist eine Organisation. Nützlich, wenn Sie mit mehreren Personen desselben
+          Unternehmens zu tun haben oder Rechnungsadresse und UID-Nummer an einem Ort brauchen.
+        </p>
+
+        <figure>
+          <img src="images/de/07-companies.png" alt="Die Firmenliste mit Name, Ort, E-Mail und Telefon." />
+          <figcaption>Firmen. Die Suche erfasst Name und Ort.</figcaption>
+        </figure>
+
+        <p>
+          Sie müssen Firmen nicht verwenden. Ein Kontakt ohne Firma funktioniert genauso gut, was
+          bei Ein-Personen-Kunden praktisch ist.
+        </p>
+
+        <div class="note">
+          <strong>Eine gelöschte Firma nimmt ihre Leute nicht mit</strong>
+          <p>
+            Kontakte und Geschäfte, die zu ihr gehörten, bleiben unverändert bestehen und
+            verlieren nur die Zuordnung. Es verschwindet nichts unbemerkt.
+          </p>
+        </div>
+
+        <!-- ================================================================= -->
+        <h2 id="deals">6. Geschäfte</h2>
+
+        <p>
+          Ein Geschäft ist eine Arbeit, für die Sie bezahlt werden möchten. Der Bildschirm zeigt
+          eine Spalte je Phase, damit Sie auf einen Blick sehen, was wo steht.
+        </p>
+
+        <figure>
+          <img src="images/de/08-deals.png" alt="Die Geschäftsübersicht mit Spalten für Interessent, Qualifiziert und Angebot gelegt." />
+          <figcaption>Die Pipeline. Jede Spaltenüberschrift zeigt Anzahl und Summe.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Phase</th><th>Bedeutet</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Interessent</td><td>Jemand hat Interesse gezeigt. Zugesagt ist nichts.</td></tr>
+              <tr><td>Qualifiziert</td><td>Sie haben gesprochen, es ist ernst gemeint und leistbar.</td></tr>
+              <tr><td>Angebot gelegt</td><td>Ihr Angebot liegt dort, Sie warten.</td></tr>
+              <tr><td>Gewonnen</td><td>Zusage.</td></tr>
+              <tr><td>Verloren</td><td>Absage, oder es ist endgültig still geworden.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Zum Verschieben verwenden Sie das Auswahlfeld auf der Karte und wählen die neue Phase.
+          Es wird nichts gezogen: Ein Auswahlfeld sagt genau, wohin die Karte geht, und
+          funktioniert auch am Touchscreen.
+        </p>
+
+        <p>
+          <strong>Nur offene</strong> ist voreingestellt und blendet gewonnene und verlorene
+          Geschäfte aus, damit die Pipeline nur zeigt, woran noch zu arbeiten ist. Haken entfernen,
+          um alles zu sehen, auch die Historie.
+        </p>
+
+        <!-- ================================================================= -->
+        <h2 id="todos">7. Aufgaben</h2>
+
+        <p>
+          Aufgaben sind die kleinen Zusagen, die man leicht vergisst: Angebot schicken, Rechnung
+          urgieren, Donnerstag zurückrufen.
+        </p>
+
+        <figure>
+          <img src="images/de/09-tasks.png" alt="Die Aufgabenliste mit Kästchen, Fälligkeiten, Prioritäten und einer Überfällig-Markierung." />
+          <figcaption>Aufgaben, die früheste Fälligkeit zuerst. Überfälliges ist rot markiert.</figcaption>
+        </figure>
+
+        <ul>
+          <li>Das Kästchen links hakt eine Aufgabe ab. Sie verschwindet sofort, weil <strong>Nur offene</strong> aktiv ist.</li>
+          <li><strong>Nur offene</strong> abwählen zeigt Erledigtes und erlaubt, eine Aufgabe wieder zu öffnen, falls Sie zu schnell waren.</li>
+          <li>Eine Aufgabe mit Kontakt oder Geschäft verknüpfen — sie erscheint dann auch auf der Seite dieses Kontakts.</li>
+          <li>Aufgaben ohne Fälligkeit stehen unten. Sie sind für „irgendwann“, nicht für heute.</li>
+        </ul>
+
+        <!-- ================================================================= -->
+        <h2 id="calendar">8. Kalender</h2>
+
+        <p>
+          Der Kalender ist eine einfache Agenda: Ihre Termine nach Tagen gruppiert, die frühesten
+          zuerst. Mit den Schaltflächen oben blicken Sie 7, 30 oder 90 Tage voraus.
+        </p>
+
+        <figure>
+          <img src="images/de/10-calendar.png" alt="Die Kalenderagenda mit nach Tagen gruppierten Terminen." />
+          <figcaption>Die Agenda. Jeder Eintrag zeigt Uhrzeit, Dauer, Ort und Person.</figcaption>
+        </figure>
+
+        <h3>Die Doppelbuchungs-Prüfung</h3>
+
+        <p>
+          Während Sie einen Termin eintragen, prüft Small CRM die Zeit gegen Ihren Kalender und
+          sagt Ihnen Bescheid, bevor Sie speichern. Eine grüne Zeile heißt: frei. Ein gelber
+          Kasten heißt: Überschneidung — und nennt, womit.
+        </p>
+
+        <figure>
+          <img src="images/de/11-calendar-conflict.png" alt="Der Termindialog mit einer gelben Warnung, dass sich die gewählte Zeit mit einem bestehenden Kundentermin überschneidet." />
+          <figcaption>Die Warnung erscheint beim Tippen, nicht erst nach dem Speichern.</figcaption>
+        </figure>
+
+        <p>
+          Wenn Sie trotzdem speichern, verweigert Small CRM das und erklärt, warum. Dann haben Sie
+          zwei Möglichkeiten: die Zeit ändern, oder <strong>Trotzdem speichern</strong> drücken und
+          beides parallel eintragen. Diese Schaltfläche erscheint erst nach der Verweigerung — eine
+          Doppelbuchung ist damit immer eine Entscheidung und kein Versehen.
+        </p>
+
+        <div class="note">
+          <strong>Direkt hintereinander ist in Ordnung</strong>
+          <p>
+            Ein Termin, der um 10:00 endet, und einer, der um 10:00 beginnt, überschneiden sich
+            nicht. Gemeldet werden nur echte Überschneidungen.
+          </p>
+        </div>
+
+        <p>
+          Geprüft wird nur <em>Ihr</em> Kalender. Hat eine Kollegin zur selben Zeit etwas, ist das
+          ihre Sache, und Sie werden nicht gewarnt.
+        </p>
+
+        <!-- ================================================================= -->
+        <h2 id="language">9. Sprache umstellen</h2>
+
+        <p>
+          Small CRM spricht Deutsch und Englisch. Das Auswahlfeld in der oberen Leiste schaltet
+          sofort um — ohne Neuladen, und ohne dass Sie verlieren, woran Sie gerade sind.
+        </p>
+
+        <figure>
+          <img src="images/de/15-dashboard-english.png" alt="Dieselbe Übersicht mit allen Beschriftungen auf Englisch." />
+          <figcaption>Dieselbe Übersicht auf Englisch. Datum und Beträge folgen der Sprache mit.</figcaption>
+        </figure>
+
+        <p>
+          Ihre Wahl wird auf diesem Rechner gemerkt und gilt auch für Fehlermeldungen, nicht nur
+          für die Beschriftungen. Das Datumsformat wechselt (25.7.2026 gegenüber 25/07/2026), die
+          Beträge ebenso (€ 1.234,50 gegenüber €1,234.50).
+        </p>
+
+        <div class="note">
+          <strong>Die kleinen Kalender- und Uhr-Fenster</strong>
+          <p>
+            Wenn Sie ein Datums- oder Zeitfeld anklicken, richtet sich das Auswahlfenster des
+            Browsers nach der Sprache Ihres Rechners, nicht nach der hier gewählten. Das ist
+            Browser-Verhalten und lässt sich aus Small CRM heraus nicht ändern.
+          </p>
+        </div>
+
+        <!-- ================================================================= -->
+        <h2 id="users">10. Benutzer</h2>
+
+        <p>
+          Administratoren können weiteren Personen Zugang geben — einer Assistenz, einem Partner,
+          der Buchhaltung. Alle teilen sich dieselben Daten, es gibt keine privaten Kontakte.
+        </p>
+
+        <figure>
+          <img src="images/de/12-users.png" alt="Die Benutzerliste mit dem Administrator und einem zweiten Konto, das sein Passwort noch ändern muss." />
+          <figcaption>Benutzer. Die Markierung zeigt, wer noch ein eigenes Passwort wählen muss.</figcaption>
+        </figure>
+
+        <ol class="steps">
+          <li>Auf <strong>+ Neuer Benutzer</strong> drücken.</li>
+          <li>Benutzername und Anfangspasswort vergeben und der Person beides mitteilen.</li>
+          <li><strong>Administrator</strong> nur ankreuzen, wenn sie auch Benutzer und Sicherungen verwalten soll.</li>
+        </ol>
+
+        <p>
+          Die neue Person muss dieses Anfangspasswort bei der ersten Anmeldung ersetzen, damit es
+          nie zum echten wird. <strong>Neues Passwort setzen</strong> macht dasselbe noch einmal,
+          falls sich jemand ausgesperrt hat.
+        </p>
+
+        <p>
+          Wer das Unternehmen verlässt, sollte auf inaktiv gesetzt und nicht gelöscht werden: Die
+          Person kann Small CRM nicht mehr benutzen, ihre Einträge behalten aber ihren Namen.
+        </p>
+
+        <div class="note">
+          <strong>Sie können sich nicht selbst aussperren</strong>
+          <p>
+            Small CRM verweigert das Löschen und Deaktivieren des eigenen Kontos und das Entfernen
+            des letzten Administrators. Es gibt immer einen Weg zurück hinein.
+          </p>
+        </div>
+
+        <!-- ================================================================= -->
+        <h2 id="backups">11. Sicherungen</h2>
+
+        <p>
+          Small CRM sichert sich selbst. Bei jeder Änderung wird der gesamte Datenbestand in eine
+          XML-Datei im Ordner <code>backup</code> neben der Anwendung geschrieben. Änderungen
+          kurz hintereinander landen in einer Datei, damit ein arbeitsreicher Nachmittag nicht
+          Hunderte Kopien hinterlässt.
+        </p>
+
+        <figure>
+          <img src="images/de/13-backups.png" alt="Der Sicherungsbildschirm mit Ordnerpfad, Aufbewahrungsfrist, Upload-Bereich und Dateiliste." />
+          <figcaption>Der Sicherungsbildschirm. Der Ordner oben ist der Ort der Dateien.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Was</th><th>Tut</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Jetzt sichern</strong></td><td>Schreibt sofort eine Datei. Praktisch, bevor Sie etwas Riskantes versuchen.</td></tr>
+              <tr><td><strong>Aufbewahren für … Tage</strong></td><td>Wie lange Dateien bleiben. Anfangs vierzehn Tage. Älteres wird automatisch entfernt.</td></tr>
+              <tr><td><strong>Herunterladen</strong></td><td>Speichert die Datei, wohin Sie möchten — USB-Stick, anderer Rechner, Cloud-Speicher.</td></tr>
+              <tr><td><strong>Wiederherstellen</strong></td><td>Spielt die Daten aus dieser Datei zurück und ersetzt den aktuellen Stand.</td></tr>
+              <tr><td>Hochladen und wiederherstellen</td><td>Dasselbe, aus einer anderswo gespeicherten Datei.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Wiederherstellen</h3>
+
+        <div class="warn danger">
+          <strong>Eine Wiederherstellung ersetzt alles</strong>
+          <p>
+            Sämtliche Kontakte, Firmen, Geschäfte, Aktivitäten, Aufgaben und Termine werden
+            gelöscht und durch den Inhalt der Datei ersetzt. Was nach dieser Sicherung erfasst
+            wurde, ist weg. Benutzerkonten bleiben unverändert.
+          </p>
+        </div>
+
+        <figure>
+          <img src="images/de/14-restore-warning.png" alt="Eine Rückfrage, die die Sicherungsdatei nennt und warnt, dass alle Daten ersetzt werden." />
+          <figcaption>Die Rückfrage nennt die Datei und sagt, was passiert. Vorher wird nichts angerührt.</figcaption>
+        </figure>
+
+        <p>
+          Bevor etwas ersetzt wird, sichert Small CRM den aktuellen Stand in eine Datei, die mit
+          <code>before-restore-</code> beginnt. Haben Sie also die falsche Datei erwischt, stellen
+          Sie einfach diese wieder her und sind zurück am Ausgangspunkt. Sie steht oben in der
+          Liste mit gelber Markierung.
+        </p>
+
+        <div class="tip">
+          <strong>Was nicht in einer Sicherung steht</strong>
+          <p>
+            Benutzerkonten und Passwörter bleiben bewusst außen vor, damit eine Sicherungsdatei
+            an die Steuerberatung gehen kann, ohne Zugangsdaten preiszugeben. Nach einer
+            Wiederherstellung auf einer frischen Installation haben Sie also Ihre Daten, aber
+            keine Benutzer, und bei den Einträgen steht nicht, wer sie angelegt hat.
+          </p>
+        </div>
+
+        <div class="warn">
+          <strong>Bewahren Sie eine Kopie anderswo auf</strong>
+          <p>
+            Der Sicherungsordner liegt neben Ihrer Datenbank auf demselben Rechner. Das schützt
+            vor versehentlichem Löschen, nicht vor einem verlorenen, gestohlenen oder defekten
+            Gerät. Laden Sie hin und wieder eine Sicherung herunter und bewahren Sie sie woanders
+            auf.
+          </p>
+        </div>
+
+        <!-- ================================================================= -->
+        <h2 id="faq">12. Häufige Fragen</h2>
+
+        <h3>Wo liegen meine Daten?</h3>
+        <p>
+          In einer einzigen Datei namens <code>smallcrm.mv.db</code> im Ordner <code>data</code>
+          neben der Anwendung, dazu die XML-Dateien in <code>backup</code>. Kopieren Sie diese
+          beiden Ordner, und Sie haben alles kopiert.
+        </p>
+
+        <h3>Kann ich das am Handy verwenden?</h3>
+        <p>
+          Die Bildschirme ordnen sich für kleine Displays um, das Menü klappt hinter der
+          Schaltfläche ☰ zusammen. Zum Nachschlagen taugt das gut. Längeres Erfassen ist am
+          Rechner angenehmer.
+        </p>
+
+        <h3>Ich habe versehentlich etwas gelöscht.</h3>
+        <p>
+          Es gibt keine Rückgängig-Schaltfläche, aber mit ziemlicher Sicherheit eine Sicherung von
+          wenigen Minuten davor. Gehen Sie auf „Sicherungen“, suchen Sie die Datei von vor dem
+          Missgeschick und stellen Sie sie wieder her — im Bewusstsein, dass alles seither
+          Erfasste ebenfalls verschwindet. Im Zweifel vorher die neueste Sicherung herunterladen,
+          dann haben Sie beide Stände.
+        </p>
+
+        <h3>Wir möchten zu zweit gleichzeitig arbeiten.</h3>
+        <p>
+          Das geht. Alle sehen dieselben Kontakte, Geschäfte und Aufgaben. Zu wissen ist nur:
+          Bearbeiten zwei Personen im selben Moment denselben Eintrag, gewinnt kommentarlos, wer
+          zuletzt speichert.
+        </p>
+
+        <h3>Verlässt irgendetwas meinen Rechner?</h3>
+        <p>
+          Nein. Small CRM schickt keine Daten irgendwohin, hat keinen Cloud-Teil und braucht zum
+          Laufen keine Internetverbindung.
+        </p>
+
+        <h3>Kann ich mit Google Kalender synchronisieren?</h3>
+        <p>
+          Noch nicht. Termine werden aber bereits mit den Feldern gespeichert, die eine solche
+          Synchronisation braucht — heute erfasste Termine werden also übernommen, sobald es
+          soweit ist.
+        </p>
+
+        <footer>
+          <p>
+            Small CRM — Benutzerhandbuch. Die Bildschirmfotos zeigen erfundene Beispieldaten.
+            Lizenziert unter der Apache License 2.0.
+          </p>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>
