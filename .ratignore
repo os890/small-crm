@@ -57,3 +57,5 @@ LICENSE
 **/*.svg
 **/*.woff
 **/*.woff2
+# Generated from the HTML manuals by e2e/scripts/build-manual-pdf.mjs
+**/*.pdf

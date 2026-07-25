@@ -6,8 +6,11 @@ follow-up to-dos and a calendar that refuses to double book you.
 One process serves everything — the REST API and the web interface — against a single H2 file on
 disk. No database server, no container, no cloud account.
 
-**New here?** There is an illustrated user manual that walks through every screen — open it in a
-browser: [English](docs/manual/index.html) · [Deutsch](docs/manual/index.de.html).
+**New here?** There is an illustrated user manual that walks through every screen:
+[English](docs/manual/index.html) · [Deutsch](docs/manual/index.de.html) in the browser, or as
+PDF to print or pass on —
+[small-crm-manual-en.pdf](docs/manual/small-crm-manual-en.pdf) ·
+[small-crm-manual-de.pdf](docs/manual/small-crm-manual-de.pdf).
 
 ---
 
@@ -134,11 +137,12 @@ src/main/webui/             Angular 22 application
   src/app/features/         one folder per screen
   src/app/shared/           toasts and the confirmation prompt
 e2e/                        Playwright suite against the packaged application
-docs/manual/                illustrated user manual, English and German
+docs/manual/                illustrated user manual, English and German, HTML and PDF
 ```
 
-`docs/manual/` is the illustrated user manual in English and German; the screenshots are taken
-from a throwaway instance filled with demo data, in the matching language.
+`docs/manual/` is the illustrated user manual in English and German, as HTML and as PDF. The
+screenshots come from a throwaway instance filled with demo data, in the matching language;
+`node e2e/scripts/build-manual-pdf.mjs` regenerates the PDFs from the HTML.
 `assumption.md` records the decisions taken where the requirements were open.
 `todo.md` records what was deliberately left out.
 

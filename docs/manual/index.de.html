@@ -310,16 +310,77 @@
       }
 
       @media print {
+        /* The table of contents is a sidebar for scrolling; the PDF gets bookmarks instead. */
         nav {
           display: none;
         }
 
         .layout {
           grid-template-columns: 1fr;
+          max-width: none;
+          gap: 0;
+          padding: 0;
         }
 
         body {
           background: #fff;
+          font-size: 10.5pt;
+          line-height: 1.55;
+        }
+
+        main {
+          padding-top: 0;
+        }
+
+        h1 {
+          font-size: 21pt;
+        }
+
+        /* Each chapter starts on its own page, the way a printed manual reads. */
+        h2 {
+          font-size: 14pt;
+          break-before: page;
+          break-after: avoid;
+          border-top: none;
+          padding-top: 0;
+          margin: 0 0 10px;
+        }
+
+        h3 {
+          break-after: avoid;
+        }
+
+        /* Nothing that forms one thought may be split across a page boundary. */
+        figure,
+        .note,
+        .warn,
+        .tip,
+        .table-wrap,
+        table,
+        tr {
+          break-inside: avoid;
+        }
+
+        figure img {
+          box-shadow: none;
+          /* Keeps a tall screenshot from overflowing the page on its own. */
+          max-height: 20cm;
+          width: auto;
+          max-width: 100%;
+        }
+
+        p,
+        li,
+        .lede,
+        .note,
+        .warn,
+        .tip {
+          max-width: none;
+        }
+
+        footer {
+          break-before: avoid;
+          margin-top: 32px;
         }
       }
 
