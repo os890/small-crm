@@ -1,0 +1,7 @@
+node_modules
+test-results
+playwright-report
+coverage
+.auth
+pnpm-lock.yaml
+pnpm-workspace.yaml

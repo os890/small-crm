@@ -25,3 +25,11 @@ next_task.md
 # Working dir
 .DS_Store
 .claude
+# Angular / Playwright build and test output
+dist/
+.angular/
+test-results/
+playwright-report/
+e2e/assets/
+.auth/
+out-tsc/

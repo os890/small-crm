@@ -1,0 +1,255 @@
+/*
+ * Copyright 2026 the Small CRM authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import {
+  Appointment,
+  Company,
+  Contact,
+  CreateUserRequest,
+  CrmTask,
+  Dashboard,
+  Deal,
+  DealStage,
+  Interaction,
+  UpdateUserRequest,
+  User,
+} from './models';
+
+type QueryValue = string | number | boolean | null | undefined;
+
+function params(values: Record<string, QueryValue>): HttpParams {
+  let result = new HttpParams();
+  for (const [key, value] of Object.entries(values)) {
+    if (value !== null && value !== undefined && value !== '') {
+      result = result.set(key, String(value));
+    }
+  }
+  return result;
+}
+
+/**
+ * One typed place for every backend call.
+ *
+ * <p>Promises rather than observables: each screen awaits a handful of independent calls, and
+ * `await` keeps that far easier to follow than nested subscriptions.
+ */
+@Injectable({ providedIn: 'root' })
+export class ApiService {
+  private readonly http = inject(HttpClient);
+
+  // --- session -----------------------------------------------------------------
+
+  login(username: string, password: string): Promise<void> {
+    const body = new URLSearchParams({ username, password });
+    return firstValueFrom(
+      this.http.post<void>('/api/auth/login', body.toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      }),
+    );
+  }
+
+  logout(): Promise<void> {
+    return firstValueFrom(this.http.post<void>('/api/auth/logout', null));
+  }
+
+  me(): Promise<User> {
+    return firstValueFrom(this.http.get<User>('/api/auth/me'));
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Promise<User> {
+    return firstValueFrom(
+      this.http.post<User>('/api/auth/password', { currentPassword, newPassword }),
+    );
+  }
+
+  // --- dashboard ---------------------------------------------------------------
+
+  dashboard(): Promise<Dashboard> {
+    return firstValueFrom(this.http.get<Dashboard>('/api/dashboard'));
+  }
+
+  // --- companies ---------------------------------------------------------------
+
+  listCompanies(search?: string): Promise<Company[]> {
+    return firstValueFrom(
+      this.http.get<Company[]>('/api/companies', { params: params({ search }) }),
+    );
+  }
+
+  getCompany(id: number): Promise<Company> {
+    return firstValueFrom(this.http.get<Company>(`/api/companies/${id}`));
+  }
+
+  saveCompany(company: Company): Promise<Company> {
+    return company.id
+      ? firstValueFrom(this.http.put<Company>(`/api/companies/${company.id}`, company))
+      : firstValueFrom(this.http.post<Company>('/api/companies', company));
+  }
+
+  deleteCompany(id: number): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`/api/companies/${id}`));
+  }
+
+  // --- contacts ----------------------------------------------------------------
+
+  listContacts(search?: string, companyId?: number): Promise<Contact[]> {
+    return firstValueFrom(
+      this.http.get<Contact[]>('/api/contacts', { params: params({ search, companyId }) }),
+    );
+  }
+
+  getContact(id: number): Promise<Contact> {
+    return firstValueFrom(this.http.get<Contact>(`/api/contacts/${id}`));
+  }
+
+  saveContact(contact: Contact): Promise<Contact> {
+    return contact.id
+      ? firstValueFrom(this.http.put<Contact>(`/api/contacts/${contact.id}`, contact))
+      : firstValueFrom(this.http.post<Contact>('/api/contacts', contact));
+  }
+
+  deleteContact(id: number): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`/api/contacts/${id}`));
+  }
+
+  // --- deals -------------------------------------------------------------------
+
+  listDeals(openOnly = false, stage?: DealStage): Promise<Deal[]> {
+    return firstValueFrom(
+      this.http.get<Deal[]>('/api/deals', { params: params({ openOnly, stage }) }),
+    );
+  }
+
+  saveDeal(deal: Deal): Promise<Deal> {
+    return deal.id
+      ? firstValueFrom(this.http.put<Deal>(`/api/deals/${deal.id}`, deal))
+      : firstValueFrom(this.http.post<Deal>('/api/deals', deal));
+  }
+
+  moveDeal(id: number, stage: DealStage): Promise<Deal> {
+    return firstValueFrom(
+      this.http.put<Deal>(`/api/deals/${id}/stage`, null, { params: params({ value: stage }) }),
+    );
+  }
+
+  deleteDeal(id: number): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`/api/deals/${id}`));
+  }
+
+  // --- interactions ------------------------------------------------------------
+
+  listInteractions(contactId?: number, dealId?: number): Promise<Interaction[]> {
+    return firstValueFrom(
+      this.http.get<Interaction[]>('/api/interactions', { params: params({ contactId, dealId }) }),
+    );
+  }
+
+  saveInteraction(interaction: Interaction): Promise<Interaction> {
+    return interaction.id
+      ? firstValueFrom(
+          this.http.put<Interaction>(`/api/interactions/${interaction.id}`, interaction),
+        )
+      : firstValueFrom(this.http.post<Interaction>('/api/interactions', interaction));
+  }
+
+  deleteInteraction(id: number): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`/api/interactions/${id}`));
+  }
+
+  // --- tasks -------------------------------------------------------------------
+
+  listTasks(openOnly = false, contactId?: number, dealId?: number): Promise<CrmTask[]> {
+    return firstValueFrom(
+      this.http.get<CrmTask[]>('/api/tasks', { params: params({ openOnly, contactId, dealId }) }),
+    );
+  }
+
+  saveTask(task: CrmTask): Promise<CrmTask> {
+    return task.id
+      ? firstValueFrom(this.http.put<CrmTask>(`/api/tasks/${task.id}`, task))
+      : firstValueFrom(this.http.post<CrmTask>('/api/tasks', task));
+  }
+
+  setTaskDone(id: number, done: boolean): Promise<CrmTask> {
+    return firstValueFrom(
+      this.http.put<CrmTask>(`/api/tasks/${id}/done`, null, { params: params({ value: done }) }),
+    );
+  }
+
+  deleteTask(id: number): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`/api/tasks/${id}`));
+  }
+
+  // --- appointments ------------------------------------------------------------
+
+  listAppointments(from: Date, to: Date): Promise<Appointment[]> {
+    return firstValueFrom(
+      this.http.get<Appointment[]>('/api/appointments', {
+        params: params({ from: from.toISOString(), to: to.toISOString() }),
+      }),
+    );
+  }
+
+  appointmentConflicts(
+    startsAt: string,
+    endsAt: string,
+    excludeId?: number | null,
+  ): Promise<Appointment[]> {
+    return firstValueFrom(
+      this.http.get<Appointment[]>('/api/appointments/conflicts', {
+        params: params({ startsAt, endsAt, excludeId }),
+      }),
+    );
+  }
+
+  saveAppointment(appointment: Appointment, allowConflict = false): Promise<Appointment> {
+    const options = { params: params({ allowConflict }) };
+    return appointment.id
+      ? firstValueFrom(
+          this.http.put<Appointment>(`/api/appointments/${appointment.id}`, appointment, options),
+        )
+      : firstValueFrom(this.http.post<Appointment>('/api/appointments', appointment, options));
+  }
+
+  deleteAppointment(id: number): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`/api/appointments/${id}`));
+  }
+
+  // --- users -------------------------------------------------------------------
+
+  listUsers(): Promise<User[]> {
+    return firstValueFrom(this.http.get<User[]>('/api/users'));
+  }
+
+  createUser(request: CreateUserRequest): Promise<User> {
+    return firstValueFrom(this.http.post<User>('/api/users', request));
+  }
+
+  updateUser(id: number, request: UpdateUserRequest): Promise<User> {
+    return firstValueFrom(this.http.put<User>(`/api/users/${id}`, request));
+  }
+
+  resetUserPassword(id: number, newPassword: string): Promise<User> {
+    return firstValueFrom(this.http.post<User>(`/api/users/${id}/password`, { newPassword }));
+  }
+
+  deleteUser(id: number): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`/api/users/${id}`));
+  }
+}
