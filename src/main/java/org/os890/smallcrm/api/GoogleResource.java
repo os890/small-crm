@@ -32,12 +32,15 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import org.jboss.logging.Logger;
 import org.os890.smallcrm.api.dto.GoogleStatusDto;
 import org.os890.smallcrm.api.error.BusinessRuleException;
 import org.os890.smallcrm.domain.AppUser;
 import org.os890.smallcrm.google.GoogleConnectionService;
 import org.os890.smallcrm.google.GoogleStatusService;
+import org.os890.smallcrm.google.sync.GoogleSyncService;
+import org.os890.smallcrm.google.sync.SyncReport;
 import org.os890.smallcrm.security.CurrentUser;
 import org.os890.smallcrm.security.SessionCookie;
 import org.os890.smallcrm.security.SessionService;
@@ -59,6 +62,7 @@ public class GoogleResource {
 
   @Inject GoogleConnectionService connections;
   @Inject GoogleStatusService status;
+  @Inject GoogleSyncService sync;
   @Inject CurrentUser currentUser;
   @Inject SessionService sessions;
   @Inject SessionCookie cookie;
@@ -97,6 +101,19 @@ public class GoogleResource {
   @Path("/signin")
   public Response signIn() {
     return Response.ok(new Redirect(connections.startSignIn())).build();
+  }
+
+  /**
+   * Runs all three syncs now, and reports each separately.
+   *
+   * <p>Synchronous on purpose: the person pressed a button and wants to know what happened, and
+   * for one user's address book and calendar this is seconds rather than minutes.
+   */
+  @POST
+  @Path("/sync")
+  @Authenticated
+  public List<SyncReport> syncNow() {
+    return sync.syncAll(currentUser.get());
   }
 
   /** Withdraws the connection here and the grant at Google. */

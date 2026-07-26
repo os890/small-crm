@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.os890.smallcrm.api.dto.CrmTaskDto;
+import org.os890.smallcrm.api.error.BusinessRuleException;
 import org.os890.smallcrm.api.error.NotFoundException;
 import org.os890.smallcrm.domain.CrmTask;
 import org.os890.smallcrm.domain.TaskPriority;
@@ -99,6 +100,7 @@ public class CrmTaskService {
   @Transactional
   public CrmTaskDto update(Long id, CrmTaskDto input) {
     CrmTask task = require(id);
+    refuseIfManagedInGoogle(task.externalReadOnly);
     Versions.check(input.version(), task);
     apply(input, task);
     return CrmTaskDto.from(task, today());
@@ -151,5 +153,21 @@ public class CrmTaskService {
       throw new NotFoundException("Task", id);
     }
     return task;
+  }
+
+  /**
+   * Refuses a change to a record Google owns more of than this CRM can hold.
+   *
+   * <p>Editing it here could only end one of two ways: the edit never reaches Google, or it
+   * reaches Google and flattens a recurring series or deletes addresses the user still has. Both
+   * are worse than saying no.
+   */
+  private static void refuseIfManagedInGoogle(boolean readOnly) {
+    if (readOnly) {
+      throw new BusinessRuleException(
+          "MANAGED_IN_GOOGLE",
+          "This record is managed in Google because it holds more than this application can."
+              + " Change it in Google and it will come back here.");
+    }
   }
 }

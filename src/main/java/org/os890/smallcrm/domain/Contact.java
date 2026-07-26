@@ -79,6 +79,16 @@ public class Contact extends BaseEntity {
   /** When this record and its Google counterpart were last known to agree. */
   public Instant lastSyncedAt;
 
+  /**
+   * Whether this record came from Google carrying something the CRM cannot represent.
+   *
+   * <p>Shown, never written back. Editing it here would flatten a recurring series or drop
+   * addresses in the user's own Google account, so the API refuses the change and the interface
+   * says the record is managed in Google.
+   */
+  @Column(nullable = false)
+  public boolean externalReadOnly;
+
   public String displayName() {
     return firstName + " " + lastName;
   }

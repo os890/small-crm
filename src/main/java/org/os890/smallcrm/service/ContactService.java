@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.os890.smallcrm.api.dto.ContactDto;
+import org.os890.smallcrm.api.error.BusinessRuleException;
 import org.os890.smallcrm.api.error.NotFoundException;
 import org.os890.smallcrm.domain.Appointment;
 import org.os890.smallcrm.domain.Contact;
@@ -87,6 +88,7 @@ public class ContactService {
   @Transactional
   public ContactDto update(Long id, ContactDto input) {
     Contact contact = require(id);
+    refuseIfManagedInGoogle(contact.externalReadOnly);
     Versions.check(input.version(), contact);
     apply(input, contact);
     return ContactDto.from(contact);
@@ -158,5 +160,21 @@ public class ContactService {
       throw new NotFoundException("Contact", id);
     }
     return contact;
+  }
+
+  /**
+   * Refuses a change to a record Google owns more of than this CRM can hold.
+   *
+   * <p>Editing it here could only end one of two ways: the edit never reaches Google, or it
+   * reaches Google and flattens a recurring series or deletes addresses the user still has. Both
+   * are worse than saying no.
+   */
+  private static void refuseIfManagedInGoogle(boolean readOnly) {
+    if (readOnly) {
+      throw new BusinessRuleException(
+          "MANAGED_IN_GOOGLE",
+          "This record is managed in Google because it holds more than this application can."
+              + " Change it in Google and it will come back here.");
+    }
   }
 }

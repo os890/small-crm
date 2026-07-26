@@ -134,6 +134,7 @@ public class AppointmentService {
   @Transactional
   public AppointmentDto update(Long id, AppointmentDto input, boolean allowConflict) {
     Appointment appointment = require(id);
+    refuseIfManagedInGoogle(appointment.externalReadOnly);
     Versions.check(input.version(), appointment);
     apply(input, appointment);
     lockCalendarOf(appointment.owner);
@@ -223,5 +224,21 @@ public class AppointmentService {
       throw new NotFoundException("Appointment", id);
     }
     return appointment;
+  }
+
+  /**
+   * Refuses a change to a record Google owns more of than this CRM can hold.
+   *
+   * <p>Editing it here could only end one of two ways: the edit never reaches Google, or it
+   * reaches Google and flattens a recurring series or deletes addresses the user still has. Both
+   * are worse than saying no.
+   */
+  private static void refuseIfManagedInGoogle(boolean readOnly) {
+    if (readOnly) {
+      throw new BusinessRuleException(
+          "MANAGED_IN_GOOGLE",
+          "This record is managed in Google because it holds more than this application can."
+              + " Change it in Google and it will come back here.");
+    }
   }
 }
