@@ -48,6 +48,14 @@
                 "styles": false,
                 "vendor": false,
                 "hidden": false
+              },
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
               }
             },
             "development": {

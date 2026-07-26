@@ -81,7 +81,8 @@ export const EN = {
   'login.submit': 'Sign in',
   'login.failed': 'User name or password is not correct.',
   'login.firstStart':
-    'On first start the administrator is “admin” with the password from the configuration.',
+    'On the very first start the administrator is “admin”, and the password was printed once ' +
+    'to the window the application was started from.',
 
   'password.heading': 'Choose a new password',
   'password.explain':
@@ -363,7 +364,8 @@ export const DE: Record<TranslationKey, string> = {
   'login.submit': 'Anmelden',
   'login.failed': 'Benutzername oder Passwort ist nicht korrekt.',
   'login.firstStart':
-    'Beim ersten Start ist der Administrator „admin“ mit dem Passwort aus der Konfiguration.',
+    'Beim allerersten Start ist der Administrator „admin“; das Passwort wurde einmalig in dem ' +
+    'Fenster ausgegeben, aus dem die Anwendung gestartet wurde.',
 
   'password.heading': 'Neues Passwort wählen',
   'password.explain':
