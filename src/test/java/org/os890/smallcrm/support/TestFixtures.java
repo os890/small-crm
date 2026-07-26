@@ -27,6 +27,8 @@ import org.os890.smallcrm.domain.Company;
 import org.os890.smallcrm.domain.Contact;
 import org.os890.smallcrm.domain.CrmTask;
 import org.os890.smallcrm.domain.Deal;
+import org.os890.smallcrm.domain.GoogleAccount;
+import org.os890.smallcrm.domain.GoogleSyncState;
 import org.os890.smallcrm.domain.Interaction;
 import org.os890.smallcrm.domain.InteractionType;
 import org.os890.smallcrm.security.Passwords;
@@ -60,8 +62,10 @@ public class TestFixtures {
     Contact.<Contact>listAll().forEach(Contact::delete);
     Contact.getEntityManager().flush();
     Company.deleteAll();
-    // Sessions reference accounts, so they go first.
+    // Sessions and connected Google accounts reference accounts, so they go first.
     AppSession.deleteAll();
+    GoogleSyncState.deleteAll();
+    GoogleAccount.deleteAll();
     AppUser.delete("username <> ?1", ADMIN_USERNAME);
     AppUser admin = AppUser.findByUsername(ADMIN_USERNAME);
     admin.password = Passwords.hash(ADMIN_PASSWORD);
