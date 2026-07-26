@@ -179,7 +179,7 @@ All of these run in `mvn verify` and fail the build:
 ```
 pom.xml                     the only build file; Quinoa builds the frontend into the jar
 config/checkstyle/          Java style rules
-src/main/java/org/smallcrm/
+src/main/java/org/os890/smallcrm/
   domain/                   JPA entities and the rules that belong on them
   backup/                   XML export and import, the rolling folder, the change trigger
   service/                  business logic, one service per aggregate

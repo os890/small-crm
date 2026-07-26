@@ -9,7 +9,7 @@ target/
 
 # Runtime data (H2 database) and the backups written beside it.
 # Anchored to the project root: "backup/" alone would also match the Java package
-# src/main/java/org/smallcrm/backup.
+# src/main/java/org/os890/smallcrm/backup.
 /data/
 /backup/
 /e2e/backup/

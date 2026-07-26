@@ -183,7 +183,7 @@ useful during development. Set a real datasource password
 ### SEC-5 · High · Published default admin credentials with no first-run binding
 
 **Files:** `src/main/resources/application.properties:58-59`;
-`src/main/java/org/smallcrm/security/BootstrapAdminService.java:57-67`; also printed in
+`src/main/java/org/os890/smallcrm/security/BootstrapAdminService.java:57-67`; also printed in
 `README.md:28,51` and in the shipped end-user manual `docs/manual/index.html:437`.
 
 The bootstrap admin is created at startup with a globally known password. `mustChangePassword=true`
@@ -203,7 +203,7 @@ README table, and the manual.
 
 ### SEC-6 · Medium · Password changes do not invalidate existing sessions
 
-**Files:** `src/main/java/org/smallcrm/service/UserService.java:107-113` (`resetPassword`),
+**Files:** `src/main/java/org/os890/smallcrm/service/UserService.java:107-113` (`resetPassword`),
 `:116-130` (`changeOwnPassword`); `src/main/resources/application.properties:45-46`.
 
 The session cookie carries only `expiry:username`, and the identity provider re-authenticates by
@@ -227,7 +227,7 @@ cap.
 ### SEC-7 · Medium · No brute-force protection or rate limiting on login
 
 **Files:** `src/main/resources/application.properties:50`;
-`src/main/java/org/smallcrm/domain/AppUser.java:45-78` (no failed-attempt counter, no lock-until
+`src/main/java/org/os890/smallcrm/domain/AppUser.java:45-78` (no failed-attempt counter, no lock-until
 column); nothing in the codebase observes `FormAuthenticationEvent`.
 
 `POST /api/auth/login` accepts unlimited attempts, and the password policy is only
@@ -244,8 +244,8 @@ rate limiting at the reverse proxy and log authentication failures.
 
 ### SEC-8 · Medium · Deactivated accounts still authenticate and receive a valid cookie
 
-**Files:** `src/main/java/org/smallcrm/domain/AppUser.java:36,49-56,74-75`;
-`src/main/java/org/smallcrm/security/AccountStateFilter.java:37-59`.
+**Files:** `src/main/java/org/os890/smallcrm/domain/AppUser.java:36,49-56,74-75`;
+`src/main/java/org/os890/smallcrm/security/AccountStateFilter.java:37-59`.
 
 `@UserDefinition` generates a lookup by `@Username` only, so `POST /api/auth/login` for a
 deactivated account **succeeds**: bcrypt is verified, `200` is returned, and a valid cookie is
@@ -271,7 +271,7 @@ currently unreachable, but it is the wrong default in a security filter.
 ### SEC-9 · Medium · No CSRF token, and one mutating endpoint is HTML-form-reachable
 
 **Files:** `src/main/resources/application.properties:47` (`strict`), `:104` (`%dev` → `lax`);
-`src/main/java/org/smallcrm/api/BackupResource.java:101-104`.
+`src/main/java/org/os890/smallcrm/api/BackupResource.java:101-104`.
 
 `todo.md` frames this as belt-and-braces given `SameSite=strict`, which is mostly right — every
 JSON endpoint declares `@Consumes(APPLICATION_JSON)`, which an HTML form cannot produce. But there
