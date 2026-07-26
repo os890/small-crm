@@ -24,6 +24,9 @@ mvn package
 java -jar target/quarkus-app/quarkus-run.jar
 ```
 
+Or take a ready-made package instead, which needs no Java at all — see
+[Packaging it for someone else](#packaging-it-for-someone-else).
+
 On the very first start one administrator account is created and its password is **printed to
 the console**, in a block that is hard to miss:
 
@@ -83,6 +86,34 @@ Quinoa starts the Angular dev server alongside Quarkus, so both the backend and 
 reload on save. Everything stays on <http://localhost:8080>. Dev mode — and only dev mode — has a
 known first password, `dev-only-password`, so a fresh checkout can be signed into without reading
 the console.
+
+### Packaging it for someone else
+
+```bash
+mvn package
+node packaging/build-distributions.mjs
+```
+
+Produces one self-contained archive per platform in `target/dist/`, about 100 MB each:
+
+| Platform | Archive | Start it with |
+| --- | --- | --- |
+| macOS (Apple silicon) | `small-crm-<version>-macos-aarch64.tar.gz` | `./start.sh` |
+| Linux (Intel/AMD 64-bit) | `small-crm-<version>-linux-x64.tar.gz` | `./start.sh` |
+| Windows (Intel/AMD 64-bit) | `small-crm-<version>-windows-x64.zip` | double-click `start.cmd` |
+
+Each carries its own Java runtime — the Eclipse Temurin JRE that Adoptium publishes for that
+platform, downloaded during the build and checked against its published SHA-256 — so the person
+receiving it installs nothing. The start script waits for the application to come up and then
+opens the browser at it. `data/`, `backup/` and `logs/` live inside the package folder, which
+makes the folder the whole installation.
+
+All three are built from one machine. Note that this deliberately does not use `jlink`, which
+would make them smaller: given another platform's modules it still writes the host's launcher, so
+a Linux package built on a Mac came out with a macOS `java` in it. An official per-platform JRE is
+genuinely native and needs no build machine of that kind.
+
+Pass a target id to build just one: `node packaging/build-distributions.mjs linux-x64`.
 
 ### Configuration worth knowing
 
@@ -191,6 +222,7 @@ src/main/webui/             Angular 22 application
   src/app/core/             API client, auth, i18n, formatting, error handling
   src/app/features/         one folder per screen
   src/app/shared/           toasts, the confirmation prompt, the pager and the record picker
+packaging/                  builds the self-contained per-platform archives
 e2e/                        Playwright suite against the packaged application
 docs/manual/                illustrated user manual, English and German, HTML and PDF
 docs/architecture.md        the diagrams, from the schema up to the deployment

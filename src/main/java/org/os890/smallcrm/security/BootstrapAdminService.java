@@ -22,6 +22,7 @@ import jakarta.enterprise.event.Observes;
 import jakarta.transaction.Transactional;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.os890.smallcrm.domain.AppUser;
@@ -52,9 +53,16 @@ public class BootstrapAdminService {
   @ConfigProperty(name = "smallcrm.bootstrap.admin.username")
   String bootstrapUsername;
 
-  /** Empty means "generate one", which is the recommended way to run this. */
-  @ConfigProperty(name = "smallcrm.bootstrap.admin.password", defaultValue = "")
-  String bootstrapPassword;
+  /**
+   * Absent means "generate one", which is the recommended way to run this.
+   *
+   * <p>Optional rather than a String with an empty default: the property is declared in
+   * application.properties with an empty value, and SmallRye treats an empty value as no value
+   * — it does not fall back to {@code defaultValue}, it refuses to convert. Injecting a String
+   * here made the application fail to start on exactly the path the README recommends.
+   */
+  @ConfigProperty(name = "smallcrm.bootstrap.admin.password")
+  Optional<String> bootstrapPassword;
 
   void onStart(@Observes StartupEvent event) {
     createAdminIfNoUsersExist();
@@ -70,8 +78,9 @@ public class BootstrapAdminService {
     if (AppUser.count() > 0) {
       return null;
     }
-    boolean generated = bootstrapPassword == null || bootstrapPassword.isBlank();
-    String password = generated ? generatePassword() : bootstrapPassword;
+    String configured = bootstrapPassword.filter(value -> !value.isBlank()).orElse(null);
+    boolean generated = configured == null;
+    String password = generated ? generatePassword() : configured;
 
     AppUser admin = new AppUser();
     admin.username = bootstrapUsername;
