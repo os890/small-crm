@@ -38,9 +38,9 @@ central server. Sketched out but not started; it is comparable in size to everyt
 file put together, and the first phase alone is about the size of the production-readiness pass.
 
 **Nothing can merge until identity changes.** `BaseEntity` uses `GenerationType.IDENTITY` —
-per-database autoincrement — so two people both creating a contact both get id 5. UUIDv7 primary keys are the prerequisite for every other part of this: time
-ordered, so index locality and "newest first" survive, and generated locally with no
-coordination. Migrating properly beats adding a `uuid` column beside the numeric one, which
+per-database autoincrement — so two people both creating a contact both get id 5. UUIDv7
+primary keys are the prerequisite for every other part of this: time ordered, so index locality
+and "newest first" survive, and generated locally with no coordination. Migrating properly beats adding a `uuid` column beside the numeric one, which
 would leak a second identity into every join and every sync path for ever. `BackupService`
 already rebuilds relationships through id maps, so export → migrate → re-import gets existing
 installations across.
