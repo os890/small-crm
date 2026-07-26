@@ -32,7 +32,10 @@ test('a company and a contact can be created and linked', async ({ page }) => {
   await page.getByTestId('contact-last-name').fill(lastName);
   await page.getByTestId('contact-email').fill('maria@example.org');
   await page.getByTestId('contact-tags').fill('vip, key account');
-  await page.getByTestId('contact-company').selectOption({ label: companyName });
+  // The company field is a typeahead, not a dropdown: it looks up what is typed rather than
+  // loading every company in the installation to fill a <select>.
+  await page.getByTestId('contact-company').fill(companyName.slice(0, 12));
+  await page.getByTestId('contact-company-option').filter({ hasText: companyName }).click();
   await page.getByTestId('contact-save').click();
 
   const row = page.getByTestId('contact-rows').locator('tr', { hasText: lastName });

@@ -107,7 +107,8 @@ public class AppUser extends PanacheEntityBase {
 
   @PrePersist
   void onCreate() {
-    Instant now = Instant.now();
+    // The injectable clock, like BaseEntity: a test with a fixed clock must not get wall time.
+    Instant now = Clocks.now();
     if (createdAt == null) {
       createdAt = now;
     }
@@ -116,6 +117,6 @@ public class AppUser extends PanacheEntityBase {
 
   @PreUpdate
   void onUpdate() {
-    updatedAt = Instant.now();
+    updatedAt = Clocks.now();
   }
 }

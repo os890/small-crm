@@ -24,12 +24,54 @@ mvn package
 java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-Open <http://localhost:8080> and sign in as `admin` with the password from
-`smallcrm.bootstrap.admin.password` (`changeit` out of the box). The first sign-in forces you to
-choose your own password.
+On the very first start one administrator account is created and its password is **printed to
+the console**, in a block that is hard to miss:
+
+```
+=================== Small CRM first start ===================
+  A single administrator account has been created.
+
+      user name: admin
+      password:  4Xb2p-…
+
+  Sign in now and choose your own password; this one stops working
+  as soon as you do. It is not shown again.
+=============================================================
+```
+
+Open <http://localhost:8080>, sign in with it, and choose your own password when prompted. There
+is no default password to look up, and none is written anywhere else. If you would rather set the
+first password yourself, put it in `SMALLCRM_BOOTSTRAP_ADMIN_PASSWORD` before the first start; it
+still has to be changed at the first sign-in.
 
 The database lives in `./data/smallcrm.mv.db`. Point `SMALLCRM_DATA_DIR` somewhere else to move
-it. That one file is the entire installation — copy it and you have a backup.
+it.
+
+### Backing it up
+
+Two mechanisms, for two different situations.
+
+**While the application runs**, it looks after itself: every change writes the whole dataset to a
+timestamped XML file in `./backup`, and the Backup screen restores from one. Those files hold your
+business data — contacts, companies, activity, deals, to-dos, appointments — but deliberately
+**not** the user accounts. Restoring one onto an empty installation gives you your data back, and
+you then re-create the accounts.
+
+**For a complete copy**, including accounts, take the database file — but *not* with `cp` while
+the application is running. H2 keeps the store open, and a copy taken mid-write is a copy of a
+half-finished write. Either:
+
+- stop the application, then copy `data/smallcrm.mv.db`; or
+- leave it running and ask H2 for a consistent archive:
+
+  ```bash
+  java -cp "$(ls ~/.m2/repository/com/h2database/h2/*/h2-*.jar | head -1)" org.h2.tools.Shell \
+    -url "jdbc:h2:file:./data/smallcrm;AUTO_SERVER=TRUE" -user sa \
+    -sql "BACKUP TO 'smallcrm-backup.zip'"
+  ```
+
+  `AUTO_SERVER=TRUE` is only enabled in dev mode; in production, stopping the application first is
+  the supported route.
 
 ### Development
 
@@ -38,7 +80,9 @@ mvn quarkus:dev
 ```
 
 Quinoa starts the Angular dev server alongside Quarkus, so both the backend and the frontend
-reload on save. Everything stays on <http://localhost:8080>.
+reload on save. Everything stays on <http://localhost:8080>. Dev mode — and only dev mode — has a
+known first password, `dev-only-password`, so a fresh checkout can be signed into without reading
+the console.
 
 ### Configuration worth knowing
 
@@ -47,8 +91,14 @@ reload on save. Everything stays on <http://localhost:8080>.
 | HTTP port | `QUARKUS_HTTP_PORT` | `8080` |
 | Database directory | `SMALLCRM_DATA_DIR` | `./data` |
 | Backup folder | `SMALLCRM_BACKUP_DIR` | `./backup` |
-| Session encryption key | `SMALLCRM_SESSION_KEY` | a placeholder — **set this in production** |
-| Bootstrap administrator | `SMALLCRM_BOOTSTRAP_ADMIN_USERNAME` / `..._PASSWORD` | `admin` / `changeit` |
+| Bootstrap administrator | `SMALLCRM_BOOTSTRAP_ADMIN_USERNAME` / `..._PASSWORD` | `admin` / generated and printed once |
+| Database file password | `SMALLCRM_DB_PASSWORD` | empty; the file's own permissions are the protection |
+| Served over HTTPS | `SMALLCRM_HTTPS` | `false`; set to `true` so the session cookie is marked `Secure` |
+| Behind a TLS reverse proxy | `SMALLCRM_BEHIND_PROXY` | `false`; set to `true` to trust `X-Forwarded-*` |
+| Log file | `SMALLCRM_LOG_FILE` | `./logs/small-crm.log` (production profile only) |
+
+Sessions are held server-side; there is no shared secret to configure and nothing an attacker can
+forge from the cookie alone. They idle out after 8 hours and end after 12 regardless.
 
 The bootstrap account is only created while the user table is empty; afterwards these settings
 do nothing. How long backups are kept is not a file setting: it lives in the database and is
@@ -84,6 +134,11 @@ baselined at V1 and keeps its data.
   either from the folder or from an upload, and changes the retention period. A restore always
   writes a `before-restore-<timestamp>.xml` first, so it can itself be undone. Backups carry
   business data only, never accounts or password hashes.
+- **Lists that stay fast as they fill up.** Every list endpoint serves one page at a time and
+  says how many records there are in total, so the activity log — the one table that grows
+  without limit — is never fetched whole. The screens show "51–100 of 812" with the paging
+  buttons only when there is more than one page. Fields that point at another record look it up
+  as you type instead of loading every contact or company into a dropdown.
 - **English and German**, switched at any time from the header without a reload. Dates, times and
   currency follow the choice (`25/07/2026` and `€1,234.50` against `25.7.2026` and `€ 1.234,50`),
   and server-side validation messages come back translated too.
@@ -94,17 +149,17 @@ baselined at V1 and keeps its data.
 
 | Suite | Command | Covers |
 | --- | --- | --- |
-| Backend | `mvn test` | 132 JUnit tests: REST, services, domain rules, backup round trips, the real login flow |
-| Frontend | `cd src/main/webui && pnpm test` | 174 Vitest tests: services, guards, i18n and every page |
-| End to end | `mvn verify -Pe2e` | 23 Playwright tests through the packaged application |
+| Backend | `mvn test` | 152 JUnit tests: REST, services, domain rules, paging, backup round trips, the real login flow |
+| Frontend | `cd src/main/webui && pnpm test` | 214 Vitest tests: services, guards, i18n, the shared components and every page |
+| End to end | `mvn verify -Pe2e` | 24 Playwright tests through the packaged application |
 
 Coverage is enforced, not just reported — each build fails below its floor:
 
 | Suite | Tool | Lines | Branches |
 | --- | --- | --- | --- |
-| Backend | JaCoCo (`quarkus-jacoco`) | 91% (floor 80%) | 80% (floor 70%) |
-| Frontend | Vitest with `@vitest/coverage-v8` | 94% (floor 80%) | 78% (floor 75%) |
-| End to end | monocart-reporter (V8) | 74% | 63% |
+| Backend | JaCoCo (`quarkus-jacoco`) | 84% (floor 80%) | 71% (floor 70%) |
+| Frontend | Vitest with `@vitest/coverage-v8` | 91% (floor 80%) | 76% (floor 75%) |
+| End to end | monocart-reporter (V8) | 73% | 55% |
 
 Reports land in `target/site/jacoco/`, `src/main/webui/coverage/` and `e2e/coverage/`.
 
@@ -135,10 +190,15 @@ src/main/resources/         application.properties
 src/main/webui/             Angular 22 application
   src/app/core/             API client, auth, i18n, formatting, error handling
   src/app/features/         one folder per screen
-  src/app/shared/           toasts and the confirmation prompt
+  src/app/shared/           toasts, the confirmation prompt, the pager and the record picker
 e2e/                        Playwright suite against the packaged application
 docs/manual/                illustrated user manual, English and German, HTML and PDF
+docs/architecture.md        the diagrams, from the schema up to the deployment
 ```
+
+[`docs/architecture.md`](docs/architecture.md) has the diagrams: the tables, the entities mapped
+onto them, the code around those, the request pipeline, the key flows, and the single process it
+all ships as.
 
 `docs/manual/` is the illustrated user manual in English and German, as HTML and as PDF. The
 screenshots come from a throwaway instance filled with demo data, in the matching language;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
@@ -146,7 +146,7 @@ function nowLocalInput(): string {
                     type="submit"
                     class="btn btn-primary btn-sm"
                     data-testid="interaction-save"
-                    [disabled]="!entry.subject"
+                    [disabled]="!entry.subject || savingInteraction()"
                   >
                     {{ t('action.save') }}
                   </button>
@@ -262,10 +262,16 @@ export class ContactDetailPage {
   protected readonly tasks = signal<CrmTask[]>([]);
   protected readonly loading = signal(true);
   protected readonly draft = signal<Interaction | null>(null);
+  protected readonly savingInteraction = signal(false);
   protected occurredAtLocal = nowLocalInput();
 
   constructor() {
-    queueMicrotask(() => void this.load());
+    // An effect rather than a one-off call: the component is reused when the route changes to
+    // another contact, and a constructor-only load would leave the previous one on screen.
+    effect(() => {
+      const id = this.id();
+      queueMicrotask(() => void this.load(id));
+    });
   }
 
   protected typeLabel(type: InteractionType): string {
@@ -290,9 +296,12 @@ export class ContactDetailPage {
 
   protected async saveInteraction(): Promise<void> {
     const entry = this.draft();
-    if (!entry) {
+    if (!entry || this.savingInteraction()) {
+      // Every other form in the application guards like this; without it a double click logs
+      // the same activity twice.
       return;
     }
+    this.savingInteraction.set(true);
     try {
       await this.api.saveInteraction({
         ...entry,
@@ -303,6 +312,8 @@ export class ContactDetailPage {
       await this.loadInteractions();
     } catch (error) {
       this.toasts.problem(error);
+    } finally {
+      this.savingInteraction.set(false);
     }
   }
 
@@ -324,8 +335,8 @@ export class ContactDetailPage {
     }
   }
 
-  private async load(): Promise<void> {
-    const contactId = Number(this.id());
+  private async load(routeId: string): Promise<void> {
+    const contactId = Number(routeId);
     if (!Number.isFinite(contactId)) {
       this.loading.set(false);
       return;
@@ -334,13 +345,16 @@ export class ContactDetailPage {
       const [contact, interactions, deals, tasks] = await Promise.all([
         this.api.getContact(contactId),
         this.api.listInteractions(contactId),
-        this.api.listDeals(false),
+        // Filtered by the server. This used to fetch every deal in the installation and sift
+        // through them here, which is both the slowest request on the page and wrong as soon as
+        // the deals of this contact fall outside the first page.
+        this.api.listDeals(false, undefined, contactId),
         this.api.listTasks(true, contactId),
       ]);
       this.contact.set(contact);
-      this.interactions.set(interactions);
-      this.deals.set(deals.filter((deal) => deal.contactId === contactId));
-      this.tasks.set(tasks);
+      this.interactions.set(interactions.items);
+      this.deals.set(deals.items);
+      this.tasks.set(tasks.items);
     } catch (error) {
       this.toasts.problem(error);
     } finally {
@@ -351,7 +365,7 @@ export class ContactDetailPage {
   private async loadInteractions(): Promise<void> {
     const contactId = this.contact()?.id;
     if (contactId) {
-      this.interactions.set(await this.api.listInteractions(contactId));
+      this.interactions.set((await this.api.listInteractions(contactId)).items);
     }
   }
 }

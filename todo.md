@@ -7,27 +7,17 @@ without it.
 
 - **Off-site backups.** Backups land in a folder next to the database, which survives a mistaken
   delete but not a lost or stolen machine. Copying them somewhere else is still manual.
-- **Backups do not include accounts.** After a restore onto a fresh installation there are no
-  users, so the bootstrap administrator has to recreate them. A separate, clearly marked
-  account export would close that gap.
 - **Nothing verifies a backup can be restored.** The files are written and never read back until
   someone needs them. A periodic "restore into a scratch database" check would turn a silent
   corruption into a warning.
-- **A real session secret.** `quarkus.http.auth.session.encryption-key` falls back to a value
-  committed to the repository. The application should refuse to start in production unless
-  `SMALLCRM_SESSION_KEY` is set.
-- **HTTPS and secure cookies.** The session cookie is not marked `secure` because the proof of
-  concept is served over plain HTTP on localhost. Behind TLS, set
-  `quarkus.http.auth.form.cookie-secure=true`.
-- **Password rules and rate limiting.** The only rule today is a minimum of eight characters.
-  There is no lockout, no delay and no limit on failed sign-in attempts.
-- **Reject deactivated accounts during authentication.** They currently receive a valid session
-  cookie and are refused afterwards, on every API call, with `403 ACCOUNT_DEACTIVATED`. A
-  `SecurityIdentityAugmentor` should fail the authentication itself.
+- **A failed backup is only logged.** A permanently full or read-only backup folder stops the
+  automatic backups; with the production log file that is at least recorded, but the interface
+  says nothing. "Last successful backup" belongs on the Backup screen, or in the health check.
 - **Audit trail.** Records carry `createdAt`, `updatedAt` and an owner, but nothing records who
   changed what. For a shared workspace that is worth having.
-- **CSRF protection.** Session cookies are `SameSite=strict`, which covers the common cases, but
-  Quarkus' CSRF extension would be the belt-and-braces answer once the app is exposed.
+- **HTTPS is the operator's job.** The application marks its cookie `Secure` and trusts
+  `X-Forwarded-*` when told to (`SMALLCRM_HTTPS`, `SMALLCRM_BEHIND_PROXY`), but ships no TLS
+  configuration and no reverse-proxy example of its own.
 
 ## Google Calendar synchronisation
 
@@ -55,20 +45,33 @@ future sync instead of needing a migration. Still missing:
 
 ## Scale and polish
 
-- **Pagination and server-side sorting.** Every list endpoint returns everything it finds. Fine
-  for a few hundred records, not for tens of thousands.
+- **Server-side sorting.** Lists are paged, but the sort order of each is fixed. Clicking a
+  column heading to sort by it is the obvious next thing somebody will try.
 - **Full-name search.** Searching "Maria Huber" finds nothing because first and last name are
   matched separately.
-- **Optimistic locking is stored but not surfaced.** Entities carry `@Version`, yet the API
-  neither accepts nor returns it, so two people editing the same record silently overwrite one
-  another.
+- **The deal board is not paged.** It fetches the API's maximum page and says so when there is
+  more; splitting a pipeline across pages would make columns look empty when they are not, so
+  the real answer is per-column paging, which has not been built.
 - **Hidden source maps in production.** Maps are currently emitted openly so the Playwright
   coverage report can map back to TypeScript. A public deployment should use
   `"hidden": true` and upload them separately.
-- **Accessibility audit.** Labels, focus order and roles were written with care and the dialogs
-  use `aria-modal`, but no screen reader test and no automated axe run has happened. Focus is
-  not trapped inside dialogs.
+- **Accessibility audit.** Labels, focus order and roles were written with care, and the
+  confirmation prompt is now a native `<dialog>` so the browser handles focus trapping and
+  Escape. No screen reader test and no automated axe run has happened, and the other dialogs
+  are still hand-rolled backdrops.
 - **Frontend bundle for offline use.** No service worker, no offline mode.
+
+## Operations
+
+- **No dependency vulnerability scanning.** Nothing tells us when the pinned Quarkus, or either
+  pnpm lockfile, needs a security bump. OWASP dependency-check in `verify`, or a scheduled
+  audit, would.
+- **No service definition.** No systemd unit or launchd plist ships with the application, so
+  nothing restarts it after a crash or a reboot.
+- **No documented H2 upgrade path.** H2's file format changes across major versions, so a future
+  Quarkus bump can leave the application unable to open an existing `smallcrm.mv.db`. The
+  database snapshots written alongside the XML backups cover the data; the procedure is not
+  written down.
 
 ## Testing gaps
 

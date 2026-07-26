@@ -67,7 +67,7 @@ function extractFieldErrors(details: Record<string, unknown>): Record<string, st
 
 function defaultCodeFor(status: number): string {
   if (status === 401) {
-    return 'UNAUTHORIZED';
+    return 'unauthorized';
   }
   if (status === 403) {
     return 'forbidden';

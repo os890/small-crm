@@ -64,7 +64,7 @@ public abstract class BaseEntity extends PanacheEntityBase {
    */
   @PrePersist
   void onCreate() {
-    Instant now = Instant.now();
+    Instant now = Clocks.now();
     if (createdAt == null) {
       createdAt = now;
     }
@@ -75,6 +75,6 @@ public abstract class BaseEntity extends PanacheEntityBase {
 
   @PreUpdate
   void onUpdate() {
-    updatedAt = Instant.now();
+    updatedAt = Clocks.now();
   }
 }

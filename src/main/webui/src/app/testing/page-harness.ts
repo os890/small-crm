@@ -69,12 +69,15 @@ export function renderPage<T>(
     component: fixture.componentInstance,
     http,
     async settle() {
-      // Two rounds: the first lets the awaited promises resolve, the second renders what they
-      // changed.
-      await fixture.whenStable();
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
+      // Three rounds, each yielding to the task queue first. A page typically awaits a chain of
+      // promises — the request, then the response mapping, then the signal write — and each
+      // link needs the queue drained before the next one can run. `whenStable` alone does not
+      // do that: a plain promise chain is not something the zoneless scheduler tracks.
+      for (let round = 0; round < 3; round++) {
+        await fixture.whenStable();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        fixture.detectChanges();
+      }
     },
     async wait(ms: number) {
       await new Promise((resolve) => setTimeout(resolve, ms));

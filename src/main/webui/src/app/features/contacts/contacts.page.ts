@@ -19,16 +19,22 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { Company, Contact } from '../../core/models';
+import { Contact } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmService } from '../../shared/confirm.service';
+import {
+  EntityPickerComponent,
+  PickerOption,
+  PickerResult,
+} from '../../shared/entity-picker.component';
+import { PagerComponent } from '../../shared/pager.component';
 import { splitTags } from './contacts.util';
 
 /** Contact list with search and an inline create and edit dialog. */
 @Component({
   selector: 'app-contacts',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, EntityPickerComponent, PagerComponent],
   template: `
     <div class="stack">
       <div class="row-between">
@@ -86,7 +92,12 @@ import { splitTags } from './contacts.util';
                     }
                   </td>
                   <td class="actions">
-                    <button type="button" class="btn btn-sm" (click)="open(contact)">
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [attr.data-testid]="'contact-edit-' + contact.id"
+                      (click)="open(contact)"
+                    >
                       {{ t('action.edit') }}
                     </button>
                     <button type="button" class="btn btn-sm btn-danger" (click)="remove(contact)">
@@ -97,6 +108,13 @@ import { splitTags } from './contacts.util';
               }
             </tbody>
           </table>
+          <app-pager
+            [page]="page()"
+            [size]="pageSize()"
+            [total]="total()"
+            [shown]="contacts().length"
+            (goTo)="goToPage($event)"
+          />
         }
       </div>
     </div>
@@ -160,20 +178,14 @@ import { splitTags } from './contacts.util';
                 <label for="contact-position">{{ t('contacts.position') }}</label>
                 <input id="contact-position" name="position" [(ngModel)]="draft.position" />
               </div>
-              <div class="field">
-                <label for="contact-company">{{ t('contacts.company') }}</label>
-                <select
-                  id="contact-company"
-                  name="companyId"
-                  data-testid="contact-company"
-                  [(ngModel)]="draft.companyId"
-                >
-                  <option [ngValue]="null">{{ t('common.none') }}</option>
-                  @for (company of companies(); track company.id) {
-                    <option [ngValue]="company.id">{{ company.name }}</option>
-                  }
-                </select>
-              </div>
+              <app-entity-picker
+                testId="contact-company"
+                [label]="t('contacts.company')"
+                [value]="draft.companyId ?? null"
+                [valueLabel]="draft.companyName ?? null"
+                [search]="searchCompanies"
+                (selected)="pickCompany(draft, $event)"
+              />
               <div class="field">
                 <label for="contact-tags">{{ t('contacts.tags') }}</label>
                 <input
@@ -230,7 +242,9 @@ export class ContactsPage {
   protected readonly t = this.i18n.t;
 
   protected readonly contacts = signal<Contact[]>([]);
-  protected readonly companies = signal<Company[]>([]);
+  protected readonly total = signal(0);
+  protected readonly page = signal(0);
+  protected readonly pageSize = signal(0);
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly search = signal('');
@@ -239,16 +253,45 @@ export class ContactsPage {
   protected tagText = '';
 
   private searchTimer: ReturnType<typeof setTimeout> | undefined;
+  /**
+   * Counts the searches issued, so a slower earlier response cannot overwrite a newer one.
+   * Typing "mü" then "ller" otherwise leaves the table showing results for "mü".
+   */
+  private searchSequence = 0;
 
   constructor() {
     void this.load();
-    void this.loadCompanies();
   }
 
   protected onSearch(value: string): void {
     this.search.set(value);
+    // Back to the first page: page 4 of the previous search says nothing about this one.
+    this.page.set(0);
     clearTimeout(this.searchTimer);
     this.searchTimer = setTimeout(() => void this.load(), 250);
+  }
+
+  protected goToPage(page: number): void {
+    this.page.set(page);
+    void this.load();
+  }
+
+  /** Bound as a field so the template hands the picker a stable reference. */
+  protected readonly searchCompanies = async (term: string): Promise<PickerResult> => {
+    const found = await this.api.listCompanies(term, { size: 10 });
+    return {
+      options: found.items.map((company) => ({
+        id: company.id ?? 0,
+        label: company.name,
+        hint: company.city,
+      })),
+      total: found.total,
+    };
+  };
+
+  protected pickCompany(draft: Contact, option: PickerOption | null): void {
+    draft.companyId = option?.id ?? null;
+    draft.companyName = option?.label ?? null;
   }
 
   protected open(contact?: Contact): void {
@@ -302,21 +345,21 @@ export class ContactsPage {
   }
 
   private async load(): Promise<void> {
+    const sequence = ++this.searchSequence;
     this.loading.set(true);
     try {
-      this.contacts.set(await this.api.listContacts(this.search()));
+      const result = await this.api.listContacts(this.search(), undefined, { page: this.page() });
+      if (sequence === this.searchSequence) {
+        this.contacts.set(result.items);
+        this.total.set(result.total);
+        this.pageSize.set(result.size);
+      }
     } catch (error) {
       this.toasts.problem(error);
     } finally {
-      this.loading.set(false);
-    }
-  }
-
-  private async loadCompanies(): Promise<void> {
-    try {
-      this.companies.set(await this.api.listCompanies());
-    } catch {
-      // The picker simply stays empty; the contact can still be saved without a company.
+      if (sequence === this.searchSequence) {
+        this.loading.set(false);
+      }
     }
   }
 }

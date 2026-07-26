@@ -68,6 +68,34 @@ describe('ApiService', () => {
     await pending;
   });
 
+  it('reads the paging headers back off a list response', async () => {
+    const pending = api.listContacts(undefined, undefined, { page: 2, size: 25 });
+
+    const request = http.expectOne((candidate) => candidate.url === '/api/contacts');
+    expect(request.request.params.get('page')).toBe('2');
+    expect(request.request.params.get('size')).toBe('25');
+    request.flush([{ id: 1, firstName: 'Maria', lastName: 'Huber' }], {
+      headers: { 'X-Total-Count': '812', 'X-Page': '2', 'X-Page-Size': '25' },
+    });
+
+    const found = await pending;
+    expect(found.items).toHaveLength(1);
+    expect(found.total).toBe(812);
+    expect(found.page).toBe(2);
+    expect(found.size).toBe(25);
+  });
+
+  it('treats a response without paging headers as the whole answer', async () => {
+    const pending = api.listCompanies();
+
+    http.expectOne('/api/companies').flush([{ id: 1, name: 'Muster GmbH' }]);
+
+    const found = await pending;
+    expect(found.total).toBe(1);
+    expect(found.page).toBe(0);
+    expect(found.size).toBe(1);
+  });
+
   it('creates with POST and updates with PUT, based on the presence of an id', async () => {
     const create = api.saveCompany({ name: 'New Ltd' });
     const created = http.expectOne('/api/companies');

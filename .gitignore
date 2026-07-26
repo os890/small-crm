@@ -14,6 +14,10 @@ target/
 /backup/
 /e2e/backup/
 
+# Log files written by the production profile, beside the application.
+/logs/
+/e2e/logs/
+
 # Coverage artifacts
 coverage/
 

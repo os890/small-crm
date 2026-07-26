@@ -66,7 +66,9 @@ export class I18nService {
     if (code && key in CATALOGUES[this.current()]) {
       return this.t(key);
     }
-    return fallback ?? this.t('error.unexpected');
+    // ?? would keep an empty string, which is exactly what a body-less 401 supplies, and the
+    // user would get a blank red box.
+    return fallback || this.t('error.unexpected');
   }
 }
 

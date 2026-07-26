@@ -45,7 +45,12 @@ export const sessionInterceptor: HttpInterceptorFn = (request, next) => {
         !request.url.endsWith(LOGIN_URL);
       if (isSessionLoss && auth.isSignedIn()) {
         auth.clear();
-        void router.navigate(['/login']);
+        // Carry the page along, so signing back in returns the user where they were rather
+        // than dumping them on the dashboard.
+        const returnUrl = router.url;
+        void router.navigate(['/login'], {
+          queryParams: returnUrl && returnUrl !== '/' ? { returnUrl } : {},
+        });
       }
       return throwError(() => error);
     }),

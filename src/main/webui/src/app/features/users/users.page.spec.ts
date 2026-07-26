@@ -171,16 +171,65 @@ describe('UsersPage', () => {
 
     expect(harness.query('reset-dialog')?.textContent).toContain('assistant');
 
-    await harness.type('reset-password', 'a-fresh-secret');
+    await harness.type('reset-own-password', 'the-admins-own-password');
+    await harness.type('reset-password', 'a-fresh-secret-x');
     await harness.click('reset-save');
 
     const request = harness.http.expectOne('/api/users/2/password');
-    expect(request.request.body).toEqual({ newPassword: 'a-fresh-secret' });
+    expect(request.request.body).toEqual({
+      currentPassword: 'the-admins-own-password',
+      newPassword: 'a-fresh-secret-x',
+    });
     request.flush(ASSISTANT);
     await harness.settle();
     harness.flushGet('/api/users', []);
     await harness.settle();
 
     expect(harness.query('reset-dialog')).toBeNull();
+  });
+
+  it('will not reset anything until the administrator confirms their own password', async () => {
+    const harness = await open();
+
+    const buttons = harness.fixture.nativeElement.querySelectorAll(
+      'tbody tr:nth-child(2) .btn',
+    ) as NodeListOf<HTMLElement>;
+    buttons[1].click();
+    await harness.settle();
+
+    await harness.type('reset-password', 'a-fresh-secret-x');
+    expect(harness.query<HTMLButtonElement>('reset-save')?.disabled).toBe(true);
+
+    await harness.type('reset-own-password', 'the-admins-own-password');
+    expect(harness.query<HTMLButtonElement>('reset-save')?.disabled).toBe(false);
+  });
+
+  it('keeps the dialog open and points at the field when the own password is wrong', async () => {
+    const harness = await open();
+
+    const buttons = harness.fixture.nativeElement.querySelectorAll(
+      'tbody tr:nth-child(2) .btn',
+    ) as NodeListOf<HTMLElement>;
+    buttons[1].click();
+    await harness.settle();
+
+    await harness.type('reset-own-password', 'not-my-password');
+    await harness.type('reset-password', 'a-fresh-secret-x');
+    await harness.click('reset-save');
+
+    harness.http.expectOne('/api/users/2/password').flush(
+      {
+        code: 'VALIDATION_FAILED',
+        message: 'One or more fields are invalid',
+        details: { currentPassword: 'Your own password is not correct.' },
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    await harness.settle();
+
+    expect(harness.query('reset-dialog')).not.toBeNull();
+    expect(harness.query('reset-dialog')?.textContent).toContain(
+      'Your own password is not correct.',
+    );
   });
 });

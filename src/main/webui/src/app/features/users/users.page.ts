@@ -25,6 +25,7 @@ import { ConfirmService } from '../../shared/confirm.service';
 
 interface UserDraft {
   id?: number;
+  version?: number;
   username: string;
   password: string;
   fullName: string;
@@ -204,6 +205,23 @@ interface UserDraft {
             <h2>{{ t('users.resetPasswordFor', { name: target.username }) }}</h2>
           </div>
           <div class="dialog-body">
+            <div class="field" [class.invalid]="errors()['currentPassword']">
+              <label for="reset-own-password">{{ t('users.ownPassword') }} *</label>
+              <input
+                id="reset-own-password"
+                name="ownPassword"
+                type="password"
+                data-testid="reset-own-password"
+                autocomplete="current-password"
+                required
+                [(ngModel)]="ownPassword"
+              />
+              <span class="field-hint">{{ t('users.ownPasswordHint') }}</span>
+              @if (errors()['currentPassword']; as message) {
+                <span class="field-error">{{ message }}</span>
+              }
+            </div>
+
             <div class="field" [class.invalid]="errors()['newPassword']">
               <label for="reset-password">{{ t('password.new') }} *</label>
               <input
@@ -230,7 +248,7 @@ interface UserDraft {
               type="submit"
               class="btn btn-primary"
               data-testid="reset-save"
-              [disabled]="saving() || newPassword.length < 8"
+              [disabled]="saving() || newPassword.length < 12 || !ownPassword"
             >
               {{ t('action.save') }}
             </button>
@@ -260,6 +278,8 @@ export class UsersPage {
   protected readonly resetting = signal<User | null>(null);
   protected readonly errors = signal<Record<string, string>>({});
   protected newPassword = '';
+  /** The acting administrator's own password, required so a hijacked session cannot reset. */
+  protected ownPassword = '';
 
   constructor() {
     void this.load();
@@ -273,6 +293,7 @@ export class UsersPage {
     this.errors.set({});
     this.editing.set({
       id: user?.id,
+      version: user?.version,
       username: user?.username ?? '',
       password: '',
       fullName: user?.fullName ?? '',
@@ -285,6 +306,7 @@ export class UsersPage {
   protected startReset(user: User): void {
     this.errors.set({});
     this.newPassword = '';
+    this.ownPassword = '';
     this.resetting.set(user);
   }
 
@@ -302,6 +324,7 @@ export class UsersPage {
           email: draft.email || null,
           admin: draft.admin,
           active: draft.active,
+          version: draft.version,
         });
       } else {
         await this.api.createUser({
@@ -330,9 +353,10 @@ export class UsersPage {
     this.saving.set(true);
     this.errors.set({});
     try {
-      await this.api.resetUserPassword(target.id, this.newPassword);
+      await this.api.resetUserPassword(target.id, this.ownPassword, this.newPassword);
       this.resetting.set(null);
       this.newPassword = '';
+      this.ownPassword = '';
       this.toasts.success(this.t('common.saved'));
       await this.load();
     } catch (error) {

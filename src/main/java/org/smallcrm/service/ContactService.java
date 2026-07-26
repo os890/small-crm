@@ -16,10 +16,13 @@
 
 package org.smallcrm.service;
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,14 +43,16 @@ public class ContactService {
 
   @Inject CurrentUser currentUser;
   @Inject ReferenceResolver references;
+  @Inject Clock clock;
 
   /**
-   * Contacts ordered by last name then first name.
+   * One page of contacts, ordered by last name then first name.
    *
    * @param search optional case-insensitive fragment matched against name, e-mail and phone
    * @param companyId optional restriction to one company
+   * @param page which page to return and how large it is
    */
-  public List<ContactDto> list(String search, Long companyId) {
+  public Paged<ContactDto> list(String search, Long companyId, PageRequest page) {
     Sort byName = Sort.by("lastName").and("firstName");
     StringBuilder query = new StringBuilder("1 = 1");
     Map<String, Object> parameters = new HashMap<>();
@@ -62,8 +67,8 @@ public class ContactService {
       query.append(" and company.id = :companyId");
       parameters.put("companyId", companyId);
     }
-    List<Contact> contacts = Contact.list(query.toString(), byName, parameters);
-    return contacts.stream().map(ContactDto::from).toList();
+    PanacheQuery<Contact> found = Contact.find(query.toString(), byName, parameters);
+    return Paged.of(found, page, ContactDto::from);
   }
 
   public ContactDto get(Long id) {
@@ -94,10 +99,23 @@ public class ContactService {
   @Transactional
   public void delete(Long id) {
     Contact contact = require(id);
+    Instant now = Instant.now(clock);
     Interaction.delete("contact = ?1", contact);
-    Deal.update("contact = null where contact = ?1", contact);
-    CrmTask.update("contact = null where contact = ?1", contact);
-    Appointment.update("contact = null where contact = ?1", contact);
+    // "update versioned" so the detached rows get a new @Version and updatedAt: a plain
+    // bulk update runs no @PreUpdate, and another transaction holding one of these rows
+    // would then save over the detach without its optimistic-lock check noticing.
+    Deal.update(
+        "update versioned Deal set contact = null, updatedAt = ?1 where contact = ?2",
+        now,
+        contact);
+    CrmTask.update(
+        "update versioned CrmTask set contact = null, updatedAt = ?1 where contact = ?2",
+        now,
+        contact);
+    Appointment.update(
+        "update versioned Appointment set contact = null, updatedAt = ?1 where contact = ?2",
+        now,
+        contact);
     contact.delete();
   }
 

@@ -21,6 +21,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { Company } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmService } from '../../shared/confirm.service';
+import { PagerComponent } from '../../shared/pager.component';
 
 function blankCompany(): Company {
   return { name: '' };
@@ -30,7 +31,7 @@ function blankCompany(): Company {
 @Component({
   selector: 'app-companies',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, PagerComponent],
   template: `
     <div class="stack">
       <div class="row-between">
@@ -88,6 +89,13 @@ function blankCompany(): Company {
               }
             </tbody>
           </table>
+          <app-pager
+            [page]="page()"
+            [size]="pageSize()"
+            [total]="total()"
+            [shown]="companies().length"
+            (goTo)="goToPage($event)"
+          />
         }
       </div>
     </div>
@@ -187,6 +195,9 @@ export class CompaniesPage {
   protected readonly t = this.i18n.t;
 
   protected readonly companies = signal<Company[]>([]);
+  protected readonly total = signal(0);
+  protected readonly page = signal(0);
+  protected readonly pageSize = signal(0);
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly search = signal('');
@@ -194,6 +205,11 @@ export class CompaniesPage {
   protected readonly errors = signal<Record<string, string>>({});
 
   private searchTimer: ReturnType<typeof setTimeout> | undefined;
+  /**
+   * Counts the searches issued, so a slower earlier response cannot overwrite a newer one.
+   * Typing "mü" then "ller" otherwise leaves the table showing results for "mü".
+   */
+  private searchSequence = 0;
 
   constructor() {
     void this.load();
@@ -201,9 +217,16 @@ export class CompaniesPage {
 
   protected onSearch(value: string): void {
     this.search.set(value);
+    // Back to the first page: page 4 of the previous search says nothing about this one.
+    this.page.set(0);
     // Debounced so typing does not fire a request per keystroke.
     clearTimeout(this.searchTimer);
     this.searchTimer = setTimeout(() => void this.load(), 250);
+  }
+
+  protected goToPage(page: number): void {
+    this.page.set(page);
+    void this.load();
   }
 
   protected open(company?: Company): void {
@@ -255,13 +278,21 @@ export class CompaniesPage {
   }
 
   private async load(): Promise<void> {
+    const sequence = ++this.searchSequence;
     this.loading.set(true);
     try {
-      this.companies.set(await this.api.listCompanies(this.search()));
+      const result = await this.api.listCompanies(this.search(), { page: this.page() });
+      if (sequence === this.searchSequence) {
+        this.companies.set(result.items);
+        this.total.set(result.total);
+        this.pageSize.set(result.size);
+      }
     } catch (error) {
       this.toasts.problem(error);
     } finally {
-      this.loading.set(false);
+      if (sequence === this.searchSequence) {
+        this.loading.set(false);
+      }
     }
   }
 }

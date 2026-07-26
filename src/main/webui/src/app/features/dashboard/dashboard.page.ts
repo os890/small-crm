@@ -49,7 +49,9 @@ import { ToastService } from '../../core/toast.service';
             <span class="muted">{{ t('dashboard.openDeals') }}</span>
           </a>
           <a class="card card-pad tile" routerLink="/deals">
-            <span class="tile-value">{{ format.money(summary.openDealValue, 'EUR') }}</span>
+            @for (total of openValues(summary); track total.currency) {
+              <span class="tile-value">{{ format.money(total.amount, total.currency) }}</span>
+            }
             <span class="muted">{{ t('dashboard.openValue') }}</span>
           </a>
         </div>
@@ -186,6 +188,23 @@ export class DashboardPage {
 
   constructor() {
     void this.load();
+  }
+
+  /**
+   * The open pipeline value, one entry per currency.
+   *
+   * <p>Adding different currencies into one figure produced a headline number that was simply
+   * wrong, with nothing on screen to say so.
+   */
+  protected openValues(summary: Dashboard): { currency: string; amount: number }[] {
+    const byCurrency = summary.openDealValueByCurrency ?? {};
+    const entries = Object.entries(byCurrency).filter(([, amount]) => amount !== 0);
+    if (entries.length === 0) {
+      return [{ currency: 'EUR', amount: 0 }];
+    }
+    return entries
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([currency, amount]) => ({ currency, amount }));
   }
 
   private async load(): Promise<void> {

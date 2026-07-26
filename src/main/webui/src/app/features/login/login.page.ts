@@ -16,7 +16,7 @@
 
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { Language } from '../../core/i18n/translations';
@@ -123,6 +123,7 @@ export class LoginPage {
   protected readonly t = this.i18n.t;
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected username = '';
   protected password = '';
@@ -146,7 +147,13 @@ export class LoginPage {
     try {
       const user = await this.auth.signIn(this.username.trim(), this.password);
       this.password = '';
-      await this.router.navigate([user?.mustChangePassword ? '/change-password' : '/']);
+      if (user?.mustChangePassword) {
+        await this.router.navigate(['/change-password']);
+      } else {
+        // Back to whatever the session expiry interrupted, rather than the dashboard.
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        await this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') ? returnUrl : '/');
+      }
     } catch (error) {
       const problem = toProblem(error);
       this.failed.set(true);

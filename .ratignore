@@ -32,6 +32,9 @@ e2e/backup/**
 **/.auth/**
 **/*.mv.db
 **/*.trace.db
+# Written by the production logging profile beside the application.
+/logs/**
+e2e/logs/**
 
 # Machine written manifests, no header possible
 **/package-lock.json

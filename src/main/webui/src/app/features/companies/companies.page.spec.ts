@@ -30,7 +30,79 @@ async function open(companies: unknown[] = [MUSTER]): Promise<PageHarness<Compan
   return harness;
 }
 
+/** A page of `size` placeholder companies, for the paging tests. */
+function fill(size: number, offset = 0): unknown[] {
+  return Array.from({ length: size }, (unused, index) => ({
+    id: offset + index + 1,
+    name: `Company ${offset + index}`,
+  }));
+}
+
+/** Answers the pending company request with a page and its `X-Total-Count`. */
+function flushPage(
+  harness: PageHarness<CompaniesPage>,
+  companies: unknown[],
+  total: number,
+  page = 0,
+): void {
+  harness.http
+    .expectOne((candidate) => candidate.url === '/api/companies')
+    .flush(companies, {
+      headers: {
+        'X-Total-Count': String(total),
+        'X-Page': String(page),
+        'X-Page-Size': '50',
+      },
+    });
+}
+
 describe('CompaniesPage', () => {
+  it('offers no paging while everything fits on one page', async () => {
+    const harness = await open();
+
+    expect(harness.query('pager')).toBeNull();
+  });
+
+  it('says how much of a long list is on screen and fetches the next page', async () => {
+    const harness = renderPage(CompaniesPage);
+    await harness.settle();
+    flushPage(harness, fill(50), 120);
+    await harness.settle();
+
+    expect(harness.text('pager-range')).toBe('Showing 1–50 of 120');
+
+    await harness.click('pager-next');
+    const next = harness.http.expectOne((candidate) => candidate.url === '/api/companies');
+    expect(next.request.params.get('page')).toBe('1');
+    next.flush(fill(50, 50), {
+      headers: { 'X-Total-Count': '120', 'X-Page': '1', 'X-Page-Size': '50' },
+    });
+    await harness.settle();
+
+    expect(harness.text('pager-range')).toBe('Showing 51–100 of 120');
+    expect(harness.query('company-rows')?.textContent).toContain('Company 50');
+  });
+
+  it('starts a new search from the first page', async () => {
+    const harness = renderPage(CompaniesPage);
+    await harness.settle();
+    flushPage(harness, fill(50), 120);
+    await harness.settle();
+
+    await harness.click('pager-next');
+    flushPage(harness, fill(50, 50), 120, 1);
+    await harness.settle();
+
+    // Page 2 of the previous search says nothing about this one, and landing on an empty page
+    // reads as "nothing found".
+    await harness.type('company-search', 'gra');
+    await harness.wait(300);
+    const search = harness.http.expectOne((candidate) => candidate.url === '/api/companies');
+    expect(search.request.params.get('page')).toBe('0');
+    search.flush([MUSTER]);
+    await harness.settle();
+  });
+
   it('lists what the server returned', async () => {
     const harness = await open();
 

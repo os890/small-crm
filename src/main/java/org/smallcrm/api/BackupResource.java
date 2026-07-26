@@ -48,7 +48,7 @@ import org.smallcrm.domain.AppUser;
  * <p>Every endpoint here either exposes the whole customer database or replaces it, so the role
  * check sits on the class and there is no read-only subset for ordinary users.
  */
-@Path("/api/backups")
+@Path("/backups")
 @RolesAllowed(AppUser.ROLE_ADMIN)
 @Produces(MediaType.APPLICATION_JSON)
 public class BackupResource {

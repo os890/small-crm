@@ -39,12 +39,14 @@ public class DataChangeFilter implements ContainerResponseFilter {
       Set.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.PATCH);
 
   /**
-   * Paths whose writes never change what a backup contains: sessions, accounts (deliberately not
-   * part of a backup) and the backup endpoints themselves, which would otherwise have a restore
-   * immediately trigger a backup of what it just restored.
+   * First path segments whose writes never change what a backup contains: sessions, accounts
+   * (deliberately not part of a backup) and the backup endpoints themselves, which would
+   * otherwise have a restore immediately trigger a backup of what it just restored.
+   *
+   * <p>Matched a whole segment at a time, relative to the REST root path. Prefix matching would
+   * have quietly swallowed a future {@code userstats} endpoint along with {@code users}.
    */
-  private static final Set<String> IGNORED_PREFIXES =
-      Set.of("api/auth", "api/users", "api/backups");
+  private static final Set<String> IGNORED_SECTIONS = Set.of("auth", "users", "backups");
 
   @Inject AutoBackupTrigger trigger;
 
@@ -56,14 +58,16 @@ public class DataChangeFilter implements ContainerResponseFilter {
     if (response.getStatus() < 200 || response.getStatus() >= 300) {
       return;
     }
-    String path = normalise(request.getUriInfo().getPath());
-    if (IGNORED_PREFIXES.stream().anyMatch(path::startsWith)) {
+    if (IGNORED_SECTIONS.contains(firstSegment(request.getUriInfo().getPath()))) {
       return;
     }
     trigger.dataChanged();
   }
 
-  private static String normalise(String path) {
-    return path.startsWith("/") ? path.substring(1) : path;
+  /** The first path segment, for instance {@code users} of {@code users/3/password}. */
+  private static String firstSegment(String path) {
+    String trimmed = path.startsWith("/") ? path.substring(1) : path;
+    int slash = trimmed.indexOf('/');
+    return slash < 0 ? trimmed : trimmed.substring(0, slash);
   }
 }

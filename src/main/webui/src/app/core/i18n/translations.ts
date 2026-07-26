@@ -66,6 +66,15 @@ export const EN = {
   'common.nothingHere': 'Nothing here yet.',
   'common.noResults': 'No entries match your search.',
 
+  'pager.range': 'Showing {from}–{to} of {total}',
+  'pager.previous': 'Previous',
+  'pager.next': 'Next',
+
+  'picker.placeholder': 'Type a name to search…',
+  'picker.noMatches': 'Nothing matches what you typed.',
+  'picker.clear': 'Clear this field',
+  'picker.more': 'and {count} more — keep typing to narrow it down',
+
   'login.heading': 'Sign in',
   'login.username': 'User name',
   'login.password': 'Password',
@@ -139,6 +148,8 @@ export const EN = {
   'deals.currency': 'Currency',
   'deals.stage': 'Stage',
   'deals.expectedClose': 'Expected close',
+  'deals.showingFirst':
+    'Showing the first {count} of {total} deals. Use the filter above to narrow the pipeline.',
   'deals.empty': 'No deals yet.',
   'deals.moveTo': 'Move to',
   'deals.openOnly': 'Open only',
@@ -206,6 +217,9 @@ export const EN = {
   'users.resetPasswordFor': 'New password for {name}',
   'users.mustChange': 'Must change password',
   'users.you': 'you',
+  'users.ownPassword': 'Your own password',
+  'users.ownPasswordHint':
+    'Confirms it is really you, so a forgotten open session cannot reset other accounts.',
 
   'backup.heading': 'Backups',
   'backup.explain':
@@ -239,6 +253,9 @@ export const EN = {
     'The current data is saved to a “before-restore” file first, so this can be undone.',
   'backup.restoreConfirm': 'Replace the data',
   'backup.restored': '{count} records restored. The previous data is in {file}.',
+  'backup.unresolvedOwners':
+    '{count} records could not be matched to a user account and have no owner.',
+  'backup.skippedRecords': '{count} records in the file could not be restored.',
   'backup.noAccountsHint':
     'A backup contains your business data. User accounts and passwords are not included.',
 
@@ -269,6 +286,15 @@ export const EN = {
   'error.APPOINTMENT_CONFLICT': 'This time slot is already taken.',
   'error.ACCOUNT_DEACTIVATED': 'This account has been deactivated.',
   'error.STAGE_REQUIRED': 'Please choose a stage.',
+  'error.STALE_VERSION':
+    'Somebody else changed this while you were editing it. Reload and try again.',
+  'error.BAD_CREDENTIALS': 'User name or password is not correct.',
+  'error.TOO_MANY_ATTEMPTS': 'Too many failed attempts. Please wait a moment.',
+  'error.SESSION_INVALID': 'Your session has ended. Please sign in again.',
+  'error.CROSS_ORIGIN_REFUSED': 'This request came from another site and was refused.',
+  'error.INVALID_VALUE': 'That value is not one this application accepts.',
+  'error.INTERNAL': 'Something went wrong. Nothing was saved.',
+  'error.unauthorized': 'Please sign in.',
   'error.INVALID_RANGE': 'The selected period is not valid.',
   'error.RANGE_TOO_WIDE': 'The selected period is too long.',
   'error.INVALID_TIMESTAMP': 'The date could not be understood.',
@@ -321,6 +347,15 @@ export const DE: Record<TranslationKey, string> = {
   'common.deleted': 'Gelöscht.',
   'common.nothingHere': 'Hier gibt es noch nichts.',
   'common.noResults': 'Keine Einträge passen zu Ihrer Suche.',
+
+  'pager.range': '{from}–{to} von {total} werden angezeigt',
+  'pager.previous': 'Zurück',
+  'pager.next': 'Weiter',
+
+  'picker.placeholder': 'Zum Suchen einen Namen eingeben …',
+  'picker.noMatches': 'Nichts passt zu Ihrer Eingabe.',
+  'picker.clear': 'Feld leeren',
+  'picker.more': 'und {count} weitere – tippen Sie weiter, um einzugrenzen',
 
   'login.heading': 'Anmelden',
   'login.username': 'Benutzername',
@@ -395,6 +430,8 @@ export const DE: Record<TranslationKey, string> = {
   'deals.currency': 'Währung',
   'deals.stage': 'Phase',
   'deals.expectedClose': 'Voraussichtlicher Abschluss',
+  'deals.showingFirst':
+    'Die ersten {count} von {total} Geschäften werden angezeigt. Grenzen Sie die Pipeline mit dem Filter oben ein.',
   'deals.empty': 'Noch keine Geschäfte.',
   'deals.moveTo': 'Verschieben nach',
   'deals.openOnly': 'Nur offene',
@@ -462,6 +499,9 @@ export const DE: Record<TranslationKey, string> = {
   'users.resetPasswordFor': 'Neues Passwort für {name}',
   'users.mustChange': 'Muss Passwort ändern',
   'users.you': 'Sie',
+  'users.ownPassword': 'Ihr eigenes Passwort',
+  'users.ownPasswordHint':
+    'Bestätigt, dass Sie es wirklich sind — eine vergessene offene Sitzung kann so keine anderen Konten zurücksetzen.',
 
   'backup.heading': 'Sicherungen',
   'backup.explain':
@@ -496,6 +536,10 @@ export const DE: Record<TranslationKey, string> = {
     'Der aktuelle Stand wird vorher in einer „before-restore“-Datei gesichert und kann damit zurückgeholt werden.',
   'backup.restoreConfirm': 'Daten ersetzen',
   'backup.restored': '{count} Datensätze wiederhergestellt. Der vorherige Stand liegt in {file}.',
+  'backup.unresolvedOwners':
+    '{count} Datensätze konnten keinem Benutzerkonto zugeordnet werden und haben keinen Besitzer.',
+  'backup.skippedRecords':
+    '{count} Datensätze aus der Datei konnten nicht wiederhergestellt werden.',
   'backup.noAccountsHint':
     'Eine Sicherung enthält Ihre Geschäftsdaten. Benutzerkonten und Passwörter sind nicht enthalten.',
 
@@ -529,6 +573,15 @@ export const DE: Record<TranslationKey, string> = {
   'error.APPOINTMENT_CONFLICT': 'Dieser Zeitraum ist bereits belegt.',
   'error.ACCOUNT_DEACTIVATED': 'Dieses Konto wurde deaktiviert.',
   'error.STAGE_REQUIRED': 'Bitte wählen Sie eine Phase.',
+  'error.STALE_VERSION':
+    'Jemand anderes hat das geändert, während Sie bearbeitet haben. Bitte neu laden.',
+  'error.BAD_CREDENTIALS': 'Benutzername oder Passwort ist nicht korrekt.',
+  'error.TOO_MANY_ATTEMPTS': 'Zu viele Fehlversuche. Bitte warten Sie einen Moment.',
+  'error.SESSION_INVALID': 'Ihre Sitzung ist beendet. Bitte melden Sie sich erneut an.',
+  'error.CROSS_ORIGIN_REFUSED': 'Diese Anfrage kam von einer anderen Seite und wurde abgelehnt.',
+  'error.INVALID_VALUE': 'Diesen Wert akzeptiert die Anwendung nicht.',
+  'error.INTERNAL': 'Etwas ist schiefgelaufen. Es wurde nichts gespeichert.',
+  'error.unauthorized': 'Bitte melden Sie sich an.',
   'error.INVALID_RANGE': 'Der gewählte Zeitraum ist ungültig.',
   'error.RANGE_TOO_WIDE': 'Der gewählte Zeitraum ist zu lang.',
   'error.INVALID_TIMESTAMP': 'Das Datum konnte nicht gelesen werden.',

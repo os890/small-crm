@@ -16,11 +16,14 @@
 
 import { HttpErrorResponse } from '@angular/common/http';
 import { describe, expect, it } from 'vitest';
+import { EN } from './i18n/translations';
 import { toProblem } from './problem';
 
 function response(status: number, body: unknown): HttpErrorResponse {
   return new HttpErrorResponse({ status, error: body, url: '/api/test' });
 }
+
+const TRANSLATION_KEYS = Object.keys(EN);
 
 describe('toProblem', () => {
   it('keeps the code, message and field errors the server sent', () => {
@@ -70,8 +73,17 @@ describe('toProblem', () => {
   it('derives a code when the body is not the standard error shape', () => {
     expect(toProblem(response(403, 'Forbidden')).code).toBe('forbidden');
     expect(toProblem(response(404, null)).code).toBe('notFound');
-    expect(toProblem(response(401, null)).code).toBe('UNAUTHORIZED');
+    expect(toProblem(response(401, null)).code).toBe('unauthorized');
     expect(toProblem(response(500, null)).code).toBe('unexpected');
+  });
+
+  it('derives codes that match the translation keys they are looked up under', () => {
+    // toProblem's code is used as `error.<code>`; a mismatched case silently shows the raw key.
+    for (const status of [401, 403, 404, 500]) {
+      const code = toProblem(response(status, null)).code;
+      expect(TRANSLATION_KEYS).toContain(`error.${code}`);
+    }
+    expect(TRANSLATION_KEYS).toContain(`error.${toProblem(response(0, null)).code}`);
   });
 
   it('survives something that is not an HTTP error at all', () => {

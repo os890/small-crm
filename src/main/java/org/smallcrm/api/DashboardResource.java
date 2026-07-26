@@ -26,7 +26,7 @@ import org.smallcrm.api.dto.DashboardDto;
 import org.smallcrm.service.DashboardService;
 
 /** Everything the start page needs, in one request. */
-@Path("/api/dashboard")
+@Path("/dashboard")
 @Authenticated
 @Produces(MediaType.APPLICATION_JSON)
 public class DashboardResource {

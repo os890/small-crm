@@ -15,7 +15,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderPage } from '../../testing/page-harness';
 import { LoginPage } from './login.page';
@@ -32,6 +32,14 @@ const PROFILE = {
   createdAt: '2026-07-01T00:00:00Z',
 };
 
+/** An {@link ActivatedRoute} that carries the given query parameters and nothing else. */
+function routeWith(queryParams: Record<string, string>): unknown {
+  return {
+    provide: ActivatedRoute,
+    useValue: { snapshot: { queryParamMap: convertToParamMap(queryParams) } },
+  };
+}
+
 describe('LoginPage', () => {
   beforeEach(() => localStorage.clear());
 
@@ -44,17 +52,17 @@ describe('LoginPage', () => {
     await harness.type('username', 'admin');
     expect(harness.query<HTMLButtonElement>('login-submit')?.disabled).toBe(true);
 
-    await harness.type('password', 'changeit');
+    await harness.type('password', 'a-good-password');
     expect(harness.query<HTMLButtonElement>('login-submit')?.disabled).toBe(false);
   });
 
   it('signs in and lands on the start page', async () => {
     const harness = renderPage(LoginPage);
     await harness.settle();
-    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
 
     await harness.type('username', 'admin');
-    await harness.type('password', 'changeit');
+    await harness.type('password', 'a-good-password');
     await harness.click('login-submit');
 
     harness.http.expectOne('/api/auth/login').flush(null);
@@ -62,7 +70,45 @@ describe('LoginPage', () => {
     harness.http.expectOne('/api/auth/me').flush(PROFILE);
     await harness.settle();
 
-    expect(navigate).toHaveBeenCalledWith(['/']);
+    expect(navigate).toHaveBeenCalledWith('/');
+  });
+
+  it('returns to the page the expired session interrupted', async () => {
+    const harness = renderPage(LoginPage, {
+      providers: [routeWith({ returnUrl: '/contacts/7' })],
+    });
+    await harness.settle();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+
+    await harness.type('username', 'admin');
+    await harness.type('password', 'a-good-password');
+    await harness.click('login-submit');
+    harness.http.expectOne('/api/auth/login').flush(null);
+    await harness.settle();
+    harness.http.expectOne('/api/auth/me').flush(PROFILE);
+    await harness.settle();
+
+    expect(navigate).toHaveBeenCalledWith('/contacts/7');
+  });
+
+  it('ignores a return address that points somewhere else entirely', async () => {
+    // Without the leading-slash check this is an open redirect: a crafted login link would
+    // bounce the user, freshly signed in, onto someone else's site.
+    const harness = renderPage(LoginPage, {
+      providers: [routeWith({ returnUrl: 'https://example.invalid/steal' })],
+    });
+    await harness.settle();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+
+    await harness.type('username', 'admin');
+    await harness.type('password', 'a-good-password');
+    await harness.click('login-submit');
+    harness.http.expectOne('/api/auth/login').flush(null);
+    await harness.settle();
+    harness.http.expectOne('/api/auth/me').flush(PROFILE);
+    await harness.settle();
+
+    expect(navigate).toHaveBeenCalledWith('/');
   });
 
   it('sends a first-time user straight to the password screen', async () => {
@@ -71,7 +117,7 @@ describe('LoginPage', () => {
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 
     await harness.type('username', 'admin');
-    await harness.type('password', 'changeit');
+    await harness.type('password', 'a-good-password');
     await harness.click('login-submit');
     harness.http.expectOne('/api/auth/login').flush(null);
     await harness.settle();
@@ -101,7 +147,7 @@ describe('LoginPage', () => {
     await harness.settle();
 
     await harness.type('username', 'admin');
-    await harness.type('password', 'changeit');
+    await harness.type('password', 'a-good-password');
     await harness.click('login-submit');
     harness.http
       .expectOne('/api/auth/login')

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/api.service';
 import { FormatService } from '../../core/format.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { BackupFile, BackupSettings } from '../../core/models';
+import { BackupFile, BackupSettings, RestoreResult } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmService } from '../../shared/confirm.service';
 
@@ -189,6 +189,7 @@ import { ConfirmService } from '../../shared/confirm.service';
 })
 export class BackupsPage {
   private readonly api = inject(ApiService);
+  private readonly host = inject(ElementRef<HTMLElement>);
   private readonly toasts = inject(ToastService);
   private readonly confirm = inject(ConfirmService);
   private readonly i18n = inject(I18nService);
@@ -218,6 +219,22 @@ export class BackupsPage {
   protected onFileChosen(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.chosenFile.set(input.files?.[0] ?? null);
+  }
+
+  /**
+   * Empties the file input.
+   *
+   * <p>Without this the field still shows the name after a restore, and choosing the same file
+   * again fires no change event, so the button can never be re-armed.
+   */
+  private clearFileInput(): void {
+    const input = this.host.nativeElement.querySelector(
+      '[data-testid="backup-upload"]',
+    ) as HTMLInputElement | null;
+    if (input) {
+      input.value = '';
+    }
+    this.chosenFile.set(null);
   }
 
   protected async createNow(): Promise<void> {
@@ -258,7 +275,7 @@ export class BackupsPage {
     }
     await this.run(async () => {
       const result = await this.api.restoreBackup(file.name);
-      this.reportRestore(result.recordCount, result.safetyCopy);
+      this.reportRestore(result);
       await this.load();
     });
   }
@@ -280,14 +297,24 @@ export class BackupsPage {
     }
     await this.run(async () => {
       const result = await this.api.restoreBackupUpload(file);
-      this.reportRestore(result.recordCount, result.safetyCopy);
-      this.chosenFile.set(null);
+      this.reportRestore(result);
+      this.clearFileInput();
       await this.load();
     });
   }
 
-  private reportRestore(count: number, safetyCopy: string): void {
-    this.toasts.success(this.t('backup.restored', { count, file: safetyCopy }));
+  private reportRestore(result: RestoreResult): void {
+    this.toasts.success(
+      this.t('backup.restored', { count: result.recordCount, file: result.safetyCopy }),
+    );
+    // Said out loud rather than only logged: restoring onto a fresh installation leaves every
+    // record without an owner, and a plain record count made that look like a clean restore.
+    if (result.unresolvedOwners > 0) {
+      this.toasts.error(this.t('backup.unresolvedOwners', { count: result.unresolvedOwners }));
+    }
+    if (result.skipped > 0) {
+      this.toasts.error(this.t('backup.skippedRecords', { count: result.skipped }));
+    }
   }
 
   /** Runs an action with the buttons disabled, reporting anything that goes wrong once. */

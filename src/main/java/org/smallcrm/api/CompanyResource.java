@@ -31,12 +31,12 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.net.URI;
-import java.util.List;
 import org.smallcrm.api.dto.CompanyDto;
 import org.smallcrm.service.CompanyService;
+import org.smallcrm.service.PageRequest;
 
 /** CRUD endpoints for companies. */
-@Path("/api/companies")
+@Path("/companies")
 @Authenticated
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -44,9 +44,13 @@ public class CompanyResource {
 
   @Inject CompanyService companyService;
 
+  /** One page of companies; see {@link PagedResponse} for the paging headers. */
   @GET
-  public List<CompanyDto> list(@QueryParam("search") String search) {
-    return companyService.list(search);
+  public Response list(
+      @QueryParam("search") String search,
+      @QueryParam("page") Integer page,
+      @QueryParam("size") Integer size) {
+    return PagedResponse.of(companyService.list(search, PageRequest.of(page, size)));
   }
 
   @GET

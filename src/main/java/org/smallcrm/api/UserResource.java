@@ -39,7 +39,7 @@ import org.smallcrm.domain.AppUser;
 import org.smallcrm.service.UserService;
 
 /** Account administration; reserved for administrators. */
-@Path("/api/users")
+@Path("/users")
 @RolesAllowed(AppUser.ROLE_ADMIN)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

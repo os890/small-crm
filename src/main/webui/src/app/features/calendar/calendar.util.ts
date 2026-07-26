@@ -24,7 +24,13 @@ import { Appointment } from '../../core/models';
 
 /** Turns a local `yyyy-MM-dd` plus `HH:mm` into a UTC ISO instant. */
 export function partsToIso(date: string, time: string): string {
-  return new Date(`${date}T${time}:00`).toISOString();
+  const parsed = new Date(`${date}T${time}:00`);
+  if (Number.isNaN(parsed.getTime())) {
+    // Angular adds novalidate, so `required` never blocks the submit; without this the
+    // RangeError from toISOString surfaced as a generic "unexpected error" toast.
+    throw new RangeError(`Not a usable date and time: "${date} ${time}"`);
+  }
+  return parsed.toISOString();
 }
 
 /** The local calendar date of an instant, as `yyyy-MM-dd`. */

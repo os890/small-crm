@@ -26,6 +26,7 @@ const EMPTY: Dashboard = {
   companyCount: 0,
   openDealCount: 0,
   openDealValue: 0,
+  openDealValueByCurrency: {},
   overdueTasks: [],
   tasksDueToday: [],
   upcomingAppointments: [],
@@ -70,10 +71,30 @@ describe('DashboardPage', () => {
   });
 
   it('shows the counts as tiles', async () => {
-    const harness = await open({ ...EMPTY, contactCount: 12, openDealValue: 4500 });
+    const harness = await open({
+      ...EMPTY,
+      contactCount: 12,
+      openDealValue: 4500,
+      openDealValueByCurrency: { EUR: 4500 },
+    });
 
     expect(harness.text('tile-contacts')).toBe('12');
     expect(harness.fixture.nativeElement.textContent).toContain('€4,500.00');
+  });
+
+  it('shows one figure per currency rather than adding them together', async () => {
+    const harness = await open({
+      ...EMPTY,
+      openDealCount: 2,
+      openDealValue: 5000,
+      openDealValueByCurrency: { EUR: 5000, USD: 10000 },
+    });
+
+    const page = harness.fixture.nativeElement.textContent as string;
+    expect(page).toContain('€5,000.00');
+    expect(page).toContain('US$10,000.00');
+    // The wrong behaviour was a single "€15,000.00".
+    expect(page).not.toContain('15,000.00');
   });
 
   it('lists what is overdue and what is due today, and drops the all-clear', async () => {

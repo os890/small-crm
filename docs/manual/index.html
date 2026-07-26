@@ -433,8 +433,11 @@
 
         <p>
           Open <code>http://localhost:8080</code> in your browser. You are asked to sign in. The
-          very first time, the user name is <code>admin</code> and the password is the one set in
-          the configuration — <code>changeit</code> unless somebody changed it for you.
+          very first time, the user name is <code>admin</code>, and the password was printed to
+          the console when the application started for the first time — in a framed block headed
+          <em>Small CRM first start</em>. There is no standard password: each installation gets
+          its own, and it is shown exactly once. If whoever set the system up chose a password
+          instead, ask them for it.
         </p>
 
         <figure>
@@ -444,8 +447,9 @@
 
         <p>
           Small CRM immediately asks you to choose your own password. This cannot be skipped, and
-          that is deliberate: the starting password is written in a configuration file that other
-          people may be able to read.
+          that is deliberate: the starting password passed through a console window and possibly
+          through somebody else's hands. Once you have chosen your own, the starting one stops
+          working.
         </p>
 
         <figure>

@@ -16,7 +16,9 @@
 
 package org.smallcrm.api.dto;
 
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
@@ -33,8 +35,10 @@ public record DealDto(
     String contactName,
     Long companyId,
     String companyName,
-    @PositiveOrZero BigDecimal amount,
-    @Size(min = 3, max = 3) String currency,
+    // Matches NUMERIC(15,2); without this an 18 digit amount passes validation and
+    // fails at flush as a 500.
+    @PositiveOrZero @Digits(integer = 13, fraction = 2) BigDecimal amount,
+    @Size(min = 3, max = 3) @Pattern(regexp = "[A-Za-z]{3}") String currency,
     DealStage stage,
     LocalDate expectedCloseDate,
     @Size(max = 4000) String notes,

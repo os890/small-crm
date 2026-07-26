@@ -72,8 +72,29 @@ public class AutoBackupTrigger {
     runQuietly(backupService::applyRetention, "apply the backup retention");
   }
 
+  /**
+   * Writes a pending backup before the scheduler goes away.
+   *
+   * <p>Coalescing means a change made in the last half minute is still only scheduled. Dropping
+   * it on shutdown would bite precisely the "stop the service, copy the backup folder off the
+   * machine" workflow, where the last thing done before the stop is the thing most worth
+   * keeping.
+   */
+  @ActivateRequestContext
   void onStop(@Observes ShutdownEvent event) {
+    flushPending();
     shutdown();
+  }
+
+  /**
+   * Writes a coalesced backup that is still waiting its turn.
+   *
+   * <p>Annotated in its own right because {@link #onStop} reaches it by self-invocation, which
+   * no interceptor sees.
+   */
+  @ActivateRequestContext
+  void flushPending() {
+    writeNow();
   }
 
   /**
@@ -98,9 +119,12 @@ public class AutoBackupTrigger {
 
   @ActivateRequestContext
   void writeNow() {
-    // Cleared before writing, so a change that arrives while the file is being produced
-    // schedules another one rather than being swallowed.
-    scheduled.set(false);
+    // Claimed before writing, so a change that arrives while the file is being produced
+    // schedules another one rather than being swallowed — and so a timer that fires after the
+    // pending write was already flushed does nothing instead of writing the same data twice.
+    if (!scheduled.compareAndSet(true, false)) {
+      return;
+    }
     runQuietly(() -> backupService.write(false), "write an automatic backup");
   }
 

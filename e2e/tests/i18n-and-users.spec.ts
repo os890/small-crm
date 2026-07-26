@@ -82,6 +82,22 @@ test('an administrator adds a user who then has to choose their own password', a
   await context.close();
 });
 
+test('a bookmarked page opens the application instead of a blank 404', async ({ page }) => {
+  // Every URL other than /api belongs to the Angular router, and the server has to hand back
+  // the application for all of them. This broke once, invisibly: a catch-all exception mapper
+  // answered the unmatched path itself, so the single-page fallback never ran and every
+  // bookmark, reload and deep link came back empty.
+  for (const path of ['/contacts', '/deals', '/calendar', '/backups']) {
+    const response = await page.goto(path);
+    expect(response?.status(), `${path} should be served by the application`).toBe(200);
+    await expect(page.getByTestId('signed-in-user')).toBeVisible();
+  }
+
+  // A path the application does not know still loads it; the router shows its own not-found.
+  const unknown = await page.goto('/no-such-page');
+  expect(unknown?.status()).toBe(200);
+});
+
 test('a wrong password is refused and the session stays signed out', async ({ browser }) => {
   const context = await browser.newContext({ storageState: undefined });
   const page = await context.newPage();

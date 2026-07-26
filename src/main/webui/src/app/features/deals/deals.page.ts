@@ -19,16 +19,21 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/api.service';
 import { FormatService } from '../../core/format.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import {
-  Company,
-  Contact,
-  DEAL_STAGES,
-  Deal,
-  DealStage,
-  OPEN_DEAL_STAGES,
-} from '../../core/models';
+import { DEAL_STAGES, Deal, DealStage, OPEN_DEAL_STAGES } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmService } from '../../shared/confirm.service';
+import {
+  EntityPickerComponent,
+  PickerOption,
+  PickerResult,
+} from '../../shared/entity-picker.component';
+
+/**
+ * How many deals the board fetches at once.
+ *
+ * <p>Matches the API's maximum page size, so the board asks for everything it is allowed to.
+ */
+const MAX_BOARD_SIZE = 200;
 
 /**
  * The pipeline as a column per stage.
@@ -39,7 +44,7 @@ import { ConfirmService } from '../../shared/confirm.service';
 @Component({
   selector: 'app-deals',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, EntityPickerComponent],
   template: `
     <div class="stack">
       <div class="row-between">
@@ -64,13 +69,21 @@ import { ConfirmService } from '../../shared/confirm.service';
       } @else if (deals().length === 0) {
         <p class="card empty-state" data-testid="deals-empty">{{ t('deals.empty') }}</p>
       } @else {
+        @if (truncated() > 0) {
+          <p class="notice" data-testid="deals-truncated">
+            {{ t('deals.showingFirst', { count: deals().length, total: total() }) }}
+          </p>
+        }
         <div class="board">
           @for (stage of visibleStages(); track stage) {
             <section class="column" [attr.data-testid]="'column-' + stage">
               <header class="column-head">
                 <h2>{{ label('deals.stage', stage) }}</h2>
                 <span class="faint">
-                  {{ byStage()[stage].length }} · {{ format.money(stageTotal(stage), 'EUR') }}
+                  {{ byStage()[stage].length }}
+                  @for (total of stageTotals(stage); track total.currency) {
+                    <span>· {{ format.money(total.amount, total.currency) }}</span>
+                  }
                 </span>
               </header>
 
@@ -187,29 +200,22 @@ import { ConfirmService } from '../../shared/confirm.service';
                   [(ngModel)]="draft.expectedCloseDate"
                 />
               </div>
-              <div class="field">
-                <label for="deal-contact">{{ t('deals.contact') }}</label>
-                <select
-                  id="deal-contact"
-                  name="contactId"
-                  data-testid="deal-contact"
-                  [(ngModel)]="draft.contactId"
-                >
-                  <option [ngValue]="null">{{ t('common.none') }}</option>
-                  @for (contact of contacts(); track contact.id) {
-                    <option [ngValue]="contact.id">{{ contact.displayName }}</option>
-                  }
-                </select>
-              </div>
-              <div class="field">
-                <label for="deal-company">{{ t('deals.company') }}</label>
-                <select id="deal-company" name="companyId" [(ngModel)]="draft.companyId">
-                  <option [ngValue]="null">{{ t('common.none') }}</option>
-                  @for (company of companies(); track company.id) {
-                    <option [ngValue]="company.id">{{ company.name }}</option>
-                  }
-                </select>
-              </div>
+              <app-entity-picker
+                testId="deal-contact"
+                [label]="t('deals.contact')"
+                [value]="draft.contactId ?? null"
+                [valueLabel]="draft.contactName ?? null"
+                [search]="searchContacts"
+                (selected)="pickContact(draft, $event)"
+              />
+              <app-entity-picker
+                testId="deal-company"
+                [label]="t('deals.company')"
+                [value]="draft.companyId ?? null"
+                [valueLabel]="draft.companyName ?? null"
+                [search]="searchCompanies"
+                (selected)="pickCompany(draft, $event)"
+              />
             </div>
 
             <div class="field">
@@ -284,8 +290,7 @@ export class DealsPage {
   protected readonly stages = DEAL_STAGES;
 
   protected readonly deals = signal<Deal[]>([]);
-  protected readonly contacts = signal<Contact[]>([]);
-  protected readonly companies = signal<Company[]>([]);
+  protected readonly total = signal(0);
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly openOnly = signal(true);
@@ -307,13 +312,69 @@ export class DealsPage {
     return grouped;
   });
 
+  /**
+   * How many deals exist beyond the ones on the board.
+   *
+   * <p>The board is not paged: splitting a pipeline across pages would leave columns looking
+   * empty when they are not. It fetches as much as the API will serve at once and says plainly
+   * when that was not everything.
+   */
+  protected readonly truncated = computed(() => Math.max(0, this.total() - this.deals().length));
+
   constructor() {
     void this.load();
-    void this.loadPickers();
   }
 
-  protected stageTotal(stage: DealStage): number {
-    return this.byStage()[stage].reduce((sum, deal) => sum + (deal.amount ?? 0), 0);
+  /** Bound as fields so the templates hand the pickers a stable reference. */
+  protected readonly searchContacts = async (term: string): Promise<PickerResult> => {
+    const found = await this.api.listContacts(term, undefined, { size: 10 });
+    return {
+      options: found.items.map((contact) => ({
+        id: contact.id ?? 0,
+        label: contact.displayName ?? '',
+        hint: contact.companyName,
+      })),
+      total: found.total,
+    };
+  };
+
+  protected readonly searchCompanies = async (term: string): Promise<PickerResult> => {
+    const found = await this.api.listCompanies(term, { size: 10 });
+    return {
+      options: found.items.map((company) => ({
+        id: company.id ?? 0,
+        label: company.name,
+        hint: company.city,
+      })),
+      total: found.total,
+    };
+  };
+
+  protected pickContact(draft: Deal, option: PickerOption | null): void {
+    draft.contactId = option?.id ?? null;
+    draft.contactName = option?.label ?? null;
+  }
+
+  protected pickCompany(draft: Deal, option: PickerOption | null): void {
+    draft.companyId = option?.id ?? null;
+    draft.companyName = option?.label ?? null;
+  }
+
+  /**
+   * Column totals, one per currency present.
+   *
+   * <p>A single sum was wrong whenever a stage held more than one currency: 10.000 USD next to
+   * 5.000 EUR was displayed as "€15.000,00".
+   */
+  protected stageTotals(stage: DealStage): { currency: string; amount: number }[] {
+    const totals = new Map<string, number>();
+    for (const deal of this.byStage()[stage]) {
+      const currency = (deal.currency || 'EUR').toUpperCase();
+      totals.set(currency, (totals.get(currency) ?? 0) + (deal.amount ?? 0));
+    }
+    return [...totals.entries()]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([currency, amount]) => ({ currency, amount }));
   }
 
   protected toggleOpenOnly(): void {
@@ -393,24 +454,15 @@ export class DealsPage {
   private async load(): Promise<void> {
     this.loading.set(true);
     try {
-      this.deals.set(await this.api.listDeals(this.openOnly()));
+      const found = await this.api.listDeals(this.openOnly(), undefined, undefined, {
+        size: MAX_BOARD_SIZE,
+      });
+      this.deals.set(found.items);
+      this.total.set(found.total);
     } catch (error) {
       this.toasts.problem(error);
     } finally {
       this.loading.set(false);
-    }
-  }
-
-  private async loadPickers(): Promise<void> {
-    try {
-      const [contacts, companies] = await Promise.all([
-        this.api.listContacts(),
-        this.api.listCompanies(),
-      ]);
-      this.contacts.set(contacts);
-      this.companies.set(companies);
-    } catch {
-      // Pickers stay empty; a deal can be saved without a contact or company.
     }
   }
 }

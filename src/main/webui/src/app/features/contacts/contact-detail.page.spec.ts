@@ -96,10 +96,21 @@ describe('ContactDetailPage', () => {
     expect(page).toContain('Send the offer');
   });
 
-  it('leaves out deals that belong to somebody else', async () => {
-    const harness = await open({ deals: [{ ...DEAL, contactId: 99 }] });
+  it('asks the server for this contact\u2019s deals rather than sifting through all of them', async () => {
+    const harness = renderPage(ContactDetailPage);
+    harness.fixture.componentRef.setInput('id', '1');
+    await harness.settle();
 
-    expect(harness.fixture.nativeElement.textContent).not.toContain('Website relaunch');
+    const deals = harness.http.expectOne((request) => request.url === '/api/deals');
+    expect(deals.request.params.get('contactId')).toBe('1');
+
+    deals.flush([DEAL]);
+    harness.flushGet('/api/contacts/1', MARIA as unknown as Record<string, unknown>);
+    harness.flushGet('/api/interactions', []);
+    harness.flushGet('/api/tasks', []);
+    await harness.settle();
+
+    expect(harness.fixture.nativeElement.textContent).toContain('Website relaunch');
   });
 
   it('logs a new activity against this contact', async () => {

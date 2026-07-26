@@ -16,17 +16,47 @@
 
 package org.smallcrm.service;
 
+import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 import java.time.Clock;
+import java.time.ZoneId;
+import java.util.Optional;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.smallcrm.domain.Clocks;
 
 /** Supplies the clock the services read "now" from, so tests can substitute a fixed one. */
 @ApplicationScoped
 public class ClockProducer {
 
+  @Inject Clock clock;
+
+  /**
+   * The zone "today", "overdue" and "due today" are judged in.
+   *
+   * <p>Defaults to the machine's own zone, which is right when the application runs on the
+   * owner's computer. It is configurable because that stops being true the moment it runs on a
+   * rented server: a UTC host would tell a user in Vienna that a task due today is due tomorrow
+   * for the first hour of every day.
+   */
+  @ConfigProperty(name = "smallcrm.time-zone")
+  Optional<String> configuredZone;
+
   @Produces
   @ApplicationScoped
   public Clock systemClock() {
-    return Clock.systemDefaultZone();
+    return Clock.system(
+        configuredZone.filter(zone -> !zone.isBlank()).map(ZoneId::of).orElseGet(
+            ZoneId::systemDefault));
+  }
+
+  /**
+   * Hands the same clock to the entity lifecycle callbacks, which have no injection point of
+   * their own and would otherwise read the wall clock regardless of what the tests configured.
+   */
+  void onStart(@Observes StartupEvent event) {
+    Clocks.use(clock);
   }
 }

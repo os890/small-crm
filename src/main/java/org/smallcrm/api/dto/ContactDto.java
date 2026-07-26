@@ -35,7 +35,9 @@ public record ContactDto(
     @Size(max = 150) String position,
     Long companyId,
     String companyName,
-    Set<String> tags,
+    // Constrained per element and in size: every other string field matches its
+    // column, and a 60 character tag used to reach the database and fail there.
+    @Size(max = 50) Set<@Size(max = 50) String> tags,
     @Size(max = 4000) String notes,
     String displayName,
     String ownerName,

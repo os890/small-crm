@@ -19,15 +19,21 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/api.service';
 import { FormatService } from '../../core/format.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { Contact, CrmTask, Deal, TASK_PRIORITIES } from '../../core/models';
+import { CrmTask, TASK_PRIORITIES } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmService } from '../../shared/confirm.service';
+import {
+  EntityPickerComponent,
+  PickerOption,
+  PickerResult,
+} from '../../shared/entity-picker.component';
+import { PagerComponent } from '../../shared/pager.component';
 
 /** The to-do list, with a one-click completion checkbox. */
 @Component({
   selector: 'app-tasks',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, EntityPickerComponent, PagerComponent],
   template: `
     <div class="stack">
       <div class="row-between">
@@ -99,6 +105,13 @@ import { ConfirmService } from '../../shared/confirm.service';
               </li>
             }
           </ul>
+          <app-pager
+            [page]="page()"
+            [size]="pageSize()"
+            [total]="total()"
+            [shown]="tasks().length"
+            (goTo)="goToPage($event)"
+          />
         }
       </div>
     </div>
@@ -143,24 +156,22 @@ import { ConfirmService } from '../../shared/confirm.service';
                   }
                 </select>
               </div>
-              <div class="field">
-                <label for="task-contact">{{ t('tasks.contact') }}</label>
-                <select id="task-contact" name="contactId" [(ngModel)]="draft.contactId">
-                  <option [ngValue]="null">{{ t('common.none') }}</option>
-                  @for (contact of contacts(); track contact.id) {
-                    <option [ngValue]="contact.id">{{ contact.displayName }}</option>
-                  }
-                </select>
-              </div>
-              <div class="field">
-                <label for="task-deal">{{ t('tasks.deal') }}</label>
-                <select id="task-deal" name="dealId" [(ngModel)]="draft.dealId">
-                  <option [ngValue]="null">{{ t('common.none') }}</option>
-                  @for (deal of deals(); track deal.id) {
-                    <option [ngValue]="deal.id">{{ deal.title }}</option>
-                  }
-                </select>
-              </div>
+              <app-entity-picker
+                testId="task-contact"
+                [label]="t('tasks.contact')"
+                [value]="draft.contactId ?? null"
+                [valueLabel]="draft.contactName ?? null"
+                [search]="searchContacts"
+                (selected)="pickContact(draft, $event)"
+              />
+              <app-entity-picker
+                testId="task-deal"
+                [label]="t('tasks.deal')"
+                [value]="draft.dealId ?? null"
+                [valueLabel]="draft.dealTitle ?? null"
+                [search]="searchDeals"
+                (selected)="pickDeal(draft, $event)"
+              />
             </div>
 
             <div class="field">
@@ -234,8 +245,9 @@ export class TasksPage {
   protected readonly priorities = TASK_PRIORITIES;
 
   protected readonly tasks = signal<CrmTask[]>([]);
-  protected readonly contacts = signal<Contact[]>([]);
-  protected readonly deals = signal<Deal[]>([]);
+  protected readonly total = signal(0);
+  protected readonly page = signal(0);
+  protected readonly pageSize = signal(0);
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly openOnly = signal(true);
@@ -244,11 +256,56 @@ export class TasksPage {
 
   constructor() {
     void this.load();
-    void this.loadPickers();
+  }
+
+  protected goToPage(page: number): void {
+    this.page.set(page);
+    void this.load();
+  }
+
+  /** Bound as fields so the templates hand the pickers a stable reference. */
+  protected readonly searchContacts = async (term: string): Promise<PickerResult> => {
+    const found = await this.api.listContacts(term, undefined, { size: 10 });
+    return {
+      options: found.items.map((contact) => ({
+        id: contact.id ?? 0,
+        label: contact.displayName ?? '',
+        hint: contact.companyName,
+      })),
+      total: found.total,
+    };
+  };
+
+  protected readonly searchDeals = async (term: string): Promise<PickerResult> => {
+    // Deals have no search parameter of their own; the first page of open deals is what the
+    // field offers, and a to-do can always be saved without one.
+    const found = await this.api.listDeals(false, undefined, undefined, { size: 20 });
+    const matching = found.items.filter((deal) =>
+      deal.title.toLowerCase().includes(term.toLowerCase()),
+    );
+    return {
+      options: matching.map((deal) => ({
+        id: deal.id ?? 0,
+        label: deal.title,
+        hint: deal.contactName,
+      })),
+      total: term ? matching.length : found.total,
+    };
+  };
+
+  protected pickContact(draft: CrmTask, option: PickerOption | null): void {
+    draft.contactId = option?.id ?? null;
+    draft.contactName = option?.label ?? null;
+  }
+
+  protected pickDeal(draft: CrmTask, option: PickerOption | null): void {
+    draft.dealId = option?.id ?? null;
+    draft.dealTitle = option?.label ?? null;
   }
 
   protected toggleOpenOnly(): void {
     this.openOnly.set(!this.openOnly());
+    this.page.set(0);
     void this.load();
   }
 
@@ -315,24 +372,16 @@ export class TasksPage {
   private async load(): Promise<void> {
     this.loading.set(true);
     try {
-      this.tasks.set(await this.api.listTasks(this.openOnly()));
+      const found = await this.api.listTasks(this.openOnly(), undefined, undefined, {
+        page: this.page(),
+      });
+      this.tasks.set(found.items);
+      this.total.set(found.total);
+      this.pageSize.set(found.size);
     } catch (error) {
       this.toasts.problem(error);
     } finally {
       this.loading.set(false);
-    }
-  }
-
-  private async loadPickers(): Promise<void> {
-    try {
-      const [contacts, deals] = await Promise.all([
-        this.api.listContacts(),
-        this.api.listDeals(false),
-      ]);
-      this.contacts.set(contacts);
-      this.deals.set(deals);
-    } catch {
-      // Pickers stay empty; a to-do can be saved without a link.
     }
   }
 }

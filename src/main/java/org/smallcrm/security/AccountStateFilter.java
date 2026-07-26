@@ -38,8 +38,14 @@ import org.smallcrm.domain.AppUser;
 @Priority(Priorities.AUTHORIZATION + 10)
 public class AccountStateFilter implements ContainerRequestFilter {
 
+  /**
+   * Paths a user who still has to change their password may reach.
+   *
+   * <p>Relative to the REST root path ({@code /api}), which is what {@code UriInfo.getPath()}
+   * returns.
+   */
   private static final Set<String> ALWAYS_ALLOWED =
-      Set.of("api/auth/me", "api/auth/password", "api/auth/login", "api/auth/logout");
+      Set.of("auth/me", "auth/password", "auth/login", "auth/logout");
 
   @Inject CurrentUser currentUser;
 

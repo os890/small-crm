@@ -254,6 +254,22 @@ class BackupResourceTest extends AbstractApiTest {
   }
 
   @Test
+  void a_hand_edited_file_with_a_repeated_id_is_refused_rather_than_half_restored() {
+    fixtures.createCompany("Muster GmbH");
+    fixtures.createCompany("Beispiel AG");
+    String xml = download(given().when().post("/api/backups").then().extract().path("name"));
+    // The restore rebuilds the links between records through maps keyed on these ids. A repeat
+    // silently drops an entry, and the result is activity attached to the wrong contact.
+    String firstId = xml.substring(xml.indexOf("<company>"), xml.indexOf("</company>"));
+    String id = firstId.substring(firstId.indexOf("<id>") + 4, firstId.indexOf("</id>"));
+    String broken = xml.replaceAll("<id>\\d+</id>", "<id>" + id + "</id>");
+
+    restoreUpload(broken).statusCode(400).body("code", is("BACKUP_ID_DUPLICATE"));
+
+    given().when().get("/api/companies").then().body("$", hasSize(2));
+  }
+
+  @Test
   void an_unknown_or_unsafe_file_name_yields_a_not_found_error() {
     given().when().get("/api/backups/nope.xml/content").then().statusCode(404);
     given()

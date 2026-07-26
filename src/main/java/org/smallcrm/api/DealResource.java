@@ -32,13 +32,13 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.net.URI;
-import java.util.List;
 import org.smallcrm.api.dto.DealDto;
 import org.smallcrm.domain.DealStage;
 import org.smallcrm.service.DealService;
+import org.smallcrm.service.PageRequest;
 
 /** CRUD endpoints for deals plus the pipeline stage transition. */
-@Path("/api/deals")
+@Path("/deals")
 @Authenticated
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -46,11 +46,16 @@ public class DealResource {
 
   @Inject DealService dealService;
 
+  /** One page of deals; see {@link PagedResponse} for the paging headers. */
   @GET
-  public List<DealDto> list(
+  public Response list(
       @QueryParam("stage") DealStage stage,
-      @QueryParam("openOnly") @DefaultValue("false") boolean openOnly) {
-    return dealService.list(stage, openOnly);
+      @QueryParam("openOnly") @DefaultValue("false") boolean openOnly,
+      @QueryParam("contactId") Long contactId,
+      @QueryParam("page") Integer page,
+      @QueryParam("size") Integer size) {
+    return PagedResponse.of(
+        dealService.list(stage, openOnly, contactId, PageRequest.of(page, size)));
   }
 
   @GET

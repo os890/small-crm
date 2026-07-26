@@ -34,14 +34,10 @@ const MARIA: Contact = {
 
 const MUSTER: Company = { id: 5, name: 'Muster GmbH' };
 
-async function open(
-  contacts: Contact[] = [MARIA],
-  companies: Company[] = [MUSTER],
-): Promise<PageHarness<ContactsPage>> {
+async function open(contacts: Contact[] = [MARIA]): Promise<PageHarness<ContactsPage>> {
   const harness = renderPage(ContactsPage);
   await harness.settle();
   harness.flushGet('/api/contacts', contacts);
-  harness.flushGet('/api/companies', companies);
   await harness.settle();
   return harness;
 }
@@ -103,27 +99,48 @@ describe('ContactsPage', () => {
     expect(harness.query<HTMLInputElement>('contact-tags')?.value).toBe('vip');
   });
 
-  it('offers the known companies in the picker', async () => {
+  it('looks companies up as they are typed instead of loading them all', async () => {
     const harness = await open();
 
     await harness.click('new-contact');
+    // Nothing has been fetched merely by opening the dialog — that is the whole point of the
+    // change: the previous version pulled every company in the installation to fill a dropdown.
+    harness.http.expectNone((request) => request.url === '/api/companies');
 
-    expect(harness.query('contact-company')?.textContent).toContain('Muster GmbH');
+    await harness.type('contact-company', 'must');
+    await harness.wait(250);
+
+    const lookup = harness.http.expectOne((request) => request.url === '/api/companies');
+    expect(lookup.request.params.get('search')).toBe('must');
+    expect(lookup.request.params.get('size')).toBe('10');
+    lookup.flush([MUSTER]);
+    await harness.settle();
+
+    expect(harness.query('contact-company-option')?.textContent).toContain('Muster GmbH');
   });
 
-  it('still works when the company list cannot be loaded', async () => {
-    const harness = renderPage(ContactsPage);
-    await harness.settle();
-    harness.flushGet('/api/contacts', [MARIA]);
-    harness.http
-      .match((c) => c.url === '/api/companies')
-      .forEach((request) => request.flush(null, { status: 500, statusText: 'Server Error' }));
-    await harness.settle();
+  it('keeps the dialog usable when the company lookup fails', async () => {
+    const harness = await open();
 
     await harness.click('new-contact');
+    await harness.type('contact-company', 'must');
+    await harness.wait(250);
+    harness.http
+      .expectOne((request) => request.url === '/api/companies')
+      .flush(null, { status: 500, statusText: 'Server Error' });
+    await harness.settle();
 
     expect(harness.query('contact-dialog')).not.toBeNull();
-    expect(harness.query('contact-company')?.textContent).toContain('None');
+    expect(harness.query('contact-company-empty')).not.toBeNull();
+  });
+
+  it('shows the company a contact already has without a lookup', async () => {
+    const harness = await open();
+
+    await harness.click('contact-edit-1');
+
+    expect(harness.query<HTMLInputElement>('contact-company')?.value).toBe('Muster GmbH');
+    harness.http.expectNone((request) => request.url === '/api/companies');
   });
 
   it('names the contact in the delete prompt', async () => {

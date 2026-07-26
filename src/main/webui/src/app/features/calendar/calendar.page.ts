@@ -19,9 +19,14 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/api.service';
 import { FormatService } from '../../core/format.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { Appointment, Contact, Deal } from '../../core/models';
+import { Appointment } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmService } from '../../shared/confirm.service';
+import {
+  EntityPickerComponent,
+  PickerOption,
+  PickerResult,
+} from '../../shared/entity-picker.component';
 import {
   addMinutes,
   durationMinutes,
@@ -34,6 +39,7 @@ import {
 
 interface Draft {
   id?: number;
+  version?: number;
   title: string;
   date: string;
   from: string;
@@ -41,7 +47,10 @@ interface Draft {
   location: string;
   notes: string;
   contactId: number | null;
+  /** Kept alongside the id purely so the picker can show what is chosen. */
+  contactName: string | null;
   dealId: number | null;
+  dealTitle: string | null;
 }
 
 const RANGE_OPTIONS = [7, 30, 90] as const;
@@ -59,11 +68,14 @@ const NEXT_MORNING_HOUR = 9;
 function defaultStart(now = new Date()): Date {
   const start = new Date(now);
   start.setMinutes(0, 0, 0);
-  start.setHours(start.getHours() + 1);
-  if (start.getHours() >= 23) {
+  // Tested before the hour is advanced. Testing afterwards never fired, because at 23:xx the
+  // rollover already made the hour 0, so a new appointment defaulted to midnight.
+  if (start.getHours() >= 22) {
     start.setDate(start.getDate() + 1);
     start.setHours(NEXT_MORNING_HOUR, 0, 0, 0);
+    return start;
   }
+  start.setHours(start.getHours() + 1);
   return start;
 }
 
@@ -77,7 +89,7 @@ function defaultStart(now = new Date()): Date {
 @Component({
   selector: 'app-calendar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, EntityPickerComponent],
   template: `
     <div class="stack">
       <div class="row-between">
@@ -247,29 +259,22 @@ function defaultStart(now = new Date()): Date {
                 <label for="appointment-location">{{ t('calendar.location') }}</label>
                 <input id="appointment-location" name="location" [(ngModel)]="entry.location" />
               </div>
-              <div class="field">
-                <label for="appointment-contact">{{ t('calendar.contact') }}</label>
-                <select
-                  id="appointment-contact"
-                  name="contactId"
-                  data-testid="appointment-contact"
-                  [(ngModel)]="entry.contactId"
-                >
-                  <option [ngValue]="null">{{ t('common.none') }}</option>
-                  @for (contact of contacts(); track contact.id) {
-                    <option [ngValue]="contact.id">{{ contact.displayName }}</option>
-                  }
-                </select>
-              </div>
-              <div class="field">
-                <label for="appointment-deal">{{ t('calendar.deal') }}</label>
-                <select id="appointment-deal" name="dealId" [(ngModel)]="entry.dealId">
-                  <option [ngValue]="null">{{ t('common.none') }}</option>
-                  @for (deal of deals(); track deal.id) {
-                    <option [ngValue]="deal.id">{{ deal.title }}</option>
-                  }
-                </select>
-              </div>
+              <app-entity-picker
+                testId="appointment-contact"
+                [label]="t('calendar.contact')"
+                [value]="entry.contactId"
+                [valueLabel]="entry.contactName"
+                [search]="searchContacts"
+                (selected)="pickContact($event)"
+              />
+              <app-entity-picker
+                testId="appointment-deal"
+                [label]="t('calendar.deal')"
+                [value]="entry.dealId"
+                [valueLabel]="entry.dealTitle"
+                [search]="searchDeals"
+                (selected)="pickDeal($event)"
+              />
             </div>
 
             <div class="field">
@@ -358,8 +363,6 @@ export class CalendarPage {
   protected readonly rangeOptions = RANGE_OPTIONS;
 
   protected readonly appointments = signal<Appointment[]>([]);
-  protected readonly contacts = signal<Contact[]>([]);
-  protected readonly deals = signal<Deal[]>([]);
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly rangeDays = signal<number>(30);
@@ -375,7 +378,44 @@ export class CalendarPage {
 
   constructor() {
     void this.load();
-    void this.loadPickers();
+  }
+
+  /** Bound as fields so the templates hand the pickers a stable reference. */
+  protected readonly searchContacts = async (term: string): Promise<PickerResult> => {
+    const found = await this.api.listContacts(term, undefined, { size: 10 });
+    return {
+      options: found.items.map((contact) => ({
+        id: contact.id ?? 0,
+        label: contact.displayName ?? '',
+        hint: contact.companyName,
+      })),
+      total: found.total,
+    };
+  };
+
+  protected readonly searchDeals = async (term: string): Promise<PickerResult> => {
+    // Deals have no search parameter of their own; the first page of open deals is what the
+    // field offers, and an appointment can always be saved without one.
+    const found = await this.api.listDeals(false, undefined, undefined, { size: 20 });
+    const matching = found.items.filter((deal) =>
+      deal.title.toLowerCase().includes(term.toLowerCase()),
+    );
+    return {
+      options: matching.map((deal) => ({
+        id: deal.id ?? 0,
+        label: deal.title,
+        hint: deal.contactName,
+      })),
+      total: term ? matching.length : found.total,
+    };
+  };
+
+  protected pickContact(option: PickerOption | null): void {
+    this.patch({ contactId: option?.id ?? null, contactName: option?.label ?? null });
+  }
+
+  protected pickDeal(option: PickerOption | null): void {
+    this.patch({ dealId: option?.id ?? null, dealTitle: option?.label ?? null });
   }
 
   protected minutes(appointment: Appointment): number {
@@ -401,6 +441,7 @@ export class CalendarPage {
     if (appointment) {
       this.draft.set({
         id: appointment.id,
+        version: appointment.version,
         title: appointment.title,
         date: isoToDatePart(appointment.startsAt),
         from: isoToTimePart(appointment.startsAt),
@@ -408,7 +449,9 @@ export class CalendarPage {
         location: appointment.location ?? '',
         notes: appointment.notes ?? '',
         contactId: appointment.contactId ?? null,
+        contactName: appointment.contactName ?? null,
         dealId: appointment.dealId ?? null,
+        dealTitle: appointment.dealTitle ?? null,
       });
     } else {
       const start = defaultStart();
@@ -421,7 +464,9 @@ export class CalendarPage {
         location: '',
         notes: '',
         contactId: null,
+        contactName: null,
         dealId: null,
+        dealTitle: null,
       });
     }
     this.scheduleConflictCheck();
@@ -456,6 +501,7 @@ export class CalendarPage {
       await this.api.saveAppointment(
         {
           id: entry.id,
+          version: entry.version,
           title: entry.title,
           startsAt: partsToIso(entry.date, entry.from),
           endsAt: partsToIso(entry.date, entry.to),
@@ -471,6 +517,11 @@ export class CalendarPage {
       this.toasts.success(this.t('common.saved'));
       await this.load();
     } catch (error) {
+      if (error instanceof RangeError) {
+        // An emptied date or time field; a field error, not a server failure.
+        this.errors.set({ title: this.t('calendar.endBeforeStart') });
+        return;
+      }
       const problem = this.toasts.problem(error);
       this.errors.set(problem.fieldErrors);
       if (problem.code === 'APPOINTMENT_CONFLICT') {
@@ -524,11 +575,9 @@ export class CalendarPage {
       return;
     }
     try {
-      const found = await this.api.appointmentConflicts(
-        partsToIso(entry.date, entry.from),
-        partsToIso(entry.date, entry.to),
-        entry.id ?? null,
-      );
+      const from = partsToIso(entry.date, entry.from);
+      const to = partsToIso(entry.date, entry.to);
+      const found = await this.api.appointmentConflicts(from, to, entry.id ?? null);
       // The user may have kept typing while the request was in flight.
       if (this.draft() === entry) {
         this.conflicts.set(found);
@@ -551,19 +600,6 @@ export class CalendarPage {
       this.toasts.problem(error);
     } finally {
       this.loading.set(false);
-    }
-  }
-
-  private async loadPickers(): Promise<void> {
-    try {
-      const [contacts, deals] = await Promise.all([
-        this.api.listContacts(),
-        this.api.listDeals(false),
-      ]);
-      this.contacts.set(contacts);
-      this.deals.set(deals);
-    } catch {
-      // Pickers stay empty; an appointment can be saved without a link.
     }
   }
 }

@@ -18,6 +18,8 @@
 
 export interface User {
   id: number;
+  /** Optimistic locking token. Send back what the GET returned. */
+  version?: number;
   username: string;
   fullName: string | null;
   email: string | null;
@@ -30,6 +32,8 @@ export interface User {
 
 export interface Company {
   id?: number;
+  /** Optimistic locking token. Send back what the GET returned. */
+  version?: number;
   name: string;
   vatId?: string | null;
   website?: string | null;
@@ -47,6 +51,8 @@ export interface Company {
 
 export interface Contact {
   id?: number;
+  /** Optimistic locking token. Send back what the GET returned. */
+  version?: number;
   firstName: string;
   lastName: string;
   email?: string | null;
@@ -71,6 +77,8 @@ export const OPEN_DEAL_STAGES: DealStage[] = ['LEAD', 'QUALIFIED', 'PROPOSAL'];
 
 export interface Deal {
   id?: number;
+  /** Optimistic locking token. Send back what the GET returned. */
+  version?: number;
   title: string;
   contactId?: number | null;
   contactName?: string | null;
@@ -91,6 +99,8 @@ export type InteractionType = (typeof INTERACTION_TYPES)[number];
 
 export interface Interaction {
   id?: number;
+  /** Optimistic locking token. Send back what the GET returned. */
+  version?: number;
   type: InteractionType;
   occurredAt: string;
   subject: string;
@@ -107,6 +117,8 @@ export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
 export interface CrmTask {
   id?: number;
+  /** Optimistic locking token. Send back what the GET returned. */
+  version?: number;
   title: string;
   description?: string | null;
   dueDate?: string | null;
@@ -123,6 +135,8 @@ export interface CrmTask {
 
 export interface Appointment {
   id?: number;
+  /** Optimistic locking token. Send back what the GET returned. */
+  version?: number;
   title: string;
   startsAt: string;
   endsAt: string;
@@ -136,11 +150,29 @@ export interface Appointment {
   ownerName?: string | null;
 }
 
+/**
+ * One page of a list endpoint.
+ *
+ * <p>Every list the API serves is paged, so a screen has to know both what it received and how
+ * much there is in total — otherwise it cannot tell the user they are looking at the first fifty
+ * of eight hundred.
+ */
+export interface Page<T> {
+  items: T[];
+  /** How many records match in total, across all pages. */
+  total: number;
+  /** Zero-based index of the page in {@link items}. */
+  page: number;
+  size: number;
+}
+
 export interface Dashboard {
   contactCount: number;
   companyCount: number;
   openDealCount: number;
   openDealValue: number;
+  /** The same total split per currency; a mixed pipeline has no single meaningful sum. */
+  openDealValueByCurrency: Record<string, number>;
   overdueTasks: CrmTask[];
   tasksDueToday: CrmTask[];
   upcomingAppointments: Appointment[];
@@ -160,6 +192,7 @@ export interface UpdateUserRequest {
   email?: string | null;
   admin: boolean;
   active: boolean;
+  version?: number;
 }
 
 export interface BackupFile {
@@ -182,6 +215,10 @@ export interface RestoreResult {
   recordCount: number;
   /** Name of the before-restore file holding the state that was replaced. */
   safetyCopy: string;
+  /** Records the file held but that could not be loaded, for instance an orphaned activity. */
+  skipped: number;
+  /** Records whose owner name matches no account here; expected on a fresh installation. */
+  unresolvedOwners: number;
 }
 
 /** The single error shape every failing endpoint returns. */

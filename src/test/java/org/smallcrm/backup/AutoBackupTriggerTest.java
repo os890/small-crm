@@ -57,6 +57,7 @@ class AutoBackupTriggerTest extends AbstractApiTest {
   }
 
   @Inject BackupService backupService;
+  @Inject AutoBackupTrigger trigger;
 
   @BeforeEach
   void emptyTheBackupFolder() throws IOException {
@@ -109,6 +110,23 @@ class AutoBackupTriggerTest extends AbstractApiTest {
 
     Path file = backupService.directory().resolve(backupService.list().getFirst().name());
     assertThat(readFile(file)).contains("Freshly added");
+  }
+
+  @Test
+  void a_change_still_waiting_out_the_coalescing_window_is_written_on_shutdown() {
+    createCompany("Saved on the way out");
+    assertThat(trigger.isPending()).isTrue();
+
+    // What a service stop does first, before the scheduler is torn down. Shutting the scheduler
+    // down without this dropped the pending write, which bites exactly the "stop the service,
+    // copy the backup folder off the machine" workflow. Only the flush is exercised here: the
+    // shutdown itself would leave the container without a scheduler for the tests that follow.
+    trigger.flushPending();
+
+    assertThat(backupService.list()).hasSize(1);
+    Path file = backupService.directory().resolve(backupService.list().getFirst().name());
+    assertThat(readFile(file)).contains("Saved on the way out");
+    assertThat(trigger.isPending()).isFalse();
   }
 
   private static void createCompany(String name) {

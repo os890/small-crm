@@ -34,9 +34,10 @@ import java.net.URI;
 import java.util.List;
 import org.smallcrm.api.dto.ContactDto;
 import org.smallcrm.service.ContactService;
+import org.smallcrm.service.PageRequest;
 
 /** CRUD endpoints for contacts. */
-@Path("/api/contacts")
+@Path("/contacts")
 @Authenticated
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -44,10 +45,14 @@ public class ContactResource {
 
   @Inject ContactService contactService;
 
+  /** One page of contacts; see {@link PagedResponse} for the paging headers. */
   @GET
-  public List<ContactDto> list(
-      @QueryParam("search") String search, @QueryParam("companyId") Long companyId) {
-    return contactService.list(search, companyId);
+  public Response list(
+      @QueryParam("search") String search,
+      @QueryParam("companyId") Long companyId,
+      @QueryParam("page") Integer page,
+      @QueryParam("size") Integer size) {
+    return PagedResponse.of(contactService.list(search, companyId, PageRequest.of(page, size)));
   }
 
   @GET

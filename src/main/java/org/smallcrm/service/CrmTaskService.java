@@ -16,6 +16,7 @@
 
 package org.smallcrm.service;
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -41,13 +42,14 @@ public class CrmTaskService {
   @Inject Clock clock;
 
   /**
-   * Tasks ordered by due date, with tasks that have no due date last.
+   * One page of tasks ordered by due date, with tasks that have no due date last.
    *
    * @param openOnly when true, completed tasks are left out
    * @param contactId optional restriction to one contact
    * @param dealId optional restriction to one deal
+   * @param page which page to return and how large it is
    */
-  public List<CrmTaskDto> list(boolean openOnly, Long contactId, Long dealId) {
+  public Paged<CrmTaskDto> list(boolean openOnly, Long contactId, Long dealId, PageRequest page) {
     StringBuilder query = new StringBuilder("1 = 1");
     Map<String, Object> parameters = new HashMap<>();
     if (openOnly) {
@@ -63,8 +65,9 @@ public class CrmTaskService {
     }
     Sort byDueDate = Sort.by("dueDate", Sort.Direction.Ascending, Sort.NullPrecedence.NULLS_LAST)
         .and("id");
-    List<CrmTask> tasks = CrmTask.list(query.toString(), byDueDate, parameters);
-    return toDtos(tasks);
+    PanacheQuery<CrmTask> found = CrmTask.find(query.toString(), byDueDate, parameters);
+    LocalDate today = today();
+    return Paged.of(found, page, task -> CrmTaskDto.from(task, today));
   }
 
   /** Open tasks whose due date has already passed, most overdue first. */

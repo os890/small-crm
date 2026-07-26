@@ -43,7 +43,7 @@ import org.smallcrm.service.AppointmentService;
  * <p>Writes refuse a slot that is already occupied with HTTP 409 and list the colliding entries,
  * unless {@code allowConflict=true} says the parallel booking is intentional.
  */
-@Path("/api/appointments")
+@Path("/appointments")
 @Authenticated
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

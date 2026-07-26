@@ -29,12 +29,20 @@ import {
   Deal,
   DealStage,
   Interaction,
+  Page,
   RestoreResult,
   UpdateUserRequest,
   User,
 } from './models';
 
 type QueryValue = string | number | boolean | null | undefined;
+
+/** How much of a list to ask for; omitted parts fall back to the server's defaults. */
+export interface PageQuery {
+  /** Zero-based page index. */
+  page?: number;
+  size?: number;
+}
 
 function params(values: Record<string, QueryValue>): HttpParams {
   let result = new HttpParams();
@@ -46,6 +54,12 @@ function params(values: Record<string, QueryValue>): HttpParams {
   return result;
 }
 
+/** Reads a numeric response header, falling back when it is absent or unparseable. */
+function header(value: string | null, fallback: number): number {
+  const parsed = Number(value);
+  return value !== null && Number.isFinite(parsed) ? parsed : fallback;
+}
+
 /**
  * One typed place for every backend call.
  *
@@ -55,6 +69,26 @@ function params(values: Record<string, QueryValue>): HttpParams {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
+
+  /**
+   * Runs a paged GET and reads the paging headers back.
+   *
+   * <p>The body of a list endpoint is a plain array; how many there are in total travels in
+   * `X-Total-Count`. When a header is missing — an older server, or a stubbed response in a test
+   * — what arrived is treated as the whole answer.
+   */
+  private async paged<T>(url: string, query: Record<string, QueryValue>): Promise<Page<T>> {
+    const response = await firstValueFrom(
+      this.http.get<T[]>(url, { params: params(query), observe: 'response' }),
+    );
+    const items = response.body ?? [];
+    return {
+      items,
+      total: header(response.headers.get('X-Total-Count'), items.length),
+      page: header(response.headers.get('X-Page'), 0),
+      size: header(response.headers.get('X-Page-Size'), items.length),
+    };
+  }
 
   // --- session -----------------------------------------------------------------
 
@@ -89,10 +123,8 @@ export class ApiService {
 
   // --- companies ---------------------------------------------------------------
 
-  listCompanies(search?: string): Promise<Company[]> {
-    return firstValueFrom(
-      this.http.get<Company[]>('/api/companies', { params: params({ search }) }),
-    );
+  listCompanies(search?: string, paging: PageQuery = {}): Promise<Page<Company>> {
+    return this.paged<Company>('/api/companies', { search, ...paging });
   }
 
   getCompany(id: number): Promise<Company> {
@@ -111,10 +143,12 @@ export class ApiService {
 
   // --- contacts ----------------------------------------------------------------
 
-  listContacts(search?: string, companyId?: number): Promise<Contact[]> {
-    return firstValueFrom(
-      this.http.get<Contact[]>('/api/contacts', { params: params({ search, companyId }) }),
-    );
+  listContacts(
+    search?: string,
+    companyId?: number,
+    paging: PageQuery = {},
+  ): Promise<Page<Contact>> {
+    return this.paged<Contact>('/api/contacts', { search, companyId, ...paging });
   }
 
   getContact(id: number): Promise<Contact> {
@@ -133,10 +167,13 @@ export class ApiService {
 
   // --- deals -------------------------------------------------------------------
 
-  listDeals(openOnly = false, stage?: DealStage): Promise<Deal[]> {
-    return firstValueFrom(
-      this.http.get<Deal[]>('/api/deals', { params: params({ openOnly, stage }) }),
-    );
+  listDeals(
+    openOnly = false,
+    stage?: DealStage,
+    contactId?: number,
+    paging: PageQuery = {},
+  ): Promise<Page<Deal>> {
+    return this.paged<Deal>('/api/deals', { openOnly, stage, contactId, ...paging });
   }
 
   saveDeal(deal: Deal): Promise<Deal> {
@@ -157,10 +194,12 @@ export class ApiService {
 
   // --- interactions ------------------------------------------------------------
 
-  listInteractions(contactId?: number, dealId?: number): Promise<Interaction[]> {
-    return firstValueFrom(
-      this.http.get<Interaction[]>('/api/interactions', { params: params({ contactId, dealId }) }),
-    );
+  listInteractions(
+    contactId?: number,
+    dealId?: number,
+    paging: PageQuery = {},
+  ): Promise<Page<Interaction>> {
+    return this.paged<Interaction>('/api/interactions', { contactId, dealId, ...paging });
   }
 
   saveInteraction(interaction: Interaction): Promise<Interaction> {
@@ -177,10 +216,13 @@ export class ApiService {
 
   // --- tasks -------------------------------------------------------------------
 
-  listTasks(openOnly = false, contactId?: number, dealId?: number): Promise<CrmTask[]> {
-    return firstValueFrom(
-      this.http.get<CrmTask[]>('/api/tasks', { params: params({ openOnly, contactId, dealId }) }),
-    );
+  listTasks(
+    openOnly = false,
+    contactId?: number,
+    dealId?: number,
+    paging: PageQuery = {},
+  ): Promise<Page<CrmTask>> {
+    return this.paged<CrmTask>('/api/tasks', { openOnly, contactId, dealId, ...paging });
   }
 
   saveTask(task: CrmTask): Promise<CrmTask> {
@@ -248,8 +290,10 @@ export class ApiService {
     return firstValueFrom(this.http.put<User>(`/api/users/${id}`, request));
   }
 
-  resetUserPassword(id: number, newPassword: string): Promise<User> {
-    return firstValueFrom(this.http.post<User>(`/api/users/${id}/password`, { newPassword }));
+  resetUserPassword(id: number, currentPassword: string, newPassword: string): Promise<User> {
+    return firstValueFrom(
+      this.http.post<User>(`/api/users/${id}/password`, { currentPassword, newPassword }),
+    );
   }
 
   deleteUser(id: number): Promise<void> {

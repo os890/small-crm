@@ -49,7 +49,7 @@ import org.smallcrm.service.UserService;
  * <p>The request body stays form encoded, which is what browsers send from a password manager
  * and what the frontend already posts.
  */
-@Path("/api/auth")
+@Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 

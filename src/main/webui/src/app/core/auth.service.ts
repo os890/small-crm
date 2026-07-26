@@ -17,6 +17,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { ApiService } from './api.service';
 import { User } from './models';
+import { toProblem } from './problem';
 
 /** Holds who is signed in and keeps that answer available to guards and templates. */
 @Injectable({ providedIn: 'root' })
@@ -48,8 +49,14 @@ export class AuthService {
       const user = await this.api.me();
       this.currentUser.set(user);
       return user;
-    } catch {
+    } catch (error) {
       this.currentUser.set(null);
+      const problem = toProblem(error);
+      if (problem.status !== 401 && problem.status !== 403) {
+        // A network blip or a 500 at boot is not the same as "nobody is signed in"; the
+        // caller decides what to do rather than the user being silently signed out.
+        throw error;
+      }
       return null;
     } finally {
       this.loaded.set(true);
@@ -66,9 +73,11 @@ export class AuthService {
     if (this.loaded()) {
       return;
     }
-    this.inFlight ??= this.refresh().finally(() => {
-      this.inFlight = null;
-    });
+    this.inFlight ??= this.refresh()
+      .catch(() => null)
+      .finally(() => {
+        this.inFlight = null;
+      });
     await this.inFlight;
   }
 
@@ -77,9 +86,18 @@ export class AuthService {
     return this.refresh();
   }
 
+  /**
+   * Ends the session.
+   *
+   * <p>A failing call is swallowed on purpose: the local state is cleared either way, and an
+   * unhandled rejection here used to leave the user stranded on a protected page because the
+   * navigation that follows never ran.
+   */
   async signOut(): Promise<void> {
     try {
       await this.api.logout();
+    } catch {
+      // The server may be unreachable; signing out locally is still the right outcome.
     } finally {
       this.currentUser.set(null);
       this.loaded.set(true);

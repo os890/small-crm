@@ -31,8 +31,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
@@ -239,7 +241,42 @@ public class BackupService {
               + backup.formatVersion()
               + ")");
     }
+    requireUniqueIds(backup);
     return backup;
+  }
+
+  /**
+   * Refuses a file whose records do not have distinct ids.
+   *
+   * <p>The restore rebuilds the links between records through maps keyed on the id in the file.
+   * A hand-edited file with a repeated or missing id silently loses entries from those maps, and
+   * the result is a restore that appears to succeed while attaching activity to the wrong
+   * contact. Better to refuse the file and say why.
+   */
+  private static void requireUniqueIds(Backup backup) {
+    checkIds("companies", backup.companies(), BackupModel.BackupCompany::id);
+    checkIds("contacts", backup.contacts(), BackupModel.BackupContact::id);
+    checkIds("deals", backup.deals(), BackupModel.BackupDeal::id);
+    checkIds("interactions", backup.interactions(), BackupModel.BackupInteraction::id);
+    checkIds("tasks", backup.tasks(), BackupModel.BackupTask::id);
+    checkIds("appointments", backup.appointments(), BackupModel.BackupAppointment::id);
+  }
+
+  private static <T> void checkIds(
+      String section, List<T> records, java.util.function.Function<T, Long> idOf) {
+    Set<Long> seen = new HashSet<>();
+    for (T record : nullToEmpty(records)) {
+      Long id = idOf.apply(record);
+      if (id == null) {
+        throw new BusinessRuleException(
+            "BACKUP_ID_MISSING", "A record in the " + section + " of this backup has no id");
+      }
+      if (!seen.add(id)) {
+        throw new BusinessRuleException(
+            "BACKUP_ID_DUPLICATE",
+            "The id " + id + " appears more than once in the " + section + " of this backup");
+      }
+    }
   }
 
   /**

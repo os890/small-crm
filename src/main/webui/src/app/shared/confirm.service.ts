@@ -40,7 +40,17 @@ export class ConfirmService {
 
   readonly request = this.pending.asReadonly();
 
+  /**
+   * Asks a question and resolves with the answer.
+   *
+   * <p>A second question raised while one is still open resolves immediately as declined rather
+   * than replacing it. Overwriting left the first caller's promise pending for ever, which in
+   * practice meant a delete flow that silently stopped halfway.
+   */
   ask(request: ConfirmRequest): Promise<boolean> {
+    if (this.pending() !== null) {
+      return Promise.resolve(false);
+    }
     return new Promise<boolean>((resolve) => {
       this.pending.set({ ...request, resolve });
     });

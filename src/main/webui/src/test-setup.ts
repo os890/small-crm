@@ -48,3 +48,24 @@ if (typeof globalThis.localStorage === 'undefined') {
     configurable: true,
   });
 }
+
+/*
+ * jsdom renders <dialog> but implements none of its behaviour. The confirmation prompt relies on
+ * `showModal()` for the things that make it a real modal — focus trapping, Escape, inertness of
+ * the page behind it — all of which are the browser's job and cannot be asserted here anyway.
+ * What can be asserted is the wiring around it, so the two methods are stood in for with just
+ * enough behaviour to drive that: the open flag and the `close` event.
+ */
+const dialogPrototype = globalThis.HTMLDialogElement?.prototype;
+if (dialogPrototype && typeof dialogPrototype.showModal !== 'function') {
+  dialogPrototype.showModal = function showModal(this: HTMLDialogElement) {
+    this.open = true;
+  };
+  dialogPrototype.close = function close(this: HTMLDialogElement, returnValue?: string) {
+    if (returnValue !== undefined) {
+      this.returnValue = returnValue;
+    }
+    this.open = false;
+    this.dispatchEvent(new Event('close'));
+  };
+}

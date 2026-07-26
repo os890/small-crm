@@ -19,6 +19,7 @@ package org.smallcrm.service;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -216,11 +217,26 @@ public class UserService {
     }
   }
 
+  /**
+   * Refuses a change that would leave the installation with no administrator.
+   *
+   * <p>Counting and then acting is two statements: two administrators demoting each other at the
+   * same moment would each see the other still in place, and both changes would land. The rows
+   * are read under a write lock so the pair is atomic — there are never more than a handful of
+   * administrators, so locking them all costs nothing.
+   */
   private static void requireAnotherAdminRemains(AppUser about) {
-    long remaining =
-        AppUser.count("active = true and roles like ?1 and id <> ?2", "%" + AppUser.ROLE_ADMIN
-            + "%", about.id);
-    if (remaining == 0) {
+    List<AppUser> remaining =
+        AppUser.getEntityManager()
+            .createQuery(
+                "select u from AppUser u where u.active = true and u.roles like :role"
+                    + " and u.id <> :id",
+                AppUser.class)
+            .setParameter("role", "%" + AppUser.ROLE_ADMIN + "%")
+            .setParameter("id", about.id)
+            .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+            .getResultList();
+    if (remaining.isEmpty()) {
       throw new BusinessRuleException(
           "LAST_ADMIN", "At least one active administrator must remain");
     }

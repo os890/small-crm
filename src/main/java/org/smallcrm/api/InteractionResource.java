@@ -31,12 +31,12 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.net.URI;
-import java.util.List;
 import org.smallcrm.api.dto.InteractionDto;
 import org.smallcrm.service.InteractionService;
+import org.smallcrm.service.PageRequest;
 
 /** CRUD endpoints for the activity log. */
-@Path("/api/interactions")
+@Path("/interactions")
 @Authenticated
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -44,10 +44,14 @@ public class InteractionResource {
 
   @Inject InteractionService interactionService;
 
+  /** One page of the activity log; see {@link PagedResponse} for the paging headers. */
   @GET
-  public List<InteractionDto> list(
-      @QueryParam("contactId") Long contactId, @QueryParam("dealId") Long dealId) {
-    return interactionService.list(contactId, dealId);
+  public Response list(
+      @QueryParam("contactId") Long contactId,
+      @QueryParam("dealId") Long dealId,
+      @QueryParam("page") Integer page,
+      @QueryParam("size") Integer size) {
+    return PagedResponse.of(interactionService.list(contactId, dealId, PageRequest.of(page, size)));
   }
 
   @GET

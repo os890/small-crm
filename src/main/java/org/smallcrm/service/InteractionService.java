@@ -16,6 +16,7 @@
 
 package org.smallcrm.service;
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -40,26 +41,30 @@ public class InteractionService {
   @Inject Clock clock;
 
   /**
-   * Logged interactions, most recent first.
+   * One page of logged interactions, most recent first.
+   *
+   * <p>This is the list that grows without bound — a row per call, e-mail and meeting for as long
+   * as the installation lives — so it is never returned whole.
    *
    * @param contactId optional restriction to one contact
    * @param dealId optional restriction to one deal
+   * @param page which page to return and how large it is
    */
-  public List<InteractionDto> list(Long contactId, Long dealId) {
+  public Paged<InteractionDto> list(Long contactId, Long dealId, PageRequest page) {
     Sort newestFirst = Sort.by("occurredAt", Sort.Direction.Descending).and("id",
         Sort.Direction.Descending);
-    List<Interaction> interactions;
+    PanacheQuery<Interaction> found;
     if (contactId != null && dealId != null) {
-      interactions =
-          Interaction.list("contact.id = ?1 and deal.id = ?2", newestFirst, contactId, dealId);
+      found =
+          Interaction.find("contact.id = ?1 and deal.id = ?2", newestFirst, contactId, dealId);
     } else if (contactId != null) {
-      interactions = Interaction.list("contact.id", newestFirst, contactId);
+      found = Interaction.find("contact.id", newestFirst, contactId);
     } else if (dealId != null) {
-      interactions = Interaction.list("deal.id", newestFirst, dealId);
+      found = Interaction.find("deal.id", newestFirst, dealId);
     } else {
-      interactions = Interaction.listAll(newestFirst);
+      found = Interaction.findAll(newestFirst);
     }
-    return interactions.stream().map(InteractionDto::from).toList();
+    return Paged.of(found, page, InteractionDto::from);
   }
 
   /** The most recently logged interactions across all contacts, used by the dashboard. */

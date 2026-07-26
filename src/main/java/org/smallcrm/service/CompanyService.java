@@ -16,11 +16,13 @@
 
 package org.smallcrm.service;
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import java.util.List;
+import java.time.Clock;
+import java.time.Instant;
 import org.smallcrm.api.dto.CompanyDto;
 import org.smallcrm.api.error.NotFoundException;
 import org.smallcrm.domain.Company;
@@ -33,24 +35,26 @@ import org.smallcrm.security.CurrentUser;
 public class CompanyService {
 
   @Inject CurrentUser currentUser;
+  @Inject Clock clock;
 
   /**
-   * All companies ordered by name.
+   * One page of companies, ordered by name.
    *
    * @param search optional case-insensitive fragment matched against name and city
+   * @param page which page to return and how large it is
    */
-  public List<CompanyDto> list(String search) {
-    Sort byName = Sort.by("name");
-    List<Company> companies;
+  public Paged<CompanyDto> list(String search, PageRequest page) {
+    Sort byName = Sort.by("name").and("id");
+    PanacheQuery<Company> found;
     if (search == null || search.isBlank()) {
-      companies = Company.listAll(byName);
+      found = Company.findAll(byName);
     } else {
       String pattern = "%" + search.trim().toLowerCase() + "%";
-      companies =
-          Company.list(
+      found =
+          Company.find(
               "lower(name) like ?1 or lower(coalesce(city, '')) like ?1", byName, pattern);
     }
-    return companies.stream().map(CompanyDto::from).toList();
+    return Paged.of(found, page, CompanyDto::from);
   }
 
   public CompanyDto get(Long id) {
@@ -81,8 +85,18 @@ public class CompanyService {
   @Transactional
   public void delete(Long id) {
     Company company = require(id);
-    Contact.update("company = null where company = ?1", company);
-    Deal.update("company = null where company = ?1", company);
+    Instant now = Instant.now(clock);
+    // "update versioned" so the detached rows get a new @Version and updatedAt: a plain
+    // bulk update runs no @PreUpdate, and another transaction holding one of these rows
+    // would then save over the detach without its optimistic-lock check noticing.
+    Contact.update(
+        "update versioned Contact set company = null, updatedAt = ?1 where company = ?2",
+        now,
+        company);
+    Deal.update(
+        "update versioned Deal set company = null, updatedAt = ?1 where company = ?2",
+        now,
+        company);
     company.delete();
   }
 

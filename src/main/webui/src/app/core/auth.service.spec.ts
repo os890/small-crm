@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiService } from './api.service';
@@ -78,9 +79,25 @@ describe('AuthService', () => {
   });
 
   it('treats an unauthenticated answer as signed out rather than an error', async () => {
-    api.me.mockRejectedValue(new Error('401'));
+    api.me.mockRejectedValue(new HttpErrorResponse({ status: 401, url: '/api/me' }));
 
     await expect(auth.refresh()).resolves.toBeNull();
+    expect(auth.isSignedIn()).toBe(false);
+  });
+
+  it('does not pass a server fault off as being signed out', async () => {
+    // Swallowing this signed everyone out whenever the backend hiccuped at boot, and the
+    // login screen they landed on then rejected their perfectly valid session cookie.
+    api.me.mockRejectedValue(new HttpErrorResponse({ status: 500, url: '/api/me' }));
+
+    await expect(auth.refresh()).rejects.toBeInstanceOf(HttpErrorResponse);
+    expect(auth.isSignedIn()).toBe(false);
+  });
+
+  it('still settles the guards when the boot request fails outright', async () => {
+    api.me.mockRejectedValue(new HttpErrorResponse({ status: 500, url: '/api/me' }));
+
+    await expect(auth.ensureLoaded()).resolves.toBeUndefined();
     expect(auth.isSignedIn()).toBe(false);
   });
 
@@ -117,7 +134,9 @@ describe('AuthService', () => {
     await auth.refresh();
     api.logout.mockRejectedValue(new Error('offline'));
 
-    await expect(auth.signOut()).rejects.toThrow('offline');
+    // Resolves rather than rejects: the caller navigates away next, and a rejection here left
+    // the user sitting on a protected page that looked signed in.
+    await expect(auth.signOut()).resolves.toBeUndefined();
     expect(auth.isSignedIn()).toBe(false);
   });
 

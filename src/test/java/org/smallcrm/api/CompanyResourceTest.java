@@ -18,6 +18,7 @@ package org.smallcrm.api;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -137,6 +138,39 @@ class CompanyResourceTest extends AbstractApiTest {
         .then()
         .statusCode(200)
         .body("companyId", nullValue());
+  }
+
+  @Test
+  void detaching_a_contact_bumps_its_version_so_a_stale_edit_is_still_caught() {
+    var company = fixtures.createCompany("Doomed Ltd");
+    var contact = fixtures.createContact("Anna", "Berger", company);
+    Integer before =
+        given().when().get("/api/contacts/" + contact.id).then().extract().path("version");
+
+    given().when().delete("/api/companies/" + company.id).then().statusCode(204);
+
+    // A plain bulk update runs no @PreUpdate, so the detached row would keep the version
+    // another transaction is already holding, and that transaction could then save the company
+    // straight back on top without its optimistic-lock check noticing.
+    given()
+        .when()
+        .get("/api/contacts/" + contact.id)
+        .then()
+        .body("version", greaterThan(before));
+
+    Map<String, Object> stale = new HashMap<>();
+    stale.put("firstName", "Anna");
+    stale.put("lastName", "Berger");
+    stale.put("companyId", company.id);
+    stale.put("version", before);
+    given()
+        .contentType(ContentType.JSON)
+        .body(stale)
+        .when()
+        .put("/api/contacts/" + contact.id)
+        .then()
+        .statusCode(409)
+        .body("code", is("STALE_VERSION"));
   }
 
   @Test

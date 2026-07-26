@@ -16,12 +16,15 @@
 
 package org.smallcrm.service;
 
-import io.quarkus.panache.common.Sort;
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import java.util.Comparator;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.smallcrm.api.dto.DealDto;
 import org.smallcrm.api.error.BusinessRuleException;
 import org.smallcrm.api.error.NotFoundException;
@@ -36,42 +39,62 @@ import org.smallcrm.security.CurrentUser;
 @ApplicationScoped
 public class DealService {
 
-  /** Only a tie-breaker; the pipeline position is applied afterwards, in memory. */
-  private static final Sort ORDER = Sort.by("expectedCloseDate").and("id");
+  /**
+   * Orders by pipeline position, then by expected close date.
+   *
+   * <p>The stage column stores the constant's name, so ordering by the column itself is
+   * alphabetical and reads LEAD, LOST, PROPOSAL, QUALIFIED, WON. This was previously corrected by
+   * re-sorting the result in memory, which cannot work once only one page is fetched: the
+   * database has to hand back the right rows in the right order in the first place.
+   */
+  private static final String PIPELINE_ORDER = pipelineOrder();
 
   @Inject CurrentUser currentUser;
   @Inject ReferenceResolver references;
+  @Inject Clock clock;
 
   /**
-   * Deals ordered by pipeline stage then expected close date.
+   * One page of deals, ordered by pipeline stage then expected close date.
    *
    * @param stage optional restriction to one stage
    * @param openOnly when true, won and lost deals are left out
+   * @param contactId optional restriction to the deals of one contact
+   * @param page which page to return and how large it is
    */
-  public List<DealDto> list(DealStage stage, boolean openOnly) {
-    List<Deal> deals;
+  public Paged<DealDto> list(DealStage stage, boolean openOnly, Long contactId, PageRequest page) {
+    StringBuilder query = new StringBuilder("1 = 1");
+    Map<String, Object> parameters = new HashMap<>();
     if (stage != null) {
-      deals = Deal.list("stage", ORDER, stage);
+      query.append(" and stage = :stage");
+      parameters.put("stage", stage);
     } else if (openOnly) {
-      deals = Deal.list("stage not in ?1", ORDER, DealService.closedStages());
-    } else {
-      deals = Deal.listAll(ORDER);
+      query.append(" and stage not in :closed");
+      parameters.put("closed", closedStages());
     }
-    // Sorted in memory by pipeline position: the column holds the constant's name, so letting
-    // the database order it would read LEAD, LOST, PROPOSAL, QUALIFIED, WON.
-    return deals.stream()
-        .sorted(
-            Comparator.comparingInt((Deal deal) -> stageOf(deal).order())
-                .thenComparing(
-                    deal -> deal.expectedCloseDate,
-                    Comparator.nullsLast(Comparator.naturalOrder()))
-                .thenComparing(deal -> deal.id))
-        .map(DealDto::from)
-        .toList();
+    if (contactId != null) {
+      query.append(" and contact.id = :contactId");
+      parameters.put("contactId", contactId);
+    }
+    PanacheQuery<Deal> found = Deal.find(query + PIPELINE_ORDER, parameters);
+    return Paged.of(found, page, DealDto::from);
   }
 
-  private static DealStage stageOf(Deal deal) {
-    return deal.stage == null ? DealStage.LEAD : deal.stage;
+  /**
+   * Builds the {@code order by} that puts the stages in pipeline order.
+   *
+   * <p>Generated from the enum rather than written out, so a new stage cannot be added without
+   * its position coming along.
+   */
+  private static String pipelineOrder() {
+    StringBuilder order = new StringBuilder(" order by case stage");
+    for (DealStage value : DealStage.values()) {
+      order
+          .append(" when org.smallcrm.domain.DealStage.")
+          .append(value.name())
+          .append(" then ")
+          .append(value.order());
+    }
+    return order.append(" end, expectedCloseDate asc nulls last, id asc").toString();
   }
 
   public DealDto get(Long id) {
@@ -110,9 +133,16 @@ public class DealService {
   @Transactional
   public void delete(Long id) {
     Deal deal = require(id);
-    Interaction.update("deal = null where deal = ?1", deal);
-    CrmTask.update("deal = null where deal = ?1", deal);
-    Appointment.update("deal = null where deal = ?1", deal);
+    Instant now = Instant.now(clock);
+    // "update versioned" so the detached rows get a new @Version and updatedAt: a plain
+    // bulk update runs no @PreUpdate, and another transaction holding one of these rows
+    // would then save over the detach without its optimistic-lock check noticing.
+    Interaction.update(
+        "update versioned Interaction set deal = null, updatedAt = ?1 where deal = ?2", now, deal);
+    CrmTask.update(
+        "update versioned CrmTask set deal = null, updatedAt = ?1 where deal = ?2", now, deal);
+    Appointment.update(
+        "update versioned Appointment set deal = null, updatedAt = ?1 where deal = ?2", now, deal);
     deal.delete();
   }
 
