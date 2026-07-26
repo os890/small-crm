@@ -18,6 +18,9 @@ target/
 /logs/
 /e2e/logs/
 
+# Ad-hoc archives of the rendered diagrams; the PNGs themselves are committed.
+docs/diagrams.zip
+
 # Coverage artifacts
 coverage/
 

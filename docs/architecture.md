@@ -685,12 +685,13 @@ one more thing they would have to keep alive.
 
 ## 7. Deployment
 
-The two ways this is actually run. Everything the installation consists of lives in three
+The two ways this is actually run — on the owner's own machine, which is the usual case, and on
+a small server behind a reverse proxy. Everything the installation consists of lives in three
 directories beside the jar.
 
 ```mermaid
 flowchart TB
-    subgraph laptop["The usual case — the owner's own machine"]
+    subgraph laptop["On the owner's machine"]
         direction TB
         B1["Browser<br/>localhost:8080"]
         subgraph n1["Java 25 runtime"]
@@ -707,7 +708,7 @@ flowchart TB
         P1 --- F3
     end
 
-    subgraph server["The other case — a small server"]
+    subgraph server["On a small server"]
         direction TB
         B2["Browser<br/>crm.example.org"]
         subgraph n2["Host"]

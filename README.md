@@ -194,11 +194,15 @@ src/main/webui/             Angular 22 application
 e2e/                        Playwright suite against the packaged application
 docs/manual/                illustrated user manual, English and German, HTML and PDF
 docs/architecture.md        the diagrams, from the schema up to the deployment
+docs/diagrams/              the same diagrams as PNG, plus an index page to browse them
 ```
 
 [`docs/architecture.md`](docs/architecture.md) has the diagrams: the tables, the entities mapped
 onto them, the code around those, the request pipeline, the key flows, and the single process it
-all ships as.
+all ships as. The Mermaid blocks in it are the source; `node docs/render-diagrams.mjs` renders
+them to PNG in `docs/diagrams/` — open `docs/diagrams/index.html` to look at them without a
+Mermaid-aware viewer. Rendering borrows a headless Chromium from the `mermaid-cli` container
+image rather than adding a dependency.
 
 `docs/manual/` is the illustrated user manual in English and German, as HTML and as PDF. The
 screenshots come from a throwaway instance filled with demo data, in the matching language;
