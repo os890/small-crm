@@ -31,6 +31,69 @@ future sync instead of needing a migration. Still missing:
 - Recurring appointments. The current model has no recurrence rule at all, and Google Calendar
   is full of them; this is the largest single gap.
 
+## Peer-to-peer sync between team members
+
+Everyone runs their own instance and they reconcile whenever they can reach each other, with no
+central server. Sketched out but not started; it is comparable in size to everything else in this
+file put together, and the first phase alone is about the size of the production-readiness pass.
+
+**Nothing can merge until identity changes.** `BaseEntity` uses `GenerationType.IDENTITY` —
+per-database autoincrement — so two people both creating a contact both get id 5. UUIDv7 primary keys are the prerequisite for every other part of this: time
+ordered, so index locality and "newest first" survive, and generated locally with no
+coordination. Migrating properly beats adding a `uuid` column beside the numeric one, which
+would leak a second identity into every join and every sync path for ever. `BackupService`
+already rebuilds relationships through id maps, so export → migrate → re-import gets existing
+installations across.
+
+**The shape: an append-only change log, replicated by anti-entropy, resolved per field.**
+
+- A `change_log` table of `(peer_id, seq, entity_uuid, entity_type, op, payload, hlc, actor)`,
+  written by every mutation. Deletes are tombstones — without them a record you delete comes
+  back the next time a peer that still has it syncs.
+- A hybrid logical clock for ordering: physical millis, a counter and the peer id as tiebreak.
+  `Clocks` and the injectable `Clock` are where it hangs.
+- Last writer wins **per field**, not per record. Per record silently discards a colleague's
+  edit to a different field, which is the thing people notice and do not forgive.
+- Tags become an add-wins set; they are already their own table. Free-text notes are the one
+  field where last-writer-wins genuinely destroys work, so a real conflict should keep both and
+  say so rather than pick.
+
+**Transport, in the order worth building it.**
+
+1. mDNS on the local network (`_smallcrm._tcp.local`). Zero configuration, and it covers
+   everyone who is ever in the same room. Sync itself is two endpoints on the HTTP server each
+   instance already runs, so every peer is both client and server.
+2. Change bundles as files, for everyone else. A sync is "my changes since your position",
+   which is a file; the merge code does not care whether it arrived over HTTP, on a memory
+   stick or through a folder that Syncthing keeps in step. This needs no discovery, no pairing
+   handshake and no liveness handling, so it is arguably less work than the network path.
+   Note that syncing *bundles* this way is safe where syncing the database file is not: each
+   bundle is written once by one peer and never modified, so there is no concurrent write to
+   corrupt and applying one twice is harmless.
+3. A "mailbox" peer, only if the team wants continuous sync while apart. One instance somewhere
+   reachable, running the same code and holding the same log, with no authority over anybody:
+   not a source of truth, and its loss costs nothing. Worth checking whether the team's
+   connections have working IPv6 first — with no NAT in the way, peers can simply connect.
+
+**Trust.** An Ed25519 keypair per instance, pairing by a one-time short code, changes signed and
+only accepted from paired peers. Not optional: this puts customer data on a wire that today has
+no authentication between machines at all. Accounts also have to become synced identities — uuid,
+display name, public key — with credentials staying local. `RestoreOutcome.unresolvedOwners`
+already models that gap.
+
+**One invariant does not survive, and that is a product decision.** The double-booking guard is a
+uniqueness constraint, and no merge strategy preserves those across disconnected peers: two
+people offline will both book 10:00 and nothing prevents it. The honest design is to detect the
+overlap when the changes meet, mark both appointments conflicted, and surface them on the
+calendar and the dashboard for a person to settle.
+
+**Knock-on effects elsewhere.** Optimistic locking becomes a local-only guard — `STALE_VERSION`
+still means something inside one instance but is not the cross-peer story. The backup format
+needs uuids and tombstones, so `BackupModel.FORMAT_VERSION` goes to 2. Restoring an old backup on
+a synced peer would resurrect deleted records unless a restore is itself expressed as changes,
+which is worth designing for rather than discovering. And it needs a two-peer test harness; the
+suite has never run two instances at once.
+
 ## Features the audience will ask for next
 
 - **Recurring appointments and all-day events.**
