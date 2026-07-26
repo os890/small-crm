@@ -16,8 +16,20 @@ PDF to print or pass on —
 
 ## Run it
 
-Requirements: **Java 25**, **Maven 3.9+**, **Node 22+** and **pnpm** (only for building the
-frontend).
+Nothing installed? One command, and it needs none of the above:
+
+```bash
+./build.sh          # build.cmd on Windows
+```
+
+It fetches its own Java, Maven, Node and pnpm into `.build-tools/`, builds the application, and
+writes the ready-to-hand-on packages described under
+[Packaging it for someone else](#packaging-it-for-someone-else). See
+[Building with nothing installed](#building-with-nothing-installed) for what that does and does
+not touch.
+
+With the tools already there — **Java 25**, **Maven 3.9+**, **Node 22+** and **pnpm** (the last
+two only for the frontend) — the ordinary way round works as well:
 
 ```bash
 mvn package
@@ -90,6 +102,12 @@ the console.
 ### Packaging it for someone else
 
 ```bash
+./build.sh                       # fetches its own toolchain; build.cmd on Windows
+```
+
+or, with Java, Maven, Node and pnpm already installed:
+
+```bash
 mvn package
 node packaging/build-distributions.mjs
 ```
@@ -113,7 +131,34 @@ would make them smaller: given another platform's modules it still writes the ho
 a Linux package built on a Mac came out with a macOS `java` in it. An official per-platform JRE is
 genuinely native and needs no build machine of that kind.
 
-Pass a target id to build just one: `node packaging/build-distributions.mjs linux-x64`.
+Pass a target id to build just one: `./build.sh linux-x64`, or
+`node packaging/build-distributions.mjs linux-x64`.
+
+### Building with nothing installed
+
+`./build.sh` (`build.cmd` on Windows) builds everything on a machine that has no Java, no Maven,
+no Node and no pnpm. It is the same build — it ends in `mvn package` and the packaging script
+above — with the toolchain fetched first instead of assumed.
+
+What it needs is what every macOS and Linux install already has: a shell, `curl`, `tar`, and
+`shasum` or `sha256sum`. On Windows, PowerShell and `tar`, both present since Windows 10.
+
+What it fetches, each checked against the checksum its publisher announces and discarded if it
+does not match:
+
+| | From | How the version is chosen |
+| --- | --- | --- |
+| Node 22 | nodejs.org | current 22.x, read from the published `SHASUMS256.txt` |
+| Temurin JDK 25 | Adoptium | current build for this platform, from the Adoptium API |
+| Maven | Apache | pinned in `packaging/bootstrap-build.mjs`, checksum read from Apache |
+| pnpm | Corepack | the version pinned in `package.json`, so it matches the lockfiles |
+
+Everything lands in `.build-tools/` inside the project folder. Nothing is installed, no `PATH`
+or `JAVA_HOME` outside the build is read or written, and a Java or Maven already on the machine
+is deliberately ignored rather than used — so what comes out does not depend on what happened to
+be there. `rm -rf .build-tools` undoes it completely.
+
+Only the first run pays for the downloads; after that they are cached and reused.
 
 ### Configuration worth knowing
 
@@ -209,6 +254,7 @@ All of these run in `mvn verify` and fail the build:
 
 ```
 pom.xml                     the only build file; Quinoa builds the frontend into the jar
+build.sh, build.cmd         builds on a machine with nothing installed
 config/checkstyle/          Java style rules
 src/main/java/org/os890/smallcrm/
   domain/                   JPA entities and the rules that belong on them
@@ -222,7 +268,8 @@ src/main/webui/             Angular 22 application
   src/app/core/             API client, auth, i18n, formatting, error handling
   src/app/features/         one folder per screen
   src/app/shared/           toasts, the confirmation prompt, the pager and the record picker
-packaging/                  builds the self-contained per-platform archives
+packaging/                  builds the self-contained per-platform archives, and fetches the
+                            toolchain build.sh hands over to
 e2e/                        Playwright suite against the packaged application
 docs/manual/                illustrated user manual, English and German, HTML and PDF
 docs/architecture.md        the diagrams, from the schema up to the deployment

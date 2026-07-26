@@ -7,6 +7,10 @@ team.md
 # Build output
 target/
 
+# Toolchains ./build.sh and build.cmd fetch: the JDK, Maven, Node and the pnpm shims.
+# Downloaded, never committed; deleting the folder undoes the bootstrap.
+.build-tools/
+
 # Runtime data (H2 database) and the backups written beside it.
 # Anchored to the project root: "backup/" alone would also match the Java package
 # src/main/java/org/os890/smallcrm/backup.

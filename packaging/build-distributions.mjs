@@ -36,21 +36,26 @@
  * a file that does not match is deleted rather than used.
  */
 
-import { createHash } from "node:crypto";
-import { execFileSync } from "node:child_process";
 import {
   chmodSync,
   cpSync,
   existsSync,
   mkdirSync,
   readFileSync,
-  readdirSync,
   rmSync,
   statSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  downloadVerified,
+  jarExecutable,
+  resolveTemurin,
+  run,
+  runtimeHome,
+  unpack,
+} from "./toolchain.mjs";
 
 const PACKAGING = dirname(fileURLToPath(import.meta.url));
 const PROJECT = resolve(PACKAGING, "..");
@@ -86,10 +91,6 @@ const TARGETS = [
   },
 ];
 
-function run(command, args, options = {}) {
-  return execFileSync(command, args, { encoding: "utf8", ...options });
-}
-
 function projectVersion() {
   const pom = readFileSync(join(PROJECT, "pom.xml"), "utf8");
   const match = pom.match(
@@ -99,76 +100,6 @@ function projectVersion() {
     throw new Error("Could not read the project version from pom.xml");
   }
   return match[1];
-}
-
-/** Asks Adoptium which JRE build is current for a platform, and where to get it. */
-async function resolveJre({ os, arch }) {
-  const url =
-    `https://api.adoptium.net/v3/assets/latest/${JAVA_VERSION}/hotspot` +
-    `?architecture=${arch}&image_type=jre&os=${os}&vendor=eclipse`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Adoptium said ${response.status} for ${os}/${arch}`);
-  }
-  const [asset] = await response.json();
-  if (!asset) {
-    throw new Error(
-      `Adoptium has no Java ${JAVA_VERSION} build for ${os}/${arch}`,
-    );
-  }
-  return {
-    version: asset.version.semver,
-    name: asset.binary.package.name,
-    link: asset.binary.package.link,
-    checksum: asset.binary.package.checksum,
-  };
-}
-
-async function download(jdk) {
-  mkdirSync(CACHE, { recursive: true });
-  const file = join(CACHE, jdk.name);
-  if (existsSync(file) && sha256(file) === jdk.checksum) {
-    return file;
-  }
-  console.log(`  downloading ${jdk.name} (${jdk.version})`);
-  const response = await fetch(jdk.link);
-  if (!response.ok) {
-    throw new Error(`Downloading ${jdk.name} failed with ${response.status}`);
-  }
-  writeFileSync(file, Buffer.from(await response.arrayBuffer()));
-  const actual = sha256(file);
-  if (actual !== jdk.checksum) {
-    rmSync(file);
-    throw new Error(
-      `${jdk.name} does not match its published checksum; it was not used`,
-    );
-  }
-  return file;
-}
-
-function sha256(file) {
-  return createHash("sha256").update(readFileSync(file)).digest("hex");
-}
-
-/** Unpacks a runtime archive once and returns the directory holding bin/ and lib/. */
-function unpack(archive, id) {
-  const into = join(CACHE, id);
-  if (!existsSync(join(into, "unpacked.ok"))) {
-    rmSync(into, { recursive: true, force: true });
-    mkdirSync(into, { recursive: true });
-    if (archive.endsWith(".zip")) {
-      run("unzip", ["-q", archive, "-d", into]);
-    } else {
-      run("tar", ["-xzf", archive, "-C", into]);
-    }
-    writeFileSync(join(into, "unpacked.ok"), "");
-  }
-  const [root] = readdirSync(into)
-    .map((entry) => join(into, entry))
-    .filter((entry) => statSync(entry).isDirectory());
-  // macOS builds bury the actual runtime inside the bundle layout.
-  const bundled = join(root, "Contents", "Home");
-  return existsSync(bundled) ? bundled : root;
 }
 
 function readme(target, version, jreVersion) {
@@ -272,7 +203,18 @@ function archive(target, name) {
   if (target.archive === "zip") {
     const file = join(OUTPUT, `${name}.zip`);
     rmSync(file, { force: true });
-    run("zip", ["-q", "-r", "-9", file, name], { cwd: WORK });
+    // `jar` rather than `zip`, which minimal Linux images do not have. --no-manifest keeps it a
+    // plain archive instead of quietly turning it into a jar. The execute bit a zip cannot
+    // carry anyway is no loss here: this archive only ever holds the Windows package, whose
+    // launcher is a .cmd.
+    const jar = jarExecutable();
+    if (!jar) {
+      throw new Error(
+        "No `jar` found to write the Windows archive. Set JAVA_HOME to a JDK, or " +
+          "use ./build.sh, which fetches one.",
+      );
+    }
+    run(jar, ["--create", "--file", file, "--no-manifest", "-C", WORK, name]);
     return file;
   }
   const file = join(OUTPUT, `${name}.tar.gz`);
@@ -307,8 +249,17 @@ rmSync(WORK, { recursive: true, force: true });
 const built = [];
 for (const target of selected) {
   console.log(`${target.label}`);
-  const jre = await resolveJre(target.api);
-  const jreHome = unpack(await download(jre), target.id);
+  const jre = await resolveTemurin({
+    javaVersion: JAVA_VERSION,
+    ...target.api,
+    imageType: "jre",
+  });
+  const runtimeArchive = await downloadVerified(jre, CACHE, (message) =>
+    console.log(message),
+  );
+  const jreHome = runtimeHome(
+    unpack(runtimeArchive, join(CACHE, target.id), process.env.JAVA_HOME),
+  );
   const { name } = assemble(target, version, jreHome, jre.version);
   const file = archive(target, name);
   built.push({ target, file });
