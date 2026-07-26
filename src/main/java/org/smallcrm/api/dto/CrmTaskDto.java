@@ -39,7 +39,9 @@ public record CrmTaskDto(
     boolean overdue,
     String ownerName,
     Instant createdAt,
-    Instant updatedAt) {
+    Instant updatedAt,
+    // Optimistic locking token; send back what the GET returned.
+    Long version) {
 
   public static CrmTaskDto from(CrmTask task, LocalDate today) {
     return new CrmTaskDto(
@@ -57,6 +59,7 @@ public record CrmTaskDto(
         task.isOverdue(today),
         task.owner == null ? null : task.owner.username,
         task.createdAt,
-        task.updatedAt);
+        task.updatedAt,
+        task.version);
   }
 }

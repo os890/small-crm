@@ -18,6 +18,15 @@ package org.smallcrm.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.smallcrm.security.Passwords;
 
-/** Payload an administrator sends to set a temporary password for another account. */
-public record ResetPasswordRequest(@NotBlank @Size(min = 8, max = 100) String newPassword) {}
+/**
+ * Payload an administrator sends to set a temporary password for another account.
+ *
+ * @param currentPassword the administrator's own password. Required so that a single hijacked
+ *     administrator session cannot quietly take over every other account in the installation.
+ * @param newPassword the temporary password for the target account
+ */
+public record ResetPasswordRequest(
+    @NotBlank String currentPassword,
+    @NotBlank @Size(min = Passwords.MIN_LENGTH, max = Passwords.MAX_LENGTH) String newPassword) {}

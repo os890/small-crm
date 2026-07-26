@@ -101,10 +101,15 @@
       <artifactId>quarkus-flyway</artifactId>
     </dependency>
 
-    <!-- Security: form based authentication backed by the AppUser table -->
+    <!--
+      Security. The application authenticates through its own session mechanism, so the
+      username/password identity provider of quarkus-security-jpa is deliberately not used:
+      it cannot express lock-out or deactivation, and leaving it wired would keep a second
+      authentication path alive that those rules do not cover.
+    -->
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-security-jpa</artifactId>
+      <artifactId>quarkus-security</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

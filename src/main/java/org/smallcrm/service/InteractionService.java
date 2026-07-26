@@ -87,6 +87,7 @@ public class InteractionService {
   @Transactional
   public InteractionDto update(Long id, InteractionDto input) {
     Interaction interaction = require(id);
+    Versions.check(input.version(), interaction);
     apply(input, interaction);
     return InteractionDto.from(interaction);
   }

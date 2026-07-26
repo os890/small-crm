@@ -45,16 +45,19 @@ public class AccountStateFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext) {
-    AppUser user = currentUser.find().orElse(null);
-    if (user == null) {
+    if (requestContext.getSecurityContext().getUserPrincipal() == null) {
+      // Anonymous; the permission layer already decided this path is reachable.
       return;
     }
-    if (!user.active) {
+    AppUser user = currentUser.find().orElse(null);
+    if (user == null) {
+      // Authenticated but no account: the row vanished mid-request. Refuse rather than fall
+      // through, which is the wrong default for a security filter even when unreachable.
       abort(
           requestContext,
-          Response.Status.FORBIDDEN,
-          "ACCOUNT_DEACTIVATED",
-          "This account has been deactivated.");
+          Response.Status.UNAUTHORIZED,
+          "SESSION_INVALID",
+          "This session is no longer valid.");
       return;
     }
     String path = requestContext.getUriInfo().getPath();

@@ -24,4 +24,6 @@ public record UpdateUserRequest(
     @Size(max = 150) String fullName,
     @Email @Size(max = 200) String email,
     boolean admin,
-    boolean active) {}
+    boolean active,
+    // Optimistic locking token; send back what the GET returned.
+    Long version) {}

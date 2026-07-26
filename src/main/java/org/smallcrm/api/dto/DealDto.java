@@ -40,7 +40,9 @@ public record DealDto(
     @Size(max = 4000) String notes,
     String ownerName,
     Instant createdAt,
-    Instant updatedAt) {
+    Instant updatedAt,
+    // Optimistic locking token; send back what the GET returned.
+    Long version) {
 
   public static DealDto from(Deal deal) {
     return new DealDto(
@@ -57,6 +59,7 @@ public record DealDto(
         deal.notes,
         deal.owner == null ? null : deal.owner.username,
         deal.createdAt,
-        deal.updatedAt);
+        deal.updatedAt,
+        deal.version);
   }
 }

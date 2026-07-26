@@ -125,7 +125,7 @@ class AppointmentResourceTest extends AbstractApiTest {
 
   @Test
   void another_users_calendar_does_not_block_the_slot() {
-    AppUser other = fixtures.createUser("colleague", "colleague-secret", false);
+    AppUser other = fixtures.createUser("colleague", "colleague-secret-x", false);
     fixtures.createAppointment(
         "Their meeting", Instant.parse(TEN), Instant.parse(ELEVEN), other);
 

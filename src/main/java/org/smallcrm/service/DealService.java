@@ -20,6 +20,7 @@ import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import java.util.Comparator;
 import java.util.List;
 import org.smallcrm.api.dto.DealDto;
 import org.smallcrm.api.error.BusinessRuleException;
@@ -35,6 +36,9 @@ import org.smallcrm.security.CurrentUser;
 @ApplicationScoped
 public class DealService {
 
+  /** Only a tie-breaker; the pipeline position is applied afterwards, in memory. */
+  private static final Sort ORDER = Sort.by("expectedCloseDate").and("id");
+
   @Inject CurrentUser currentUser;
   @Inject ReferenceResolver references;
 
@@ -45,16 +49,29 @@ public class DealService {
    * @param openOnly when true, won and lost deals are left out
    */
   public List<DealDto> list(DealStage stage, boolean openOnly) {
-    Sort order = Sort.by("stage").and("expectedCloseDate").and("id");
     List<Deal> deals;
     if (stage != null) {
-      deals = Deal.list("stage", order, stage);
+      deals = Deal.list("stage", ORDER, stage);
     } else if (openOnly) {
-      deals = Deal.list("stage not in ?1", order, DealService.closedStages());
+      deals = Deal.list("stage not in ?1", ORDER, DealService.closedStages());
     } else {
-      deals = Deal.listAll(order);
+      deals = Deal.listAll(ORDER);
     }
-    return deals.stream().map(DealDto::from).toList();
+    // Sorted in memory by pipeline position: the column holds the constant's name, so letting
+    // the database order it would read LEAD, LOST, PROPOSAL, QUALIFIED, WON.
+    return deals.stream()
+        .sorted(
+            Comparator.comparingInt((Deal deal) -> stageOf(deal).order())
+                .thenComparing(
+                    deal -> deal.expectedCloseDate,
+                    Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(deal -> deal.id))
+        .map(DealDto::from)
+        .toList();
+  }
+
+  private static DealStage stageOf(Deal deal) {
+    return deal.stage == null ? DealStage.LEAD : deal.stage;
   }
 
   public DealDto get(Long id) {
@@ -73,6 +90,7 @@ public class DealService {
   @Transactional
   public DealDto update(Long id, DealDto input) {
     Deal deal = require(id);
+    Versions.check(input.version(), deal);
     apply(input, deal);
     return DealDto.from(deal);
   }

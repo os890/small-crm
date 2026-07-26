@@ -34,4 +34,14 @@ public enum DealStage {
   public boolean isClosed() {
     return closed;
   }
+
+  /**
+   * Position in the pipeline, for sorting.
+   *
+   * <p>The column stores the constant's name, so ordering by it in SQL is alphabetical and puts
+   * LOST between LEAD and PROPOSAL. Queries order by this instead.
+   */
+  public int order() {
+    return ordinal();
+  }
 }

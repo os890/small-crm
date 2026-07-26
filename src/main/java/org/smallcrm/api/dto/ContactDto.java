@@ -40,7 +40,9 @@ public record ContactDto(
     String displayName,
     String ownerName,
     Instant createdAt,
-    Instant updatedAt) {
+    Instant updatedAt,
+    // Optimistic locking token; send back what the GET returned.
+    Long version) {
 
   public static ContactDto from(Contact contact) {
     return new ContactDto(
@@ -58,6 +60,7 @@ public record ContactDto(
         contact.displayName(),
         contact.owner == null ? null : contact.owner.username,
         contact.createdAt,
-        contact.updatedAt);
+        contact.updatedAt,
+        contact.version);
   }
 }

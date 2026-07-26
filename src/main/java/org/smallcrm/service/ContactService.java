@@ -82,6 +82,7 @@ public class ContactService {
   @Transactional
   public ContactDto update(Long id, ContactDto input) {
     Contact contact = require(id);
+    Versions.check(input.version(), contact);
     apply(input, contact);
     return ContactDto.from(contact);
   }

@@ -69,6 +69,7 @@ public class CompanyService {
   @Transactional
   public CompanyDto update(Long id, CompanyDto input) {
     Company company = require(id);
+    Versions.check(input.version(), company);
     apply(input, company);
     return CompanyDto.from(company);
   }

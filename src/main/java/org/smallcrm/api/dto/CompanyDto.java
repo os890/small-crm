@@ -37,7 +37,9 @@ public record CompanyDto(
     @Size(max = 4000) String notes,
     String ownerName,
     Instant createdAt,
-    Instant updatedAt) {
+    Instant updatedAt,
+    // Optimistic locking token; send back what the GET returned.
+    Long version) {
 
   public static CompanyDto from(Company company) {
     return new CompanyDto(
@@ -54,6 +56,7 @@ public record CompanyDto(
         company.notes,
         company.owner == null ? null : company.owner.username,
         company.createdAt,
-        company.updatedAt);
+        company.updatedAt,
+        company.version);
   }
 }

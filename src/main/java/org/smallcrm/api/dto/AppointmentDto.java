@@ -37,7 +37,9 @@ public record AppointmentDto(
     String dealTitle,
     String ownerName,
     Instant createdAt,
-    Instant updatedAt) {
+    Instant updatedAt,
+    // Optimistic locking token; send back what the GET returned.
+    Long version) {
 
   public static AppointmentDto from(Appointment appointment) {
     return new AppointmentDto(
@@ -54,6 +56,7 @@ public record AppointmentDto(
         appointment.deal == null ? null : appointment.deal.title,
         appointment.owner == null ? null : appointment.owner.username,
         appointment.createdAt,
-        appointment.updatedAt);
+        appointment.updatedAt,
+        appointment.version);
   }
 }

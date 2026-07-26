@@ -14,14 +14,27 @@
  * limitations under the License.
  */
 
-package org.smallcrm.api.dto;
+package org.smallcrm.api.error;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import org.smallcrm.security.Passwords;
+/**
+ * Raised when a request cannot be applied because the world moved underneath it; mapped to
+ * HTTP 409.
+ *
+ * <p>Used for an edit based on a copy somebody else has since changed, and for a uniqueness
+ * clash that only two simultaneous requests could produce.
+ */
+public class ConflictException extends RuntimeException {
 
-/** Payload a signed-in user sends to replace their own password. */
-public record ChangePasswordRequest(
-    @NotBlank String currentPassword,
-    @NotBlank @Size(min = Passwords.MIN_LENGTH, max = Passwords.MAX_LENGTH)
-        String newPassword) {}
+  private static final long serialVersionUID = 1L;
+
+  private final String code;
+
+  public ConflictException(String code, String message) {
+    super(message);
+    this.code = code;
+  }
+
+  public String code() {
+    return code;
+  }
+}

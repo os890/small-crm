@@ -30,7 +30,9 @@ public record UserDto(
     boolean admin,
     boolean active,
     boolean mustChangePassword,
-    Instant createdAt) {
+    Instant createdAt,
+    // Optimistic locking token; send back what the GET returned.
+    Long version) {
 
   public static UserDto from(AppUser user) {
     List<String> roles = user.roles == null ? List.of() : List.of(user.roles.split(","));
@@ -43,6 +45,7 @@ public record UserDto(
         user.isAdmin(),
         user.active,
         user.mustChangePassword,
-        user.createdAt);
+        user.createdAt,
+        user.version);
   }
 }

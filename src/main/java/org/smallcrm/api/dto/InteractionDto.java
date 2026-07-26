@@ -36,7 +36,9 @@ public record InteractionDto(
     String dealTitle,
     String ownerName,
     Instant createdAt,
-    Instant updatedAt) {
+    Instant updatedAt,
+    // Optimistic locking token; send back what the GET returned.
+    Long version) {
 
   public static InteractionDto from(Interaction interaction) {
     return new InteractionDto(
@@ -51,6 +53,7 @@ public record InteractionDto(
         interaction.deal == null ? null : interaction.deal.title,
         interaction.owner == null ? null : interaction.owner.username,
         interaction.createdAt,
-        interaction.updatedAt);
+        interaction.updatedAt,
+        interaction.version);
   }
 }

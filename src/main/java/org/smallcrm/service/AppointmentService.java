@@ -19,10 +19,12 @@ package org.smallcrm.service;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +59,7 @@ public class AppointmentService {
    * @param to exclusive upper bound; defaults to 30 days after {@code from}
    */
   public List<AppointmentDto> list(Instant from, Instant to) {
-    Instant start = from != null ? from : Instant.now(clock).minus(Duration.ofDays(1));
+    Instant start = from != null ? from : startOfToday();
     Instant end = to != null ? to : start.plus(Duration.ofDays(30));
     if (!end.isAfter(start)) {
       throw new BusinessRuleException("INVALID_RANGE", "'to' must be after 'from'");
@@ -70,6 +72,11 @@ public class AppointmentService {
         Appointment.list(
             "startsAt < ?1 and endsAt > ?2", Sort.by("startsAt").and("id"), end, start);
     return appointments.stream().map(AppointmentDto::from).toList();
+  }
+
+  /** Local midnight of the current day, the agenda's default lower bound. */
+  private Instant startOfToday() {
+    return LocalDate.now(clock).atStartOfDay(clock.getZone()).toInstant();
   }
 
   /** Appointments starting from now, earliest first, used by the dashboard. */
@@ -113,6 +120,7 @@ public class AppointmentService {
     AppUser owner = currentUser.find().orElse(null);
     apply(input, appointment);
     appointment.owner = owner;
+    lockCalendarOf(owner);
     guardSlot(owner, appointment.startsAt, appointment.endsAt, null, allowConflict);
     appointment.persist();
     return AppointmentDto.from(appointment);
@@ -126,7 +134,9 @@ public class AppointmentService {
   @Transactional
   public AppointmentDto update(Long id, AppointmentDto input, boolean allowConflict) {
     Appointment appointment = require(id);
+    Versions.check(input.version(), appointment);
     apply(input, appointment);
+    lockCalendarOf(appointment.owner);
     guardSlot(appointment.owner, appointment.startsAt, appointment.endsAt, id, allowConflict);
     return AppointmentDto.from(appointment);
   }
@@ -134,6 +144,24 @@ public class AppointmentService {
   @Transactional
   public void delete(Long id) {
     require(id).delete();
+  }
+
+  /**
+   * Serialises everybody writing to one person's calendar.
+   *
+   * <p>Checking for an overlap and then inserting are two statements. Under the database's
+   * default isolation two simultaneous requests for the same slot both see an empty calendar,
+   * both insert, and both are told the slot was free — the one case the whole feature exists
+   * for. Taking a write lock on the owner's account row first makes the pair atomic with
+   * respect to that calendar, while leaving other users' calendars fully concurrent.
+   *
+   * <p>An appointment with no owner cannot be locked against; that only happens for records
+   * whose owner was deleted, which no longer take part in conflict checks anyway.
+   */
+  private void lockCalendarOf(AppUser owner) {
+    if (owner != null) {
+      AppUser.getEntityManager().lock(owner, LockModeType.PESSIMISTIC_WRITE);
+    }
   }
 
   private void guardSlot(

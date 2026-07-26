@@ -31,6 +31,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.smallcrm.domain.AppUser;
 import org.smallcrm.support.AbstractApiTest;
+import org.smallcrm.support.TestFixtures;
 
 /** Account administration, including the guards that prevent locking everybody out. */
 @QuarkusTest
@@ -41,7 +42,7 @@ class UserResourceTest extends AbstractApiTest {
   void a_new_account_must_change_its_password_and_never_exposes_the_hash() {
     given()
         .contentType(ContentType.JSON)
-        .body(newUser("assistant", "initial-secret", false))
+        .body(newUser("assistant", "initial-secret-x", false))
         .when()
         .post("/api/users")
         .then()
@@ -55,11 +56,11 @@ class UserResourceTest extends AbstractApiTest {
 
   @Test
   void usernames_are_unique() {
-    fixtures.createUser("assistant", "initial-secret", false);
+    fixtures.createUser("assistant", "initial-secret-x", false);
 
     given()
         .contentType(ContentType.JSON)
-        .body(newUser("assistant", "another-secret", false))
+        .body(newUser("assistant", "another-secret-xx", false))
         .when()
         .post("/api/users")
         .then()
@@ -83,8 +84,8 @@ class UserResourceTest extends AbstractApiTest {
 
   @Test
   void accounts_are_listed_alphabetically() {
-    fixtures.createUser("zoe", "zoe-secret", false);
-    fixtures.createUser("bob", "bob-secret", false);
+    fixtures.createUser("zoe", "zoe-secret-longer", false);
+    fixtures.createUser("bob", "bob-secret-longer", false);
 
     given()
         .when()
@@ -96,7 +97,7 @@ class UserResourceTest extends AbstractApiTest {
 
   @Test
   void an_account_can_be_promoted_and_deactivated() {
-    AppUser assistant = fixtures.createUser("assistant", "initial-secret", false);
+    AppUser assistant = fixtures.createUser("assistant", "initial-secret-x", false);
 
     given()
         .contentType(ContentType.JSON)
@@ -143,7 +144,7 @@ class UserResourceTest extends AbstractApiTest {
 
   @Test
   void you_cannot_delete_or_deactivate_yourself_even_with_a_second_administrator() {
-    fixtures.createUser("second-admin", "second-secret", true);
+    fixtures.createUser("second-admin", "second-secret-xx", true);
     Long adminId = fixtures.admin().id;
 
     given().when().delete("/api/users/" + adminId).then()
@@ -162,11 +163,14 @@ class UserResourceTest extends AbstractApiTest {
 
   @Test
   void resetting_a_password_forces_the_next_login_to_change_it() {
-    AppUser assistant = fixtures.createUser("assistant", "initial-secret", false);
+    AppUser assistant = fixtures.createUser("assistant", "initial-secret-x", false);
 
     given()
         .contentType(ContentType.JSON)
-        .body(Map.of("newPassword", "a-fresh-secret"))
+        .body(
+            Map.of(
+                "currentPassword", TestFixtures.ADMIN_PASSWORD,
+                "newPassword", "a-fresh-secret-here"))
         .when()
         .post("/api/users/" + assistant.id + "/password")
         .then()
@@ -175,8 +179,26 @@ class UserResourceTest extends AbstractApiTest {
   }
 
   @Test
+  void resetting_another_password_requires_the_administrator_s_own_password() {
+    AppUser assistant = fixtures.createUser("assistant", "initial-secret-x", false);
+
+    // Without this, one hijacked administrator session could take over every other account.
+    given()
+        .contentType(ContentType.JSON)
+        .body(
+            Map.of(
+                "currentPassword", "not-my-password",
+                "newPassword", "a-fresh-secret-here"))
+        .when()
+        .post("/api/users/" + assistant.id + "/password")
+        .then()
+        .statusCode(400)
+        .body("code", is("CURRENT_PASSWORD_WRONG"));
+  }
+
+  @Test
   void deleting_an_account_leaves_the_records_it_created_behind() {
-    AppUser assistant = fixtures.createUser("assistant", "initial-secret", false);
+    AppUser assistant = fixtures.createUser("assistant", "initial-secret-x", false);
     var company = fixtures.createCompany("Muster GmbH");
     setOwner(company.id, assistant);
 
@@ -200,7 +222,7 @@ class UserResourceTest extends AbstractApiTest {
   @Test
   @TestSecurity(user = "assistant", roles = {"USER"})
   void a_plain_user_may_not_administer_accounts() {
-    fixtures.createUser("assistant", "initial-secret", false);
+    fixtures.createUser("assistant", "initial-secret-x", false);
 
     given().when().get("/api/users").then().statusCode(403);
     given()

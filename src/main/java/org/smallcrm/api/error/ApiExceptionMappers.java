@@ -16,12 +16,15 @@
 
 package org.smallcrm.api.error;
 
+import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
 /**
@@ -29,6 +32,8 @@ import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
  * frontend only ever has to understand one error format.
  */
 public class ApiExceptionMappers {
+
+  private static final Logger LOG = Logger.getLogger(ApiExceptionMappers.class);
 
   @ServerExceptionMapper
   public Response handleNotFound(NotFoundException exception) {
@@ -41,6 +46,42 @@ public class ApiExceptionMappers {
   public Response handleBusinessRule(BusinessRuleException exception) {
     return Response.status(Response.Status.BAD_REQUEST)
         .entity(new ApiError(exception.code(), exception.getMessage(), exception.details()))
+        .build();
+  }
+
+  @ServerExceptionMapper
+  public Response handleConflict(ConflictException exception) {
+    return Response.status(Response.Status.CONFLICT)
+        .entity(ApiError.of(exception.code(), exception.getMessage()))
+        .build();
+  }
+
+  /**
+   * Two people saved the same record at once. Hibernate detects it at flush; the client is told
+   * to reload rather than being left believing its write landed.
+   */
+  @ServerExceptionMapper
+  public Response handleOptimisticLock(OptimisticLockException exception) {
+    return Response.status(Response.Status.CONFLICT)
+        .entity(
+            ApiError.of(
+                "STALE_VERSION",
+                "This record was changed by somebody else while you were editing it"))
+        .build();
+  }
+
+  /**
+   * Last resort, so an unforeseen failure still arrives in the shape the frontend understands
+   * instead of a framework page. The cause is logged rather than returned.
+   */
+  @ServerExceptionMapper(priority = Priorities.USER + 1000)
+  public Response handleAnythingElse(Throwable exception) {
+    if (exception instanceof WebApplicationException web) {
+      return web.getResponse();
+    }
+    LOG.error("Unhandled failure while serving a request", exception);
+    return Response.serverError()
+        .entity(ApiError.of("INTERNAL", "Something went wrong. Nothing was saved."))
         .build();
   }
 

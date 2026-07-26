@@ -16,11 +16,11 @@
 
 package org.smallcrm.support;
 
-import io.quarkus.elytron.security.common.BcryptUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
+import org.smallcrm.domain.AppSession;
 import org.smallcrm.domain.AppUser;
 import org.smallcrm.domain.Appointment;
 import org.smallcrm.domain.Company;
@@ -29,6 +29,7 @@ import org.smallcrm.domain.CrmTask;
 import org.smallcrm.domain.Deal;
 import org.smallcrm.domain.Interaction;
 import org.smallcrm.domain.InteractionType;
+import org.smallcrm.security.Passwords;
 
 /**
  * Brings the shared in-memory database back to a known state between tests and creates the small
@@ -41,7 +42,7 @@ public class TestFixtures {
   public static final String ADMIN_USERNAME = "admin";
 
   /** Matches the bootstrap password configured for the test profile. */
-  public static final String ADMIN_PASSWORD = "changeit";
+  public static final String ADMIN_PASSWORD = "changeit-for-tests";
 
   /**
    * Deletes every business record, removes extra accounts and returns the administrator to a
@@ -59,12 +60,16 @@ public class TestFixtures {
     Contact.<Contact>listAll().forEach(Contact::delete);
     Contact.getEntityManager().flush();
     Company.deleteAll();
+    // Sessions reference accounts, so they go first.
+    AppSession.deleteAll();
     AppUser.delete("username <> ?1", ADMIN_USERNAME);
     AppUser admin = AppUser.findByUsername(ADMIN_USERNAME);
-    admin.password = BcryptUtil.bcryptHash(ADMIN_PASSWORD);
+    admin.password = Passwords.hash(ADMIN_PASSWORD);
     admin.mustChangePassword = false;
     admin.active = true;
     admin.roles = AppUser.ROLE_ADMIN + "," + AppUser.ROLE_USER;
+    admin.failedLoginCount = 0;
+    admin.lockedUntil = null;
   }
 
   /** Puts the administrator back into the "must change password" state. */
@@ -83,7 +88,7 @@ public class TestFixtures {
   public AppUser createUser(String username, String password, boolean admin) {
     AppUser user = new AppUser();
     user.username = username;
-    user.password = BcryptUtil.bcryptHash(password);
+    user.password = Passwords.hash(password);
     user.roles = admin ? AppUser.ROLE_ADMIN + "," + AppUser.ROLE_USER : AppUser.ROLE_USER;
     user.fullName = username;
     user.active = true;

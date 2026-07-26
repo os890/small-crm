@@ -96,6 +96,7 @@ public class CrmTaskService {
   @Transactional
   public CrmTaskDto update(Long id, CrmTaskDto input) {
     CrmTask task = require(id);
+    Versions.check(input.version(), task);
     apply(input, task);
     return CrmTaskDto.from(task, today());
   }

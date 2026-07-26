@@ -17,6 +17,7 @@
 package org.smallcrm.api;
 
 import io.quarkus.security.Authenticated;
+import io.vertx.ext.web.RoutingContext;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -25,27 +26,70 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
+import java.time.Duration;
+import java.time.Instant;
+import org.jboss.resteasy.reactive.RestForm;
 import org.smallcrm.api.dto.ChangePasswordRequest;
 import org.smallcrm.api.dto.UserDto;
+import org.smallcrm.api.error.ApiError;
+import org.smallcrm.security.LoginService;
+import org.smallcrm.security.SessionCookie;
+import org.smallcrm.security.SessionService;
 import org.smallcrm.service.UserService;
 
 /**
- * Session endpoints.
+ * Signing in and out, and the signed-in profile.
  *
- * <p>{@code POST /api/auth/login} itself is handled by the Quarkus form authentication mechanism,
- * which intercepts the request before it reaches a resource method; it expects a form encoded body
- * with {@code username} and {@code password}. What remains here is everything the frontend needs
- * around that: reading the current profile, changing the password and signing out.
+ * <p>The login is an ordinary endpoint rather than a framework interception, which is what lets
+ * it lock out repeated failures, keep a missing account and a wrong password
+ * indistinguishable in both answer and timing, and refuse deactivated accounts before a cookie
+ * is ever issued.
+ *
+ * <p>The request body stays form encoded, which is what browsers send from a password manager
+ * and what the frontend already posts.
  */
 @Path("/api/auth")
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 
-  private static final String SESSION_COOKIE = "quarkus-credential";
-
+  @Inject LoginService loginService;
+  @Inject SessionService sessions;
+  @Inject SessionCookie cookie;
   @Inject UserService userService;
+  @Inject RoutingContext routingContext;
+
+  /** Verifies credentials and starts a session. */
+  @POST
+  @Path("/login")
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  public Response login(
+      @RestForm("username") String username, @RestForm("password") String password) {
+    LoginService.Attempt attempt = loginService.attempt(username, password);
+
+    if (!attempt.succeeded()) {
+      if (attempt.failure() == LoginService.Failure.LOCKED_OUT) {
+        long seconds = Math.max(1, attempt.retryAfter().toSeconds());
+        return Response.status(Response.Status.TOO_MANY_REQUESTS)
+            .header("Retry-After", seconds)
+            .entity(
+                ApiError.of(
+                    "TOO_MANY_ATTEMPTS",
+                    "Too many failed attempts. Try again in " + seconds + " seconds."))
+            .build();
+      }
+      return Response.status(Response.Status.UNAUTHORIZED)
+          .entity(ApiError.of("BAD_CREDENTIALS", "User name or password is not correct"))
+          .build();
+    }
+
+    SessionService.IssuedSession issued = sessions.issue(attempt.user());
+    cookie.write(
+        routingContext,
+        issued.token(),
+        Duration.between(Instant.now(), issued.expiresAt()).toSeconds());
+    return Response.noContent().build();
+  }
 
   /** The signed-in profile, including whether the password still has to be changed. */
   @GET
@@ -55,26 +99,41 @@ public class AuthResource {
     return userService.me();
   }
 
-  /** Replaces the own password and clears the "must change password" flag. */
+  /**
+   * Replaces the own password, clears the "must change password" flag and ends every other
+   * session of this account.
+   */
   @POST
   @Path("/password")
   @Authenticated
   @Consumes(MediaType.APPLICATION_JSON)
   public UserDto changePassword(@Valid ChangePasswordRequest request) {
-    return userService.changeOwnPassword(request);
+    UserDto updated = userService.changeOwnPassword(request);
+    // Every session was just revoked, including this one, so issue a fresh cookie rather than
+    // signing the user out of the browser they are actively using.
+    reissueSessionForCurrentUser();
+    return updated;
   }
 
-  /** Clears the session cookie. Safe to call when no session exists. */
+  /** Ends this session, on the server as well as in the browser. */
   @POST
   @Path("/logout")
   public Response logout() {
-    NewCookie expired =
-        new NewCookie.Builder(SESSION_COOKIE)
-            .value("")
-            .path("/")
-            .maxAge(0)
-            .httpOnly(true)
-            .build();
-    return Response.noContent().cookie(expired).build();
+    sessions.revoke(cookie.read(routingContext));
+    cookie.clear(routingContext);
+    return Response.noContent().build();
+  }
+
+  private void reissueSessionForCurrentUser() {
+    userService
+        .currentAccount()
+        .ifPresent(
+            user -> {
+              SessionService.IssuedSession issued = sessions.issue(user);
+              cookie.write(
+                  routingContext,
+                  issued.token(),
+                  Duration.between(Instant.now(), issued.expiresAt()).toSeconds());
+            });
   }
 }

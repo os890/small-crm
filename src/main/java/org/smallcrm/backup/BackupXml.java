@@ -63,6 +63,11 @@ public class BackupXml {
     Files.writeString(target, toXml(backup));
   }
 
+  /** Writes and forces the bytes to disk, so a power cut cannot leave an empty backup. */
+  public void writeDurably(Backup backup, Path target) throws IOException {
+    Durability.writeAndSync(target, toXml(backup));
+  }
+
   public String toXml(Backup backup) {
     try {
       return mapper.writeValueAsString(backup);

@@ -77,13 +77,13 @@ class AuthResourceTest extends AbstractApiTest {
   void the_new_password_must_be_long_enough() {
     given()
         .contentType(ContentType.JSON)
-        .body(Map.of("currentPassword", TestFixtures.ADMIN_PASSWORD, "newPassword", "short"))
+        .body(Map.of("currentPassword", TestFixtures.ADMIN_PASSWORD, "newPassword", "too-short"))
         .when()
         .post("/api/auth/password")
         .then()
         .statusCode(400)
         .body("code", is("VALIDATION_FAILED"))
-        .body("details.newPassword", is("size must be between 8 and 100"));
+        .body("details.newPassword", is("size must be between 12 and 72"));
   }
 
   @Test

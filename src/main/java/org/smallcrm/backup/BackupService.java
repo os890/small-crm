@@ -47,6 +47,7 @@ import org.smallcrm.backup.BackupModel.BackupInteraction;
 import org.smallcrm.backup.BackupModel.BackupTask;
 import org.smallcrm.domain.AppUser;
 import org.smallcrm.domain.Appointment;
+import org.smallcrm.domain.BaseEntity;
 import org.smallcrm.domain.Company;
 import org.smallcrm.domain.Contact;
 import org.smallcrm.domain.CrmTask;
@@ -73,10 +74,26 @@ public class BackupService {
   @ConfigProperty(name = "smallcrm.backup-dir", defaultValue = "./backup")
   String backupDir;
 
+  @ConfigProperty(name = "smallcrm.backup.snapshot-enabled", defaultValue = "true")
+  boolean snapshotEnabled;
+
   @Inject BackupXml xml;
   @Inject BackupSettingsService settings;
   @Inject CurrentUser currentUser;
   @Inject Clock clock;
+  @Inject DatabaseSnapshot snapshot;
+
+  /**
+   * Serialises everything that writes into the backup folder or replaces the database.
+   *
+   * <p>Three problems share this one cause. Two backups written in the same second could pick
+   * the same file name, and the atomic move that protects a half-written file would then
+   * silently replace the other one. A restore ran as three separate steps, so a record saved
+   * between the safety copy and the delete vanished from both. And two restores at once could
+   * interleave their delete and insert phases.
+   */
+  private final java.util.concurrent.locks.ReentrantLock fileLock =
+      new java.util.concurrent.locks.ReentrantLock();
 
   /** A file in the backup folder, as the interface lists it. */
   public record BackupFile(String name, long sizeBytes, Instant createdAt, boolean beforeRestore) {}
@@ -142,6 +159,15 @@ public class BackupService {
    * @return the file that was written
    */
   public BackupFile write(boolean beforeRestore) {
+    fileLock.lock();
+    try {
+      return writeLocked(beforeRestore);
+    } finally {
+      fileLock.unlock();
+    }
+  }
+
+  private BackupFile writeLocked(boolean beforeRestore) {
     Backup data = export();
     Instant at = Instant.now(clock);
     Path dir = directory();
@@ -152,13 +178,22 @@ public class BackupService {
       // half finished file looking like a usable backup.
       Path temp = Files.createTempFile(dir, ".writing-", ".xml");
       try {
-        xml.write(data, temp);
+        // Forced to disk before the rename. A journalling filesystem can otherwise persist the
+        // rename while the contents are still in the page cache, so a power cut leaves an empty
+        // file under a perfectly valid name that only reveals itself at restore time.
+        xml.writeDurably(data, temp);
         Files.move(temp, file, StandardCopyOption.ATOMIC_MOVE);
+        Durability.syncDirectory(dir);
       } catch (IOException e) {
         Files.deleteIfExists(temp);
         throw e;
       }
       LOG.infof("Wrote backup %s with %d records", file.getFileName(), data.recordCount());
+      if (snapshotEnabled) {
+        // Unlike the XML this includes accounts and settings, which is what a rebuild after a
+        // disk loss actually needs.
+        snapshot.writeBeside(file);
+      }
       applyRetention();
       return describe(file);
     } catch (IOException e) {
@@ -216,13 +251,17 @@ public class BackupService {
    * @return how many records were loaded
    */
   @Transactional
-  public int replaceAll(Backup backup) {
+  public RestoreOutcome replaceAll(Backup backup) {
     deleteAllBusinessData();
 
     Map<String, AppUser> usersByName = new HashMap<>();
     for (AppUser user : AppUser.<AppUser>listAll()) {
       usersByName.put(user.username, user);
     }
+    // Counted rather than merely logged: restoring onto a fresh installation leaves every
+    // record ownerless, and a cheerful record count alone made that look like a clean restore.
+    OwnerResolver owners = new OwnerResolver(usersByName);
+    int skipped = 0;
 
     Map<Long, Company> companies = new HashMap<>();
     for (BackupCompany source : nullToEmpty(backup.companies())) {
@@ -237,7 +276,8 @@ public class BackupService {
       company.city = source.city();
       company.country = source.country();
       company.notes = source.notes();
-      company.owner = usersByName.get(source.owner());
+      company.owner = owners.resolve(source.owner());
+      applyTimestamps(company, source.createdAt(), source.updatedAt());
       company.persist();
       companies.put(source.id(), company);
     }
@@ -253,10 +293,11 @@ public class BackupService {
       contact.position = source.position();
       contact.company = companies.get(source.companyId());
       contact.notes = source.notes();
-      contact.owner = usersByName.get(source.owner());
+      contact.owner = owners.resolve(source.owner());
       if (source.tags() != null) {
         contact.tags.addAll(source.tags());
       }
+      applyTimestamps(contact, source.createdAt(), source.updatedAt());
       contact.persist();
       contacts.put(source.id(), contact);
     }
@@ -272,7 +313,8 @@ public class BackupService {
       deal.stage = source.stage();
       deal.expectedCloseDate = source.expectedCloseDate();
       deal.notes = source.notes();
-      deal.owner = usersByName.get(source.owner());
+      deal.owner = owners.resolve(source.owner());
+      applyTimestamps(deal, source.createdAt(), source.updatedAt());
       deal.persist();
       deals.put(source.id(), deal);
     }
@@ -284,6 +326,7 @@ public class BackupService {
         // rather than failing the whole restore.
         LOG.warnf("Skipping interaction '%s': its contact is not part of the file",
             source.subject());
+        skipped++;
         continue;
       }
       Interaction interaction = new Interaction();
@@ -293,7 +336,8 @@ public class BackupService {
       interaction.notes = source.notes();
       interaction.contact = contact;
       interaction.deal = deals.get(source.dealId());
-      interaction.owner = usersByName.get(source.owner());
+      interaction.owner = owners.resolve(source.owner());
+      applyTimestamps(interaction, source.createdAt(), source.updatedAt());
       interaction.persist();
     }
 
@@ -307,7 +351,8 @@ public class BackupService {
       task.priority = source.priority();
       task.contact = contacts.get(source.contactId());
       task.deal = deals.get(source.dealId());
-      task.owner = usersByName.get(source.owner());
+      task.owner = owners.resolve(source.owner());
+      applyTimestamps(task, source.createdAt(), source.updatedAt());
       task.persist();
     }
 
@@ -325,29 +370,86 @@ public class BackupService {
       appointment.externalEventId = source.externalEventId();
       appointment.externalEtag = source.externalEtag();
       appointment.lastSyncedAt = source.lastSyncedAt();
-      appointment.owner = usersByName.get(source.owner());
+      appointment.owner = owners.resolve(source.owner());
+      applyTimestamps(appointment, source.createdAt(), source.updatedAt());
       appointment.persist();
     }
 
-    return backup.recordCount();
+    return new RestoreOutcome(
+        backup.recordCount() - skipped, skipped, owners.unresolved());
   }
 
-  /** Result of a restore, reported back to the interface. */
-  public record RestoreResult(int recordCount, String safetyCopy) {}
+  /** Maps an exported owner name onto a local account, counting the ones that do not exist. */
+  private static final class OwnerResolver {
+    private final Map<String, AppUser> byName;
+    private int unresolved;
+
+    OwnerResolver(Map<String, AppUser> byName) {
+      this.byName = byName;
+    }
+
+    AppUser resolve(String username) {
+      if (username == null) {
+        return null;
+      }
+      AppUser user = byName.get(username);
+      if (user == null) {
+        unresolved++;
+      }
+      return user;
+    }
+
+    int unresolved() {
+      return unresolved;
+    }
+  }
+
+  /**
+   * Result of a restore, reported back to the interface.
+   *
+   * @param skipped records the file contained but that could not be loaded, for instance an
+   *     interaction whose contact was missing; previously only a log line
+   * @param unresolvedOwners records whose owner name matches no account here, which is expected
+   *     when restoring onto a fresh installation and worth saying out loud
+   */
+  public record RestoreResult(
+      int recordCount, String safetyCopy, int skipped, int unresolvedOwners) {}
+
+  /** What {@link #replaceAll} loaded, before the file names are attached. */
+  public record RestoreOutcome(int recordCount, int skipped, int unresolvedOwners) {}
 
   /** Takes a safety copy of the current data, then replaces it with the given file. */
   public RestoreResult restore(byte[] content) {
     Backup backup = parse(content);
-    String safetyCopy = write(true).name();
-    int restored = replaceAll(backup);
-    LOG.infof("Restored %d records; previous data kept in %s", restored, safetyCopy);
-    return new RestoreResult(restored, safetyCopy);
+    fileLock.lock();
+    try {
+      // Safety copy and replacement inside one guarded section: otherwise a record saved in
+      // between is wiped by the restore and appears in neither the safety copy nor any
+      // automatic backup, because the coalescing window means it was probably not written yet.
+      String safetyCopy = writeLocked(true).name();
+      RestoreOutcome outcome = replaceAll(backup);
+      LOG.infof(
+          "Restored %d records; previous data kept in %s", outcome.recordCount(), safetyCopy);
+      return new RestoreResult(
+          outcome.recordCount(), safetyCopy, outcome.skipped(), outcome.unresolvedOwners());
+    } finally {
+      fileLock.unlock();
+    }
   }
 
   /** Takes a safety copy, then restores the named file from the backup folder. */
   public RestoreResult restoreFromFolder(String fileName) {
     Path file = resolve(fileName);
     try {
+      // Checked before reading: the upload path is capped by the HTTP layer, but a file placed
+      // in the folder by hand is not, and reading a multi-gigabyte one would exhaust the heap
+      // before the limit inside parse() is ever consulted.
+      long size = Files.size(file);
+      if (size > MAX_FILE_BYTES) {
+        throw new BusinessRuleException(
+            "BACKUP_TOO_LARGE",
+            "The backup file is larger than " + (MAX_FILE_BYTES >> 20) + " MB");
+      }
       return restore(Files.readAllBytes(file));
     } catch (IOException e) {
       throw new UncheckedIOException("Cannot read the backup " + fileName, e);
@@ -472,6 +574,18 @@ public class BackupService {
   /** Accounts are not part of a backup, so the owner travels as a plain user name. */
   private static String ownerName(AppUser owner) {
     return owner == null ? null : owner.username;
+  }
+
+  /**
+   * Restores the timestamps a record was exported with.
+   *
+   * <p>"When was this contact created, when was it last touched" is business information in a
+   * CRM. Leaving these to the lifecycle callback would rewrite the entire history to the moment
+   * of the restore, and the next automatic backup would then make that permanent.
+   */
+  private static void applyTimestamps(BaseEntity entity, Instant createdAt, Instant updatedAt) {
+    entity.createdAt = createdAt;
+    entity.updatedAt = updatedAt != null ? updatedAt : createdAt;
   }
 
   private static <T> List<T> nullToEmpty(List<T> list) {

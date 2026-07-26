@@ -20,6 +20,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.smallcrm.security.Passwords;
 
 /** Payload an administrator sends to add a new account. */
 public record CreateUserRequest(
@@ -29,7 +30,8 @@ public record CreateUserRequest(
             regexp = "^[a-zA-Z0-9._-]+$",
             message = "may only contain letters, digits, dot, underscore and hyphen")
         String username,
-    @NotBlank @Size(min = 8, max = 100) String password,
+    @NotBlank @Size(min = Passwords.MIN_LENGTH, max = Passwords.MAX_LENGTH)
+        String password,
     @Size(max = 150) String fullName,
     @Email @Size(max = 200) String email,
     boolean admin) {}

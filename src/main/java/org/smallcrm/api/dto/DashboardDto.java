@@ -26,7 +26,10 @@ import java.util.List;
  * @param contactCount total number of contacts
  * @param companyCount total number of companies
  * @param openDealCount deals that are neither won nor lost
- * @param openDealValue summed value of those open deals
+ * @param openDealValue summed value of the open deals in the main currency only; kept for the
+ *     headline figure, which needs a single number
+ * @param openDealValueByCurrency the same total split per currency, so a mixed pipeline is not
+ *     presented as one wrong sum
  * @param overdueTasks open tasks whose due date has passed, most overdue first
  * @param tasksDueToday open tasks due today
  * @param upcomingAppointments appointments starting within the next seven days
@@ -37,6 +40,7 @@ public record DashboardDto(
     long companyCount,
     long openDealCount,
     BigDecimal openDealValue,
+    java.util.Map<String, BigDecimal> openDealValueByCurrency,
     List<CrmTaskDto> overdueTasks,
     List<CrmTaskDto> tasksDueToday,
     List<AppointmentDto> upcomingAppointments,

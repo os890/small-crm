@@ -55,11 +55,22 @@ public abstract class BaseEntity extends PanacheEntityBase {
   @ManyToOne(fetch = FetchType.LAZY)
   public AppUser owner;
 
+  /**
+   * Stamps a new record, unless the caller already knows when it was created.
+   *
+   * <p>The guard matters for restores: a backup carries the original timestamps, and
+   * overwriting them would turn "created three years ago" into "created just now" for every
+   * record in the file — silently, and permanently once the next backup is written.
+   */
   @PrePersist
   void onCreate() {
     Instant now = Instant.now();
-    createdAt = now;
-    updatedAt = now;
+    if (createdAt == null) {
+      createdAt = now;
+    }
+    if (updatedAt == null) {
+      updatedAt = now;
+    }
   }
 
   @PreUpdate
