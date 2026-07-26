@@ -67,6 +67,26 @@ public class CrmTask extends BaseEntity {
   @JoinColumn(name = "deal_id")
   public Deal deal;
 
+  /**
+   * Identifier of the Google task this one mirrors, once an account is connected.
+   *
+   * <p>Null on everything created here and never synced, which is the normal state for an
+   * installation nobody has connected Google to.
+   */
+  @Column(length = 200)
+  public String externalId;
+
+  /** Which Google task list it came from, so it is written back to the same one. */
+  @Column(length = 200)
+  public String externalListId;
+
+  /** Google's version marker, sent back on a write so a concurrent change is refused. */
+  @Column(length = 200)
+  public String externalEtag;
+
+  /** When this task and its Google counterpart were last known to agree. */
+  public Instant lastSyncedAt;
+
   /** A task is overdue when it is still open and its due date has already passed. */
   public boolean isOverdue(LocalDate today) {
     return !done && dueDate != null && dueDate.isBefore(today);

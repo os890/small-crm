@@ -24,6 +24,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -61,6 +62,22 @@ public class Contact extends BaseEntity {
 
   @Column(length = 4000)
   public String notes;
+
+  /**
+   * Identifier of the Google record this one mirrors, once an account is connected.
+   *
+   * <p>Null on everything created here and never synced, which is the normal state for an
+   * installation nobody has connected Google to.
+   */
+  @Column(length = 200)
+  public String externalId;
+
+  /** Google's version marker, sent back on a write so a concurrent change is refused. */
+  @Column(length = 200)
+  public String externalEtag;
+
+  /** When this record and its Google counterpart were last known to agree. */
+  public Instant lastSyncedAt;
 
   public String displayName() {
     return firstName + " " + lastName;
