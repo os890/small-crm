@@ -85,7 +85,7 @@ export const EN = {
 
   'password.heading': 'Choose a new password',
   'password.explain':
-    'Your password has to be changed before you can continue. Pick something only you know, at least 8 characters long.',
+    'Your password has to be changed before you can continue. Pick something only you know, at least 12 characters long.',
   'password.current': 'Current password',
   'password.new': 'New password',
   'password.repeat': 'Repeat new password',
@@ -367,7 +367,7 @@ export const DE: Record<TranslationKey, string> = {
 
   'password.heading': 'Neues Passwort wählen',
   'password.explain':
-    'Ihr Passwort muss geändert werden, bevor es weitergeht. Wählen Sie etwas, das nur Sie kennen – mindestens 8 Zeichen.',
+    'Ihr Passwort muss geändert werden, bevor es weitergeht. Wählen Sie etwas, das nur Sie kennen – mindestens 12 Zeichen.',
   'password.current': 'Aktuelles Passwort',
   'password.new': 'Neues Passwort',
   'password.repeat': 'Neues Passwort wiederholen',
