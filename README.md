@@ -16,17 +16,24 @@ PDF to print or pass on —
 
 ## Run it
 
-Nothing installed? One command, and it needs none of the above:
+Nothing installed? Two commands, and they need none of the above:
 
 ```bash
 ./build.sh          # build.cmd on Windows
+./start.sh          # start.cmd on Windows
 ```
 
-It fetches its own Java, Maven, Node and pnpm into `.build-tools/`, builds the application, and
-writes the ready-to-hand-on packages described under
+`build.sh` fetches its own Java, Maven, Node and pnpm into `.build-tools/`, builds the
+application, and writes the ready-to-hand-on packages described under
 [Packaging it for someone else](#packaging-it-for-someone-else). See
 [Building with nothing installed](#building-with-nothing-installed) for what that does and does
 not touch.
+
+`start.sh` then runs what was built, using that same fetched Java — so there is still nothing
+installed and no archive to unpack. It opens the browser once the application answers.
+`SMALLCRM_PORT=9000 ./start.sh` moves it off port 8080, and `SMALLCRM_NO_BROWSER=1` leaves the
+browser alone. After a plain `mvn package` it works just as well, falling back to `JAVA_HOME` or
+the `java` on your `PATH`.
 
 With the tools already there — **Java 25**, **Maven 3.9+**, **Node 22+** and **pnpm** (the last
 two only for the frontend) — the ordinary way round works as well:
@@ -255,6 +262,7 @@ All of these run in `mvn verify` and fail the build:
 ```
 pom.xml                     the only build file; Quinoa builds the frontend into the jar
 build.sh, build.cmd         builds on a machine with nothing installed
+start.sh, start.cmd         runs what was built, with the Java build.sh fetched
 config/checkstyle/          Java style rules
 src/main/java/org/os890/smallcrm/
   domain/                   JPA entities and the rules that belong on them
