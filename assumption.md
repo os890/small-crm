@@ -106,3 +106,40 @@ reversible; where a change would ripple, that is noted.
     at build time, so the plain JaCoCo agent measures classes that are never loaded and reports
     almost nothing. The extension appends to the same `jacoco.exec`, and the Maven plugin still
     owns the report and the threshold check.
+
+## Google integration
+
+These were decided when the optional Google integration was added; each one changes what happens
+to somebody's real Google data, so none of them is an implementation detail.
+
+- **Google links an account, it never creates one.** An administrator invites somebody as before;
+  connecting Google is something that person then does from their own settings. Letting a Google
+  sign-in create an account would mean anyone with a Google account could walk into a database of
+  somebody's customers.
+- **Only contacts carrying one Google label are synced.** This is a shared workspace, so mirroring
+  a whole address book into it would put somebody's dentist and their mother in front of their
+  colleagues. The user chooses what is shared by labelling it in Google.
+- **Records Google holds more richly than this application can are read-only here.** A recurring
+  meeting, an all-day event, a person with several e-mail addresses, a Google subtask. They are
+  pulled in and shown, and the API refuses to change them. The alternative — writing back what
+  this application knows — would replace a standing weekly meeting with a single event, or
+  delete five addresses, in data this application does not own.
+- **A pull touches only the fields Google owns.** A to-do's priority, contact and deal have
+  nowhere to live in Google Tasks, so they are never overwritten by an incoming record and
+  survive a round trip.
+- **Conflicts are resolved per record by whichever side changed last.** Field-level merging would
+  be better and is not built; the timestamps involved are Google's `updateTime` and this
+  application's `updatedAt`.
+- **The refresh token is encrypted at rest and the key has no default.** It is a live credential
+  to somebody's whole Google account, which makes it more dangerous than anything else in the
+  database. Without `SMALLCRM_TOKEN_KEY` the integration declines to store credentials at all.
+- **The OAuth flow issues an ordinary session.** Google is an identity source, not a second
+  authentication mechanism, so a Google sign-in ends in the same server-side session a password
+  login produces — one kind of session, one place to revoke it.
+- **The id token's signature is not verified.** It arrives over a direct TLS connection to
+  Google's token endpoint rather than through the browser, which is the case OpenID Connect
+  explicitly allows server validation to stand in for. Verifying would mean fetching and rotating
+  Google's JWKS to prove what the transport already proved.
+- **Consent state lives in memory.** It matters for the minutes a browser is away at Google, and a
+  restart mid-consent costs one click; a table for it would hold nothing but rubbish within the
+  hour.

@@ -75,6 +75,58 @@ export const EN = {
   'picker.clear': 'Clear this field',
   'picker.more': 'and {count} more — keep typing to narrow it down',
 
+  'nav.settings': 'Settings',
+
+  'settings.heading': 'Settings',
+  'settings.google': 'Google account',
+  'settings.googleUnavailable': 'This installation is not set up for Google.',
+  'settings.googleExplain':
+    'Connect your Google account to keep contacts, your calendar and your to-dos in step with it. ' +
+    'Only contacts you label “Small CRM” in Google are shared with the team.',
+  'settings.googleConnect': 'Connect Google',
+  'settings.googleDisconnect': 'Disconnect',
+  'settings.googleDisconnectQuestion': 'Disconnect your Google account?',
+  'settings.googleDisconnectHint':
+    'Nothing already synced is deleted here, and access is withdrawn at Google too.',
+  'settings.googleDisconnected': 'Google account disconnected.',
+  'settings.googleConnected': 'Google account connected.',
+  'settings.googleCancelled': 'Connecting to Google was cancelled.',
+  'settings.googleFailed': 'Google could not be connected.',
+  'settings.googleAccount': 'Connected account',
+  'settings.googleSince': 'Connected',
+  'settings.googleResource': 'What is synced',
+  'settings.googleResource.CONTACTS': 'Contacts',
+  'settings.googleResource.CALENDAR': 'Calendar',
+  'settings.googleResource.TASKS': 'To-dos',
+  'settings.googleLastSync': 'Last successful sync',
+  'settings.googleNever': 'never',
+  'settings.googleOk': 'Working',
+  'settings.googleNotPermitted': 'Not granted',
+  'settings.googleFailing': 'Failing ({count}×)',
+  'settings.googleSyncNow': 'Sync now',
+  'settings.googleSyncing': 'Syncing…',
+  'settings.googleCounts': '{inbound} in, {outbound} out, {readOnly} managed in Google',
+  'settings.managedInGoogle': 'Managed in Google',
+  'settings.managedInGoogleHint':
+    'This record holds more in Google than this application can, so it is shown here but changed there.',
+
+  'login.withGoogle': 'Sign in with Google',
+  'login.orPassword': 'or sign in with your password',
+
+  'error.GOOGLE_NOT_LINKED':
+    'That Google account is not connected to anybody here. Sign in with your password first, ' +
+    'then connect it from your settings.',
+  'error.GOOGLE_ALREADY_LINKED': 'That Google account is already connected to another user.',
+  'error.GOOGLE_STATE_UNKNOWN': 'That took too long. Please try again.',
+  'error.GOOGLE_EMAIL_UNVERIFIED': 'That Google account has no verified e-mail address.',
+  'error.GOOGLE_NO_REFRESH_TOKEN':
+    'Google did not grant lasting access. Remove Small CRM from your Google account’s ' +
+    'third-party access and connect it again.',
+  'error.GOOGLE_NOT_CONFIGURED': 'This installation is not set up for Google.',
+  'error.MANAGED_IN_GOOGLE':
+    'This record is managed in Google because it holds more than this application can. ' +
+    'Change it in Google and it will come back here.',
+
   'login.heading': 'Sign in',
   'login.username': 'User name',
   'login.password': 'Password',
@@ -357,6 +409,60 @@ export const DE: Record<TranslationKey, string> = {
   'picker.noMatches': 'Nichts passt zu Ihrer Eingabe.',
   'picker.clear': 'Feld leeren',
   'picker.more': 'und {count} weitere – tippen Sie weiter, um einzugrenzen',
+
+  'nav.settings': 'Einstellungen',
+
+  'settings.heading': 'Einstellungen',
+  'settings.google': 'Google-Konto',
+  'settings.googleUnavailable': 'Diese Installation ist nicht für Google eingerichtet.',
+  'settings.googleExplain':
+    'Verbinden Sie Ihr Google-Konto, damit Kontakte, Kalender und Aufgaben abgeglichen werden. ' +
+    'Geteilt werden nur Kontakte, die in Google mit „Small CRM“ beschriftet sind.',
+  'settings.googleConnect': 'Google verbinden',
+  'settings.googleDisconnect': 'Trennen',
+  'settings.googleDisconnectQuestion': 'Google-Konto trennen?',
+  'settings.googleDisconnectHint':
+    'Bereits abgeglichene Daten bleiben hier erhalten, und der Zugriff wird auch bei Google entzogen.',
+  'settings.googleDisconnected': 'Google-Konto getrennt.',
+  'settings.googleConnected': 'Google-Konto verbunden.',
+  'settings.googleCancelled': 'Das Verbinden mit Google wurde abgebrochen.',
+  'settings.googleFailed': 'Google konnte nicht verbunden werden.',
+  'settings.googleAccount': 'Verbundenes Konto',
+  'settings.googleSince': 'Verbunden',
+  'settings.googleResource': 'Was abgeglichen wird',
+  'settings.googleResource.CONTACTS': 'Kontakte',
+  'settings.googleResource.CALENDAR': 'Kalender',
+  'settings.googleResource.TASKS': 'Aufgaben',
+  'settings.googleLastSync': 'Letzter erfolgreicher Abgleich',
+  'settings.googleNever': 'nie',
+  'settings.googleOk': 'Funktioniert',
+  'settings.googleNotPermitted': 'Nicht erlaubt',
+  'settings.googleFailing': 'Fehlerhaft ({count}×)',
+  'settings.googleSyncNow': 'Jetzt abgleichen',
+  'settings.googleSyncing': 'Wird abgeglichen …',
+  'settings.googleCounts': '{inbound} herein, {outbound} hinaus, {readOnly} in Google verwaltet',
+  'settings.managedInGoogle': 'In Google verwaltet',
+  'settings.managedInGoogleHint':
+    'Dieser Eintrag enthält in Google mehr, als diese Anwendung abbilden kann. Er wird hier ' +
+    'angezeigt, geändert wird er in Google.',
+
+  'login.withGoogle': 'Mit Google anmelden',
+  'login.orPassword': 'oder mit Ihrem Passwort anmelden',
+
+  'error.GOOGLE_NOT_LINKED':
+    'Dieses Google-Konto ist hier mit niemandem verbunden. Melden Sie sich zuerst mit Ihrem ' +
+    'Passwort an und verbinden Sie es dann in den Einstellungen.',
+  'error.GOOGLE_ALREADY_LINKED':
+    'Dieses Google-Konto ist bereits mit einem anderen Benutzer verbunden.',
+  'error.GOOGLE_STATE_UNKNOWN': 'Das hat zu lange gedauert. Bitte versuchen Sie es erneut.',
+  'error.GOOGLE_EMAIL_UNVERIFIED': 'Dieses Google-Konto hat keine bestätigte E-Mail-Adresse.',
+  'error.GOOGLE_NO_REFRESH_TOKEN':
+    'Google hat keinen dauerhaften Zugriff gewährt. Entfernen Sie Small CRM in Ihrem ' +
+    'Google-Konto aus den Drittanbieter-Zugriffen und verbinden Sie es erneut.',
+  'error.GOOGLE_NOT_CONFIGURED': 'Diese Installation ist nicht für Google eingerichtet.',
+  'error.MANAGED_IN_GOOGLE':
+    'Dieser Eintrag wird in Google verwaltet, weil er mehr enthält, als diese Anwendung ' +
+    'abbilden kann. Ändern Sie ihn in Google, dann kommt er hierher zurück.',
 
   'login.heading': 'Anmelden',
   'login.username': 'Benutzername',

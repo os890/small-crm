@@ -28,9 +28,11 @@ import {
   Dashboard,
   Deal,
   DealStage,
+  GoogleStatus,
   Interaction,
   Page,
   RestoreResult,
+  SyncReport,
   UpdateUserRequest,
   User,
 } from './models';
@@ -113,6 +115,34 @@ export class ApiService {
     return firstValueFrom(
       this.http.post<User>('/api/auth/password', { currentPassword, newPassword }),
     );
+  }
+
+  // --- google ------------------------------------------------------------------
+
+  /** Whether the sign-in-with-Google button belongs on the login screen. */
+  googleAvailable(): Promise<GoogleStatus> {
+    return firstValueFrom(this.http.get<GoogleStatus>('/api/google/available'));
+  }
+
+  googleStatus(): Promise<GoogleStatus> {
+    return firstValueFrom(this.http.get<GoogleStatus>('/api/google/status'));
+  }
+
+  /** Returns where to send the browser for Google's consent screen. */
+  googleConnect(): Promise<{ url: string }> {
+    return firstValueFrom(this.http.post<{ url: string }>('/api/google/connect', null));
+  }
+
+  googleSignIn(): Promise<{ url: string }> {
+    return firstValueFrom(this.http.post<{ url: string }>('/api/google/signin', null));
+  }
+
+  googleDisconnect(): Promise<void> {
+    return firstValueFrom(this.http.delete<void>('/api/google/connection'));
+  }
+
+  googleSyncNow(): Promise<SyncReport[]> {
+    return firstValueFrom(this.http.post<SyncReport[]>('/api/google/sync', null));
   }
 
   // --- dashboard ---------------------------------------------------------------

@@ -120,6 +120,44 @@ reload on save. Everything stays on <http://localhost:8080>. Dev mode — and on
 known first password, `dev-only-password`, so a fresh checkout can be signed into without reading
 the console.
 
+### Connecting Google (optional)
+
+Off unless configured, and every installation works fully without it. When it is on, each user
+can connect their own Google account from **Settings** and afterwards sign in with either their
+password or Google.
+
+1. In the Google Cloud console, create an OAuth client of type *Web application*, and enable the
+   People API, the Calendar API and the Tasks API.
+2. Add `http://localhost:8080/api/google/callback` as an authorised redirect URI — it must match
+   exactly, port included.
+3. Set four variables before starting:
+
+```bash
+export SMALLCRM_GOOGLE_CLIENT_ID=...apps.googleusercontent.com
+export SMALLCRM_GOOGLE_CLIENT_SECRET=...
+export SMALLCRM_GOOGLE_REDIRECT_URI=http://localhost:8080/api/google/callback
+export SMALLCRM_TOKEN_KEY=$(openssl rand -base64 32)
+```
+
+`SMALLCRM_TOKEN_KEY` encrypts the Google tokens before they are stored, and there is no default:
+without it the integration refuses to keep credentials rather than writing them to the database in
+clear. Losing the key means everybody reconnects — it is not recoverable, and it must not change
+between restarts.
+
+**Google never creates an account here.** An administrator invites somebody as usual, that person
+signs in with the password they were given and connects Google from their own settings. Only then
+does signing in with Google work for them.
+
+**Only labelled contacts are shared.** A shared workspace should not fill up with somebody's
+private address book, so only contacts carrying the Google label named in
+`SMALLCRM_GOOGLE_CONTACT_LABEL` (default `Small CRM`) are synced. Everything else stays in Google.
+
+**Some records are shown but never written back.** Google's model is richer than this one: a
+recurring meeting has a rule this application cannot hold, a person can have six e-mail addresses
+where this has one. Writing such a record back would flatten a standing meeting or delete
+addresses in somebody's own Google account, so those records are pulled in, badged *managed in
+Google*, and edited there rather than here.
+
 ### Packaging it for someone else
 
 ```bash
@@ -193,6 +231,10 @@ Only the first run pays for the downloads; after that they are cached and reused
 | Served over HTTPS | `SMALLCRM_HTTPS` | `false`; set to `true` so the session cookie is marked `Secure` |
 | Behind a TLS reverse proxy | `SMALLCRM_BEHIND_PROXY` | `false`; set to `true` to trust `X-Forwarded-*` |
 | Log file | `SMALLCRM_LOG_FILE` | `./logs/small-crm.log` (production profile only) |
+| Google OAuth client | `SMALLCRM_GOOGLE_CLIENT_ID` / `..._SECRET` | unset; the integration stays off |
+| Google redirect URI | `SMALLCRM_GOOGLE_REDIRECT_URI` | `http://localhost:8080/api/google/callback` |
+| Google token encryption | `SMALLCRM_TOKEN_KEY` | unset; required before Google can be connected |
+| Synced contact label | `SMALLCRM_GOOGLE_CONTACT_LABEL` | `Small CRM` |
 
 Sessions are held server-side; there is no shared secret to configure and nothing an attacker can
 forge from the cookie alone. They idle out after 8 hours and end after 12 regardless.
@@ -236,6 +278,11 @@ baselined at V1 and keeps its data.
   without limit — is never fetched whole. The screens show "51–100 of 812" with the paging
   buttons only when there is more than one page. Fields that point at another record look it up
   as you type instead of loading every contact or company into a dropdown.
+- **Google, optionally.** Sign in with a Google account an administrator already invited, and keep
+  contacts, the calendar and to-dos in step with it both ways. Only contacts you label in Google
+  are shared with the team, and anything Google holds more richly than this application can — a
+  recurring meeting, a person with six addresses — is shown but never written back, so nothing
+  in your Google account is ever quietly flattened.
 - **English and German**, switched at any time from the header without a reload. Dates, times and
   currency follow the choice (`25/07/2026` and `€1,234.50` against `25.7.2026` and `€ 1.234,50`),
   and server-side validation messages come back translated too.

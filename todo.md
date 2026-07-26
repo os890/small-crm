@@ -19,17 +19,26 @@ without it.
   `X-Forwarded-*` when told to (`SMALLCRM_HTTPS`, `SMALLCRM_BEHIND_PROXY`), but ships no TLS
   configuration and no reverse-proxy example of its own.
 
-## Google Calendar synchronisation
+## Google integration
 
-The schema already carries `externalCalendarId`, `externalEventId`, `externalEtag`,
-`lastSyncedAt` and a per-appointment `timeZone`, so appointments created now can be adopted by a
-future sync instead of needing a migration. Still missing:
+Built on the `feat/google-integration` branch: sign-in, and two-way sync of contacts, calendar
+and to-dos. What is still open there:
 
-- OAuth2 consent flow and refresh token storage per user.
-- A scheduled pull, plus push on create, update and delete, reconciled through the etag.
-- Conflict resolution when both sides changed since `lastSyncedAt`.
-- Recurring appointments. The current model has no recurrence rule at all, and Google Calendar
-  is full of them; this is the largest single gap.
+- **Nothing has ever run against Google.** Every test is against a stub built from the published
+  API documentation. The field names, the shape of the sync tokens and the exact error codes are
+  unverified, and the first run with real credentials should be treated as the real test.
+- **No scheduled sync.** There is a "Sync now" button and nothing that runs on its own, so the
+  two sides only agree when somebody asks.
+- **Recurring appointments are read-only.** The model has no recurrence rule, so a series is
+  shown and edited in Google. Giving appointments a rule of their own would make them writable
+  and is the largest remaining piece.
+- **Conflicts are per record, not per field.** Two people editing different fields of the same
+  contact at the same time still loses one of the edits.
+- **One Google account per user, primary calendar and default task list only.** No choice of
+  which calendar or which list.
+- **Contacts synced by two colleagues arrive twice.** Google resource names are per account, so
+  the same person in two address books becomes two records here. Matching on e-mail address on
+  the way in would fix it.
 
 ## Peer-to-peer sync between team members
 

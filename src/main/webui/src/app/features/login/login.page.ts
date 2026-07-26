@@ -17,6 +17,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { Language } from '../../core/i18n/translations';
@@ -91,6 +92,19 @@ import { toProblem } from '../../core/problem';
           {{ busy() ? t('common.loading') : t('login.submit') }}
         </button>
 
+        @if (googleAvailable()) {
+          <p class="faint centre-text">{{ t('login.orPassword') }}</p>
+          <button
+            type="button"
+            class="btn"
+            data-testid="login-google"
+            [disabled]="busy()"
+            (click)="signInWithGoogle()"
+          >
+            {{ t('login.withGoogle') }}
+          </button>
+        }
+
         <p class="faint">{{ t('login.firstStart') }}</p>
       </form>
     </div>
@@ -124,12 +138,38 @@ export class LoginPage {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly api = inject(ApiService);
+
+  /** Whether this installation offers Google at all; asked once, before anybody signs in. */
+  protected readonly googleAvailable = signal(false);
 
   protected username = '';
   protected password = '';
   protected readonly busy = signal(false);
   protected readonly failed = signal(false);
   protected readonly errorText = signal('');
+
+  constructor() {
+    // Whether the button belongs here at all. Answered without a session, and it says only
+    // that the installation is configured — never who has an account.
+    void this.api
+      .googleAvailable()
+      .then((status) => this.googleAvailable.set(status.available))
+      .catch(() => this.googleAvailable.set(false));
+  }
+
+  protected async signInWithGoogle(): Promise<void> {
+    this.busy.set(true);
+    try {
+      const { url } = await this.api.googleSignIn();
+      // A full navigation: the next page is Google's, not one of ours.
+      window.location.href = url;
+    } catch (error) {
+      this.busy.set(false);
+      this.failed.set(true);
+      this.errorText.set(this.i18n.errorMessage(toProblem(error).code, this.t('login.failed')));
+    }
+  }
 
   protected switchLanguage(event: Event): void {
     this.i18n.use((event.target as HTMLSelectElement).value as Language);

@@ -51,6 +51,8 @@ export interface Company {
 
 export interface Contact {
   id?: number;
+  /** Managed in Google: shown here, but this application refuses to change it. */
+  externalReadOnly?: boolean;
   /** Optimistic locking token. Send back what the GET returned. */
   version?: number;
   firstName: string;
@@ -117,6 +119,8 @@ export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
 export interface CrmTask {
   id?: number;
+  /** Managed in Google: shown here, but this application refuses to change it. */
+  externalReadOnly?: boolean;
   /** Optimistic locking token. Send back what the GET returned. */
   version?: number;
   title: string;
@@ -135,6 +139,8 @@ export interface CrmTask {
 
 export interface Appointment {
   id?: number;
+  /** Managed in Google: shown here, but this application refuses to change it. */
+  externalReadOnly?: boolean;
   /** Optimistic locking token. Send back what the GET returned. */
   version?: number;
   title: string;
@@ -164,6 +170,41 @@ export interface Page<T> {
   /** Zero-based index of the page in {@link items}. */
   page: number;
   size: number;
+}
+
+/** How one of the three Google syncs is getting on. */
+export interface GoogleResourceStatus {
+  resource: 'CONTACTS' | 'CALENDAR' | 'TASKS';
+  /** Whether the user granted the scope this one needs; consent is not all-or-nothing. */
+  permitted: boolean;
+  lastOkAt?: string | null;
+  lastRunAt?: string | null;
+  lastError?: string | null;
+  failures: number;
+}
+
+/** Whether the installation offers Google at all, and what this user has connected. */
+export interface GoogleStatus {
+  available: boolean;
+  unavailableReason: string;
+  connected: boolean;
+  email?: string | null;
+  connectedAt?: string | null;
+  resources: GoogleResourceStatus[];
+}
+
+/** What one pass over one resource did. */
+export interface SyncReport {
+  resource: string;
+  pulledIn: number;
+  pulledUpdated: number;
+  pulledDeleted: number;
+  pushedNew: number;
+  pushedUpdated: number;
+  /** Records left alone because Google holds more than this application can. */
+  readOnly: number;
+  skipped: number;
+  error?: string | null;
 }
 
 export interface Dashboard {

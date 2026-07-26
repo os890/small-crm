@@ -68,6 +68,11 @@ export const routes: Routes = [
           import('./features/calendar/calendar.page').then((m) => m.CalendarPage),
       },
       {
+        path: 'settings',
+        loadComponent: () =>
+          import('./features/settings/settings.page').then((m) => m.SettingsPage),
+      },
+      {
         path: 'backups',
         canActivate: [adminGuard],
         loadComponent: () => import('./features/backups/backups.page').then((m) => m.BackupsPage),

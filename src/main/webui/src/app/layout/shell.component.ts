@@ -35,7 +35,8 @@ const NAV: NavItem[] = [
   { path: '/deals', labelKey: 'nav.deals', icon: '💼' },
   { path: '/tasks', labelKey: 'nav.tasks', icon: '✓' },
   { path: '/calendar', labelKey: 'nav.calendar', icon: '📅' },
-  { path: '/users', labelKey: 'nav.users', icon: '⚙', adminOnly: true },
+  { path: '/settings', labelKey: 'nav.settings', icon: '⚙' },
+  { path: '/users', labelKey: 'nav.users', icon: '👥', adminOnly: true },
   { path: '/backups', labelKey: 'nav.backups', icon: '🗄', adminOnly: true },
 ];
 

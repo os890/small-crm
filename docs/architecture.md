@@ -13,6 +13,7 @@ All diagrams are Mermaid and render on GitHub and in any Mermaid-aware viewer.
 - [5. Behaviour](#5-behaviour)
 - [6. Runtime containers](#6-runtime-containers)
 - [7. Deployment](#7-deployment)
+- [8. The optional Google integration](#8-the-optional-google-integration)
 
 ---
 
@@ -745,3 +746,120 @@ What changes between the two is configuration, not code:
 A future Google Calendar synchronisation is the only outbound connection the design anticipates;
 the schema already carries the fields for it (`externalEventId`, `externalEtag`, `lastSyncedAt`)
 so appointments entered today can be adopted without a migration.
+
+---
+
+## 8. The optional Google integration
+
+Off unless configured, and an installation that never configures it carries three empty tables
+and some unused columns. When it is on, each user connects their own Google account and their
+contacts, calendar and to-dos are kept in step with it both ways.
+
+Two rules shape the whole design. **Google links an account, it never creates one** — otherwise
+anybody with a Google account could walk into a database of somebody's customers. And **anything
+Google holds more richly than this model can is shown but never written back** — writing our
+single e-mail field over a person who has six would delete five of them in data this application
+does not own.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant NG as Settings screen
+    participant GR as GoogleResource
+    participant GC as GoogleConnectionService
+    participant G as Google
+    participant DB as H2
+
+    Note over U,NG: already signed in with a password
+    U->>NG: Connect Google
+    NG->>GR: POST /api/google/connect
+    GR->>GC: startLinking(user)
+    GC->>GC: mint a single-use state, remember it for 10 min
+    GC-->>NG: the consent URL
+    NG->>G: browser leaves for Google
+    U->>G: grants, or declines, each scope
+    G->>GR: GET /api/google/callback?code&state
+    GR->>GC: complete(code, state)
+    GC->>GC: state known and unused? otherwise refuse
+    GC->>G: exchange the code
+    G-->>GC: access token, refresh token, id token
+    GC->>GC: read sub and email, refuse if unverified
+    GC->>DB: store the tokens, encrypted with SMALLCRM_TOKEN_KEY
+    GR-->>U: back to /settings?google=connected
+```
+
+### What a sync pass does
+
+Each resource is its own transaction, its own sync token and its own failure, so a calendar
+Google is refusing today does not stop contacts.
+
+```mermaid
+flowchart TB
+    START["Sync now, per resource"] --> SCOPE{"scope granted?"}
+    SCOPE -->|no| DECLINED["report 'not permitted'<br/>— a choice, not a fault"]
+    SCOPE -->|yes| PULL["pull changes since the sync token"]
+    PULL --> EACH{"for each remote record"}
+    EACH -->|"deleted, or unlabelled"| DROP["remove it here"]
+    EACH -->|"unknown here"| CREATE["create it"]
+    EACH -->|"known here"| NEWER{"which side changed last?"}
+    NEWER -->|Google| APPLY["apply Google's version"]
+    NEWER -->|here| LEAVE["leave it for the push"]
+    CREATE --> RICH{"richer than we can hold?"}
+    APPLY --> RICH
+    RICH -->|yes| MARK["mark managed in Google<br/>never pushed, edits refused"]
+    RICH -->|no| OK["fully two-way"]
+    PULL --> PUSH["push local records changed since<br/>they last agreed, skipping read-only ones"]
+    PUSH --> TOKEN["store the new sync token"]
+    TOKEN --> DONE["report counts per resource"]
+```
+
+### What counts as too rich to write back
+
+| Resource | Left read-only when | Because |
+| --- | --- | --- |
+| Calendar | the event recurs, belongs to a series, or is all-day | an Appointment has a start and an end and no rule; a write-back turns a standing weekly meeting into one event |
+| Contacts | more than one e-mail, more than two numbers, more than one organisation | this model holds one of each, and a patch would delete the rest |
+| Tasks | the task has a parent | there are no subtasks here, so a push would promote it to a sibling |
+
+The asymmetry runs the other way too: a pull touches only the fields Google owns, so a to-do's
+priority, contact and deal — none of which Google Tasks can hold — survive a round trip.
+
+### What is stored
+
+```mermaid
+erDiagram
+    app_user ||--o| google_account : "has connected"
+    app_user ||--o{ google_sync_state : "has progress in"
+
+    google_account {
+        bigint user_id PK "shares the user's key"
+        varchar subject UK "Google's stable id, not the e-mail"
+        varchar email
+        varchar refreshToken "AES-GCM, key from SMALLCRM_TOKEN_KEY"
+        varchar accessToken "encrypted, cached until it expires"
+        timestamp accessExpires
+        varchar scopes "what was granted, not what was asked"
+        timestamp connectedAt
+    }
+    google_sync_state {
+        bigint user_id PK
+        varchar resource PK "CONTACTS CALENDAR TASKS"
+        varchar syncToken "opaque; null means a full pass next"
+        timestamp lastOkAt
+        timestamp lastRunAt
+        varchar lastError
+        int failures
+    }
+```
+
+The refresh token is the one thing in this database that is dangerous on its own: a bcrypt hash
+is useless to whoever steals the file, and a refresh token hands out access to somebody's whole
+Google account until it is revoked. It is encrypted, and there is deliberately no default key —
+without `SMALLCRM_TOKEN_KEY` the integration refuses to store credentials rather than writing
+them in clear.
+
+**Nothing here has run against Google.** Every test is against a stub built from the published
+documentation, which covers the flow, the state handling, the merge decisions and the error
+paths, but not whether Google's real responses look like the stub's. The first run with real
+credentials is the real test.

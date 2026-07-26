@@ -24,6 +24,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.os890.smallcrm.domain.AppUser;
@@ -357,6 +358,146 @@ class GoogleSyncTest extends AbstractApiTest {
     task.lastSyncedAt = Instant.now();
     task.persist();
     return task;
+  }
+
+  @Test
+  void a_google_record_with_almost_nothing_on_it_still_arrives_intact() {
+    // Google is happy to hold a person with no name and no anything; this CRM requires two
+    // name halves, so the mapping has to produce something rather than fail the whole pass.
+    GoogleStubResource.stub.onGet(
+        "/v1/people/me/connections",
+        """
+        {"connections":[{
+          "resourceName":"people/c4",
+          "memberships":[{"contactGroupMembership":{"contactGroupResourceName":"%s"}}],
+          "metadata":{"sources":[{"updateTime":"2026-07-01T08:00:00Z"}]}
+        }],"nextSyncToken":"token-1"}
+        """
+            .formatted(LABEL));
+
+    SyncReport report = sync.sync(user, Resource.CONTACTS);
+
+    assertThat(report.pulledIn()).isEqualTo(1);
+    Contact stored = findContact("people/c4");
+    assertThat(stored.firstName).isNotBlank();
+    assertThat(stored.lastName).isNotBlank();
+    assertThat(stored.email).isNull();
+  }
+
+  @Test
+  void an_event_with_no_title_and_no_extras_is_given_a_readable_one() {
+    GoogleStubResource.stub.onGet(
+        "/calendar/v3/calendars/primary/events",
+        """
+        {"items":[{
+          "id":"ev9","status":"confirmed",
+          "start":{"dateTime":"2026-09-01T08:00:00Z"},
+          "end":{"dateTime":"2026-09-01T09:00:00Z"},
+          "updated":"2026-08-01T08:00:00Z"
+        }],"nextSyncToken":"t"}
+        """);
+
+    sync.sync(user, Resource.CALENDAR);
+
+    assertThat(findAppointment("ev9").title).isEqualTo("(no title)");
+  }
+
+  @Test
+  void an_event_whose_times_make_no_sense_is_skipped_rather_than_stored() {
+    GoogleStubResource.stub.onGet(
+        "/calendar/v3/calendars/primary/events",
+        """
+        {"items":[{
+          "id":"ev10","status":"confirmed","summary":"Backwards",
+          "start":{"dateTime":"2026-09-01T10:00:00Z"},
+          "end":{"dateTime":"2026-09-01T09:00:00Z"},
+          "updated":"2026-08-01T08:00:00Z"
+        }],"nextSyncToken":"t"}
+        """);
+
+    SyncReport report = sync.sync(user, Resource.CALENDAR);
+
+    assertThat(report.skipped()).isEqualTo(1);
+    assertThat(findAppointment("ev10")).isNull();
+  }
+
+  @Test
+  void an_appointment_changed_here_is_patched_in_google() {
+    syncedAppointment();
+    GoogleStubResource.stub.on(
+        "/calendar/v3/calendars/primary/events/ev-existing",
+        request -> GoogleStub.Reply.ok("{\"id\":\"ev-existing\",\"etag\":\"e2\"}"));
+
+    SyncReport report = sync.sync(user, Resource.CALENDAR);
+
+    assertThat(report.pushedUpdated()).isEqualTo(1);
+    var patch =
+        GoogleStubResource.stub.requestsTo("/calendar/v3/calendars/primary/events/ev-existing")
+            .getFirst();
+    assertThat(patch.method()).isEqualTo("PATCH");
+    assertThat(patch.bodyHas("Moved here")).isTrue();
+  }
+
+  @Test
+  void a_todo_completed_here_is_pushed_as_completed() {
+    syncedTask();
+    GoogleStubResource.stub.on(
+        "/tasks/v1/lists/@default/tasks/task-existing",
+        request -> GoogleStub.Reply.ok("{\"id\":\"task-existing\",\"etag\":\"e2\"}"));
+
+    SyncReport report = sync.sync(user, Resource.TASKS);
+
+    assertThat(report.pushedUpdated()).isEqualTo(1);
+    var patch =
+        GoogleStubResource.stub.requestsTo("/tasks/v1/lists/@default/tasks/task-existing")
+            .getFirst();
+    assertThat(patch.bodyHas("completed")).isTrue();
+  }
+
+  @Test
+  void a_record_google_will_not_take_does_not_stop_the_rest() {
+    fixtures.createContact("Fine", "Contact", null);
+    fixtures.createContact("Refused", "Contact", null);
+    AtomicInteger calls = new AtomicInteger();
+    GoogleStubResource.stub.on(
+        "/v1/people:createContact",
+        request ->
+            calls.incrementAndGet() == 1
+                ? GoogleStub.Reply.status(400, "{\"error\":{\"message\":\"no\"}}")
+                : GoogleStub.Reply.ok("{\"resourceName\":\"people/ok\",\"etag\":\"e\"}"));
+    GoogleStubResource.stub.on(
+        "/v1/" + LABEL + "/members:modify", request -> GoogleStub.Reply.ok("{}"));
+
+    SyncReport report = sync.sync(user, Resource.CONTACTS);
+
+    assertThat(report.skipped()).isEqualTo(1);
+    assertThat(report.pushedNew()).isEqualTo(1);
+  }
+
+  @Transactional
+  void syncedAppointment() {
+    Appointment appointment = new Appointment();
+    appointment.title = "Moved here";
+    appointment.startsAt = Instant.parse("2026-09-01T08:00:00Z");
+    appointment.endsAt = Instant.parse("2026-09-01T09:00:00Z");
+    appointment.timeZone = "UTC";
+    appointment.externalEventId = "ev-existing";
+    appointment.externalCalendarId = "primary";
+    // Older than the record, so the push path sees a local change.
+    appointment.lastSyncedAt = Instant.parse("2020-01-01T00:00:00Z");
+    appointment.persist();
+  }
+
+  @Transactional
+  void syncedTask() {
+    CrmTask task = new CrmTask();
+    task.title = "Send the offer";
+    task.done = true;
+    task.completedAt = Instant.parse("2026-07-20T08:00:00Z");
+    task.externalId = "task-existing";
+    task.externalListId = "@default";
+    task.lastSyncedAt = Instant.parse("2020-01-01T00:00:00Z");
+    task.persist();
   }
 
   // ------------------------------------------------------------ sync state
