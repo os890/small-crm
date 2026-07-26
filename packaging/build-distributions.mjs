@@ -118,7 +118,16 @@ http://localhost:8080 once the application is ready.
 
 The very first start prints a password in this window, under a heading that
 reads "Small CRM first start". Sign in as "admin" with it and choose your own
-password when asked. That password is shown once and never again.
+password when asked.
+
+If you close the window before reading it, it is also in the log:
+
+    logs/small-crm.log
+
+Look for the line beginning "password:". It stays in that file in plain text
+until the log rotates, so once you have signed in and chosen your own password,
+delete the log if other people can read this machine. There is no other copy of
+it anywhere.
 
 To stop it, close the window${windows ? "" : " or press Ctrl+C"}.
 

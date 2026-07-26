@@ -62,9 +62,23 @@ the console**, in a block that is hard to miss:
 ```
 
 Open <http://localhost:8080>, sign in with it, and choose your own password when prompted. There
-is no default password to look up, and none is written anywhere else. If you would rather set the
-first password yourself, put it in `SMALLCRM_BOOTSTRAP_ADMIN_PASSWORD` before the first start; it
-still has to be changed at the first sign-in.
+is no default password to look up: each installation generates its own.
+
+**If you closed the window before reading it**, the same block is in the log — the start script
+logs it as well as printing it:
+
+```bash
+grep -A4 'password:' logs/small-crm.log
+```
+
+It stays there in clear text until the log rotates out, so on a machine other people can read,
+delete that log once you have signed in and chosen your own password. There is no other copy: if
+both the window and the log are gone, the only way back into a running installation is to start
+over from an empty `data/` folder.
+
+If you would rather set the first password yourself, put it in
+`SMALLCRM_BOOTSTRAP_ADMIN_PASSWORD` before the first start; it still has to be changed at the
+first sign-in.
 
 The database lives in `./data/smallcrm.mv.db`. Point `SMALLCRM_DATA_DIR` somewhere else to move
 it.
