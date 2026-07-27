@@ -825,6 +825,31 @@ flowchart TB
 The asymmetry runs the other way too: a pull touches only the fields Google owns, so a to-do's
 priority, contact and deal — none of which Google Tasks can hold — survive a round trip.
 
+### When it runs
+
+Every `SMALLCRM_GOOGLE_SYNC_INTERVAL` (15 minutes by default), for every connected account, plus
+whenever somebody presses *Sync now*. Setting the interval to `off` leaves the button as the only
+way in, which is what somebody watching a two-way sync touch their real data for the first time
+should use.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle: application started, 2 minute grace
+    Idle --> Running: the interval elapses
+    Idle --> Running: somebody presses Sync now
+    Running --> Idle: pass finished
+    Running --> Skipped: the interval elapses while still running
+    Skipped --> Idle: no second pass is queued
+    Running --> BackingOff: three failures in a row on one resource
+    BackingOff --> Running: an hour later, or Sync now regardless
+```
+
+Two of those transitions are the point. A pass that outlasts its own interval is **skipped**
+rather than queued, because stacking passes on a slow Google makes both slower. And a resource
+that keeps failing **backs off for an hour**, because retrying a broken call every quarter of an
+hour for ever drains the quota and fills the log with one line — but the button ignores the
+backoff, so somebody who has just fixed their Google settings is not told to wait.
+
 ### What is stored
 
 ```mermaid

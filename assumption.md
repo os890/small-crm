@@ -23,9 +23,10 @@ reversible; where a change would ripple, that is noted.
 6. **New accounts always start with a forced password change.** Both the bootstrap administrator
    and every account an administrator adds get `mustChangePassword`, so a password typed by
    somebody else never becomes permanent.
-7. **A deactivated account is blocked at the API, not at login.** The login itself still succeeds
-   and issues a cookie, but every API call answers `403 ACCOUNT_DEACTIVATED`. Rejecting during
-   authentication is cleaner and is listed in `todo.md`.
+7. **A deactivated account is refused at login, and its open sessions end at once.** It gets the
+   same answer as a wrong password, so deactivation cannot be used to discover who has an
+   account. This replaces an earlier arrangement where the login succeeded and every subsequent
+   call answered `403`.
 8. **The last active administrator is protected.** Demoting, deactivating or deleting them is
    refused, and nobody can delete or deactivate their own account. For a one-person business a
    lockout would mean losing access to their own customer data.
@@ -36,11 +37,13 @@ reversible; where a change would ripple, that is noted.
     the application renders itself shows `26.7.2026`. That is how browsers work with
     `<input type="date">`, and matching the system convention is arguably the right behaviour;
     replacing them with custom pickers would be the alternative.
-11. **A backup holds business data only, never accounts.** Contacts, companies, deals,
+11. **The XML backup holds business data only, never accounts.** Contacts, companies, deals,
     activities, to-dos and appointments travel; user names and password hashes do not. A backup
     can therefore be handed to an accountant or moved between machines without leaking
     credentials. The cost is that a restore re-links each record to its owner by user name and
-    leaves the owner empty where no such account exists on the target installation.
+    leaves the owner empty where no such account exists on the target installation. A full
+    database snapshot is written alongside it for the disaster case, and that one *does* contain
+    accounts — it is the copy to keep and not the copy to send.
 12. **A change schedules a backup rather than writing one.** Changes arriving inside a 30 second
     window (`smallcrm.backup.coalesce-seconds`) end up in one file, so editing five fields in a
     row produces one backup instead of five and an idle installation produces none. At most a
@@ -70,9 +73,12 @@ reversible; where a change would ripple, that is noted.
 20. **Server-side validation messages follow `Accept-Language`.** The frontend sends the chosen
     language on every request, so Hibernate Validator answers in it. `quarkus.default-locale=en`
     pins the fallback so it does not depend on the locale of the host.
-21. **Form authentication with a session cookie**, configured with empty login/error/landing
-    pages so it answers with status codes instead of redirects, which is what a single page
-    application needs. `POST /api/auth/login` takes a form encoded body, not JSON.
+21. **The application's own session mechanism, not Quarkus form authentication.** A random token
+    in an `HttpOnly` cookie, with the session itself in the database and only its SHA-256 stored.
+    Quarkus' built-in cookie is self-contained, which would mean sessions that cannot be ended
+    server-side, a password change that does not invalidate them, and a configured key that
+    anybody holding could use to mint a cookie for any account. `POST /api/auth/login` still
+    takes a form encoded body, not JSON.
 22. **Flyway owns the schema, Hibernate only validates it.** Migrations live in
     `src/main/resources/db/migration` and run at startup; `schema-management.strategy=validate`
     then fails fast if the entities and the schema have drifted apart. An installation created
@@ -81,12 +87,17 @@ reversible; where a change would ripple, that is noted.
     `@Enumerated(STRING)` to an `ENUM` listing every constant, which ties the schema to H2 and
     turns "add a deal stage" into a migration. `@JdbcTypeCode(SqlTypes.VARCHAR)` pins them to
     text; migration V2 converts installations built the old way.
-24. **`Deal.value` is mapped to the column `amount`.** `VALUE` is a reserved word in H2 and the
-    `CREATE TABLE` fails on it. The API field is called `amount` for the same reason.
+24. **The money on a deal is called `amount`, not `value`.** `VALUE` is a reserved word in H2 and
+    the `CREATE TABLE` fails on it, so the column, the entity field and the API field all say
+    `amount`.
 25. **Panache active record with public fields.** The idiomatic Quarkus style; it keeps the
     entities short and there is no behaviour to hide behind accessors.
-26. **Lists are returned unpaged.** A self-employed person has hundreds, not millions, of
-    contacts. Pagination is in `todo.md`.
+26. **Every list endpoint is paged, 50 by default and 200 at most**, with the total in
+    `X-Total-Count`. A self-employed person has hundreds of contacts, but the activity log gains
+    a row for every call and e-mail ever logged and is never pruned, so no request may ask for
+    a whole table. The deal board is the one screen that is not paged — splitting a pipeline
+    across pages would leave columns looking empty when they are not — so it fetches the
+    maximum and says when there is more.
 27. **Checkstyle runs a Google Java Style subset** (`config/checkstyle/checkstyle.xml`): the
     mechanically checkable formatting and naming rules, without the Javadoc completeness checks.
     Requiring Javadoc on everything produces ceremony, not explanation; the rules that police
@@ -140,6 +151,22 @@ to somebody's real Google data, so none of them is an implementation detail.
   Google's token endpoint rather than through the browser, which is the case OpenID Connect
   explicitly allows server validation to stand in for. Verifying would mean fetching and rotating
   Google's JWKS to prove what the transport already proved.
+- **The sync runs on a timer whose interval is configuration, with `off` as a value.** How often
+  is a matter of taste and of how much of somebody's Google quota they want spent, so it is not a
+  constant. `off` matters as much as the number: while somebody is still watching what a two-way
+  sync does to their real data, the button should be the only thing that moves it.
+- **A pass that outlasts its interval is skipped, not queued.** Stacking a second pass on a slow
+  one makes both slower and can have the two halves of one account disagreeing with each other.
+- **A resource that fails three times running is left alone for an hour.** A scheduled job that
+  retries a broken call every quarter of an hour for ever is rude to Google and useless to the
+  user: the quota drains and the log fills with the same line. The backoff deliberately does not
+  apply to the Sync now button, because somebody who has just fixed their Google settings should
+  not be told to wait.
+- **Scheduling uses the Quarkus scheduler rather than the bare executor the backups use.** The
+  interval has to come from configuration, `off` has to be one of its values, and overlapping
+  passes have to be skipped — all of which the extension already does. The two mechanisms
+  sitting side by side is a small inconsistency accepted on purpose rather than rewriting
+  working backup code.
 - **Consent state lives in memory.** It matters for the minutes a browser is away at Google, and a
   restart mid-consent costs one click; a table for it would hold nothing but rubbish within the
   hour.

@@ -15,6 +15,10 @@ without it.
   says nothing. "Last successful backup" belongs on the Backup screen, or in the health check.
 - **Audit trail.** Records carry `createdAt`, `updatedAt` and an owner, but nothing records who
   changed what. For a shared workspace that is worth having.
+- **`SMALLCRM_TOKEN_KEY` has no rotation story.** Once Google accounts are connected, changing
+  the key or losing it means every user reconnects, and nothing warns anybody before that
+  happens. Re-encrypting the stored tokens under a new key would be a few lines and is not
+  written.
 - **HTTPS is the operator's job.** The application marks its cookie `Secure` and trusts
   `X-Forwarded-*` when told to (`SMALLCRM_HTTPS`, `SMALLCRM_BEHIND_PROXY`), but ships no TLS
   configuration and no reverse-proxy example of its own.
@@ -26,9 +30,13 @@ and to-dos. What is still open there:
 
 - **Nothing has ever run against Google.** Every test is against a stub built from the published
   API documentation. The field names, the shape of the sync tokens and the exact error codes are
-  unverified, and the first run with real credentials should be treated as the real test.
-- **No scheduled sync.** There is a "Sync now" button and nothing that runs on its own, so the
-  two sides only agree when somebody asks.
+  unverified, and the first run with real credentials should be treated as the real test. This
+  is the one item here that could turn out to be more than a small fix.
+- **The scheduled sync is per installation, not per user.** One interval covers everybody, and a
+  user who wants their own cadence cannot have one.
+- **A failing resource backs off for an hour and then tries again for ever.** It never gives up
+  and never tells anybody beyond the settings screen, so a connection somebody revoked at Google
+  keeps being retried until they notice.
 - **Recurring appointments are read-only.** The model has no recurrence rule, so a series is
   shown and edited in Google. Giving appointments a rule of their own would make them writable
   and is the largest remaining piece.
@@ -154,3 +162,7 @@ suite has never run two instances at once.
 - No load or volume testing; behaviour with 10,000 contacts is unknown.
 - The Playwright suite shares one database and runs single-worker. Per-test isolation would let
   it run in parallel and would remove the need for unique names.
+- Nothing exercises the Google integration end to end through a browser. The backend is covered
+  against a stub; the settings screen and the sign-in button are covered by unit tests only,
+  because a Playwright run would need a Google account or a stub the packaged application could
+  be pointed at.

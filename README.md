@@ -152,6 +152,13 @@ does signing in with Google work for them.
 private address book, so only contacts carrying the Google label named in
 `SMALLCRM_GOOGLE_CONTACT_LABEL` (default `Small CRM`) are synced. Everything else stays in Google.
 
+**Syncing happens on a timer.** Every connected account is reconciled every
+`SMALLCRM_GOOGLE_SYNC_INTERVAL` (15 minutes by default); `off` leaves the *Sync now* button as the
+only way, which is the sensible setting while you are still watching what a two-way sync does to
+your real data. A pass that outlasts its own interval is skipped rather than overlapped, and a
+resource that fails three times running is left alone for an hour — though pressing the button
+always tries immediately.
+
 **Some records are shown but never written back.** Google's model is richer than this one: a
 recurring meeting has a rule this application cannot hold, a person can have six e-mail addresses
 where this has one. Writing such a record back would flatten a standing meeting or delete
@@ -235,6 +242,7 @@ Only the first run pays for the downloads; after that they are cached and reused
 | Google redirect URI | `SMALLCRM_GOOGLE_REDIRECT_URI` | `http://localhost:8080/api/google/callback` |
 | Google token encryption | `SMALLCRM_TOKEN_KEY` | unset; required before Google can be connected |
 | Synced contact label | `SMALLCRM_GOOGLE_CONTACT_LABEL` | `Small CRM` |
+| How often Google is synced | `SMALLCRM_GOOGLE_SYNC_INTERVAL` | `15m`; any duration, or `off` for the button only |
 
 Sessions are held server-side; there is no shared secret to configure and nothing an attacker can
 forge from the cookie alone. They idle out after 8 hours and end after 12 regardless.

@@ -134,6 +134,16 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-health</artifactId>
     </dependency>
+    <!--
+      Runs the Google sync on a timer. Used rather than another bare ScheduledExecutorService
+      because the interval has to come from configuration, "off" has to be one of its values,
+      and a pass that outlives its own interval must be skipped rather than overlapped — all of
+      which this extension already does correctly.
+    -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-scheduler</artifactId>
+    </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-openapi</artifactId>
