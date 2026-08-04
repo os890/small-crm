@@ -1,0 +1,9 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant ApiExceptionMappers
+    Note over Caller,ApiExceptionMappers: 2026-08-04 21:52:17.303 - 21:52:17.303<br/>0.12 ms | thread executor-thread-1
+    Caller->>ApiExceptionMappers: handleBusinessRule(BusinessRuleException)
+    activate ApiExceptionMappers
+    ApiExceptionMappers-->>Caller: Response [0.12 ms]
+    deactivate ApiExceptionMappers

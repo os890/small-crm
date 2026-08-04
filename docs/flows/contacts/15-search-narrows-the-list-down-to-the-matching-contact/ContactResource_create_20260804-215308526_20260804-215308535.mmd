@@ -1,0 +1,24 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant ContactResource
+    participant ContactService
+    participant ReferenceResolver
+    participant CurrentUser
+    Note over Caller,CurrentUser: 2026-08-04 21:53:08.526 - 21:53:08.535<br/>8.67 ms | thread executor-thread-3
+    Caller->>ContactResource: create(ContactDto)
+    activate ContactResource
+        ContactResource->>ContactService: create(ContactDto)
+        activate ContactService
+            ContactService->>ReferenceResolver: company(Long)
+            activate ReferenceResolver
+            ReferenceResolver-->>ContactService: Company [0.00 ms]
+            deactivate ReferenceResolver
+            ContactService->>CurrentUser: find()
+            activate CurrentUser
+            CurrentUser-->>ContactService: Optional [0.63 ms]
+            deactivate CurrentUser
+        ContactService-->>ContactResource: ContactDto [4.60 ms]
+        deactivate ContactService
+    ContactResource-->>Caller: Response [8.67 ms]
+    deactivate ContactResource

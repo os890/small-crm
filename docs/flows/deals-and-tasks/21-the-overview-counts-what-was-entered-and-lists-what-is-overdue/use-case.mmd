@@ -1,0 +1,544 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant AuthResource
+    participant LoginService
+    participant SessionService
+    participant SessionCookie
+    participant UserService
+    participant CurrentUser
+    participant DashboardResource
+    participant DashboardService
+    participant CrmTaskService
+    participant AppointmentService
+    participant InteractionService
+    participant DealResource
+    participant DealService
+    participant ReferenceResolver
+    participant AutoBackupTrigger
+    participant ApiExceptionMappers
+    participant CrmTaskResource
+    rect rgb(244, 244, 244)
+        Note over Caller,SessionCookie: AuthResource.login — 271.5 ms | thread executor-thread-1
+        Caller->>AuthResource: login(String, String)
+        activate AuthResource
+            AuthResource->>LoginService: attempt(String, String)
+            activate LoginService
+            LoginService-->>AuthResource: LoginService.Attempt [252.8 ms]
+            deactivate LoginService
+            AuthResource->>SessionService: issue(AppUser)
+            activate SessionService
+                SessionService->>SessionService: purgeExpired()
+                activate SessionService
+                SessionService-->>SessionService: long [10.7 ms]
+                deactivate SessionService
+            SessionService-->>AuthResource: SessionService.IssuedSession [12.7 ms]
+            deactivate SessionService
+            AuthResource->>SessionCookie: write(RoutingContext, String, long)
+            activate SessionCookie
+            SessionCookie-->>AuthResource: void [0.74 ms]
+            deactivate SessionCookie
+        AuthResource-->>Caller: Response [271.5 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.68 ms | thread executor-thread-1
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.24 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.30 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.36 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.68 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,SessionCookie: AuthResource.changePassword — 713.8 ms | thread executor-thread-1
+        Caller->>AuthResource: changePassword(ChangePasswordRequest)
+        activate AuthResource
+            AuthResource->>UserService: changeOwnPassword(ChangePasswordRequest)
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.83 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.84 ms]
+                deactivate CurrentUser
+                UserService->>SessionService: revokeAllFor(AppUser)
+                activate SessionService
+                SessionService-->>UserService: long [2.36 ms]
+                deactivate SessionService
+            UserService-->>AuthResource: UserDto [704.5 ms]
+            deactivate UserService
+            AuthResource->>UserService: currentAccount()
+            activate UserService
+                UserService->>CurrentUser: find()
+                activate CurrentUser
+                CurrentUser-->>UserService: Optional [0.33 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: Optional [0.35 ms]
+            deactivate UserService
+            AuthResource->>SessionService: issue(AppUser)
+            activate SessionService
+                SessionService->>SessionService: purgeExpired()
+                activate SessionService
+                SessionService-->>SessionService: long [0.51 ms]
+                deactivate SessionService
+            SessionService-->>AuthResource: SessionService.IssuedSession [0.72 ms]
+            deactivate SessionService
+            AuthResource->>SessionCookie: write(RoutingContext, String, long)
+            activate SessionCookie
+            SessionCookie-->>AuthResource: void [0.03 ms]
+            deactivate SessionCookie
+        AuthResource-->>Caller: UserDto [713.8 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,InteractionService: DashboardResource.summary — 86.4 ms | thread executor-thread-2
+        Caller->>DashboardResource: summary()
+        activate DashboardResource
+            DashboardResource->>DashboardService: summary()
+            activate DashboardService
+                DashboardService->>CrmTaskService: overdue()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [3.91 ms]
+                deactivate CrmTaskService
+                DashboardService->>CrmTaskService: dueToday()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [2.08 ms]
+                deactivate CrmTaskService
+                DashboardService->>AppointmentService: upcoming(int)
+                activate AppointmentService
+                AppointmentService-->>DashboardService: List [2.72 ms]
+                deactivate AppointmentService
+                DashboardService->>InteractionService: recent(int)
+                activate InteractionService
+                InteractionService-->>DashboardService: List [1.39 ms]
+                deactivate InteractionService
+            DashboardService-->>DashboardResource: DashboardDto [86.1 ms]
+            deactivate DashboardService
+        DashboardResource-->>Caller: DashboardDto [86.4 ms]
+        deactivate DashboardResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.25 ms | thread executor-thread-2
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.22 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.23 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.25 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.25 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,DealService: DealResource.list — 11.4 ms | thread executor-thread-3
+        Caller->>DealResource: list(DealStage, boolean, Long, Integer, Integer)
+        activate DealResource
+            DealResource->>DealService: list(DealStage, boolean, Long, PageRequest)
+            activate DealService
+            DealService-->>DealResource: Paged [11.0 ms]
+            deactivate DealService
+        DealResource-->>Caller: Response [11.4 ms]
+        deactivate DealResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: DealResource.create — 3.54 ms | thread executor-thread-3
+        Caller->>DealResource: create(DealDto)
+        activate DealResource
+            DealResource->>DealService: create(DealDto)
+            activate DealService
+                DealService->>ReferenceResolver: contact(Long)
+                activate ReferenceResolver
+                ReferenceResolver-->>DealService: Contact [0.00 ms]
+                deactivate ReferenceResolver
+                DealService->>ReferenceResolver: company(Long)
+                activate ReferenceResolver
+                ReferenceResolver-->>DealService: Company [0.00 ms]
+                deactivate ReferenceResolver
+                DealService->>CurrentUser: find()
+                activate CurrentUser
+                CurrentUser-->>DealService: Optional [0.65 ms]
+                deactivate CurrentUser
+            DealService-->>DealResource: DealDto [2.09 ms]
+            deactivate DealService
+        DealResource-->>Caller: Response [3.54 ms]
+        deactivate DealResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,AutoBackupTrigger: AutoBackupTrigger.dataChanged — 0.20 ms | thread executor-thread-3
+        Caller->>AutoBackupTrigger: dataChanged()
+        activate AutoBackupTrigger
+        AutoBackupTrigger-->>Caller: void [0.20 ms]
+        deactivate AutoBackupTrigger
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,DealService: DealResource.list — 1.48 ms | thread executor-thread-3
+        Caller->>DealResource: list(DealStage, boolean, Long, Integer, Integer)
+        activate DealResource
+            DealResource->>DealService: list(DealStage, boolean, Long, PageRequest)
+            activate DealService
+            DealService-->>DealResource: Paged [1.44 ms]
+            deactivate DealService
+        DealResource-->>Caller: Response [1.48 ms]
+        deactivate DealResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,DealService: DealResource.changeStage — 1.50 ms | thread executor-thread-3
+        Caller->>DealResource: changeStage(Long, DealStage)
+        activate DealResource
+            DealResource->>DealService: changeStage(Long, DealStage)
+            activate DealService
+            DealService-->>DealResource: DealDto [0.69 ms]
+            deactivate DealService
+        DealResource-->>Caller: DealDto [1.50 ms]
+        deactivate DealResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,AutoBackupTrigger: AutoBackupTrigger.dataChanged — 0.01 ms | thread executor-thread-3
+        Caller->>AutoBackupTrigger: dataChanged()
+        activate AutoBackupTrigger
+        AutoBackupTrigger-->>Caller: void [0.01 ms]
+        deactivate AutoBackupTrigger
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,DealService: DealResource.list — 1.22 ms | thread executor-thread-3
+        Caller->>DealResource: list(DealStage, boolean, Long, Integer, Integer)
+        activate DealResource
+            DealResource->>DealService: list(DealStage, boolean, Long, PageRequest)
+            activate DealService
+            DealService-->>DealResource: Paged [1.20 ms]
+            deactivate DealService
+        DealResource-->>Caller: Response [1.22 ms]
+        deactivate DealResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,DealService: DealResource.changeStage — 1.15 ms | thread executor-thread-3
+        Caller->>DealResource: changeStage(Long, DealStage)
+        activate DealResource
+            DealResource->>DealService: changeStage(Long, DealStage)
+            activate DealService
+            DealService-->>DealResource: DealDto [0.45 ms]
+            deactivate DealService
+        DealResource-->>Caller: DealDto [1.15 ms]
+        deactivate DealResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,AutoBackupTrigger: AutoBackupTrigger.dataChanged — 0.01 ms | thread executor-thread-3
+        Caller->>AutoBackupTrigger: dataChanged()
+        activate AutoBackupTrigger
+        AutoBackupTrigger-->>Caller: void [0.01 ms]
+        deactivate AutoBackupTrigger
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,DealService: DealResource.list — 1.44 ms | thread executor-thread-3
+        Caller->>DealResource: list(DealStage, boolean, Long, Integer, Integer)
+        activate DealResource
+            DealResource->>DealService: list(DealStage, boolean, Long, PageRequest)
+            activate DealService
+            DealService-->>DealResource: Paged [1.41 ms]
+            deactivate DealService
+        DealResource-->>Caller: Response [1.44 ms]
+        deactivate DealResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,DealService: DealResource.list — 2.15 ms | thread executor-thread-3
+        Caller->>DealResource: list(DealStage, boolean, Long, Integer, Integer)
+        activate DealResource
+            DealResource->>DealService: list(DealStage, boolean, Long, PageRequest)
+            activate DealService
+            DealService-->>DealResource: Paged [2.12 ms]
+            deactivate DealService
+        DealResource-->>Caller: Response [2.15 ms]
+        deactivate DealResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.27 ms | thread executor-thread-3
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.24 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.24 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.26 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.27 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,DealService: DealResource.list — 1.53 ms | thread executor-thread-4
+        Caller->>DealResource: list(DealStage, boolean, Long, Integer, Integer)
+        activate DealResource
+            DealResource->>DealService: list(DealStage, boolean, Long, PageRequest)
+            activate DealService
+            DealService-->>DealResource: Paged [1.49 ms]
+            deactivate DealService
+        DealResource-->>Caller: Response [1.53 ms]
+        deactivate DealResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,DealResource: DealResource.create — 6.98 ms | thread executor-thread-4
+        Caller->>DealResource: create(DealDto)
+        activate DealResource
+        DealResource--xCaller: throws ResteasyReactiveViolationException [6.98 ms]
+        deactivate DealResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,ApiExceptionMappers: ApiExceptionMappers.handleConstraintViolation — 0.11 ms | thread executor-thread-4
+        Caller->>ApiExceptionMappers: handleConstraintViolation(ConstraintViolationException)
+        activate ApiExceptionMappers
+        ApiExceptionMappers-->>Caller: Response [0.11 ms]
+        deactivate ApiExceptionMappers
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.30 ms | thread executor-thread-2
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.25 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.25 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.27 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.30 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CrmTaskService: CrmTaskResource.list — 2.22 ms | thread executor-thread-5
+        Caller->>CrmTaskResource: list(boolean, Long, Long, Integer, Integer)
+        activate CrmTaskResource
+            CrmTaskResource->>CrmTaskService: list(boolean, Long, Long, PageRequest)
+            activate CrmTaskService
+            CrmTaskService-->>CrmTaskResource: Paged [2.18 ms]
+            deactivate CrmTaskService
+        CrmTaskResource-->>Caller: Response [2.22 ms]
+        deactivate CrmTaskResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: CrmTaskResource.create — 2.31 ms | thread executor-thread-5
+        Caller->>CrmTaskResource: create(CrmTaskDto)
+        activate CrmTaskResource
+            CrmTaskResource->>CrmTaskService: create(CrmTaskDto)
+            activate CrmTaskService
+                CrmTaskService->>ReferenceResolver: contact(Long)
+                activate ReferenceResolver
+                ReferenceResolver-->>CrmTaskService: Contact [0.00 ms]
+                deactivate ReferenceResolver
+                CrmTaskService->>ReferenceResolver: deal(Long)
+                activate ReferenceResolver
+                ReferenceResolver-->>CrmTaskService: Deal [0.00 ms]
+                deactivate ReferenceResolver
+                CrmTaskService->>CurrentUser: find()
+                activate CurrentUser
+                CurrentUser-->>CrmTaskService: Optional [0.61 ms]
+                deactivate CurrentUser
+            CrmTaskService-->>CrmTaskResource: CrmTaskDto [1.57 ms]
+            deactivate CrmTaskService
+        CrmTaskResource-->>Caller: Response [2.31 ms]
+        deactivate CrmTaskResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,AutoBackupTrigger: AutoBackupTrigger.dataChanged — 0.01 ms | thread executor-thread-5
+        Caller->>AutoBackupTrigger: dataChanged()
+        activate AutoBackupTrigger
+        AutoBackupTrigger-->>Caller: void [0.01 ms]
+        deactivate AutoBackupTrigger
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CrmTaskService: CrmTaskResource.list — 0.80 ms | thread executor-thread-5
+        Caller->>CrmTaskResource: list(boolean, Long, Long, Integer, Integer)
+        activate CrmTaskResource
+            CrmTaskResource->>CrmTaskService: list(boolean, Long, Long, PageRequest)
+            activate CrmTaskService
+            CrmTaskService-->>CrmTaskResource: Paged [0.77 ms]
+            deactivate CrmTaskService
+        CrmTaskResource-->>Caller: Response [0.80 ms]
+        deactivate CrmTaskResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CrmTaskService: CrmTaskResource.setDone — 1.47 ms | thread executor-thread-5
+        Caller->>CrmTaskResource: setDone(Long, boolean)
+        activate CrmTaskResource
+            CrmTaskResource->>CrmTaskService: setDone(Long, boolean)
+            activate CrmTaskService
+            CrmTaskService-->>CrmTaskResource: CrmTaskDto [0.69 ms]
+            deactivate CrmTaskService
+        CrmTaskResource-->>Caller: CrmTaskDto [1.47 ms]
+        deactivate CrmTaskResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,AutoBackupTrigger: AutoBackupTrigger.dataChanged — 0.01 ms | thread executor-thread-5
+        Caller->>AutoBackupTrigger: dataChanged()
+        activate AutoBackupTrigger
+        AutoBackupTrigger-->>Caller: void [0.01 ms]
+        deactivate AutoBackupTrigger
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CrmTaskService: CrmTaskResource.list — 0.63 ms | thread executor-thread-5
+        Caller->>CrmTaskResource: list(boolean, Long, Long, Integer, Integer)
+        activate CrmTaskResource
+            CrmTaskResource->>CrmTaskService: list(boolean, Long, Long, PageRequest)
+            activate CrmTaskService
+            CrmTaskService-->>CrmTaskResource: Paged [0.60 ms]
+            deactivate CrmTaskService
+        CrmTaskResource-->>Caller: Response [0.63 ms]
+        deactivate CrmTaskResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CrmTaskService: CrmTaskResource.list — 1.88 ms | thread executor-thread-5
+        Caller->>CrmTaskResource: list(boolean, Long, Long, Integer, Integer)
+        activate CrmTaskResource
+            CrmTaskResource->>CrmTaskService: list(boolean, Long, Long, PageRequest)
+            activate CrmTaskService
+            CrmTaskService-->>CrmTaskResource: Paged [1.84 ms]
+            deactivate CrmTaskService
+        CrmTaskResource-->>Caller: Response [1.88 ms]
+        deactivate CrmTaskResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.25 ms | thread executor-thread-5
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.22 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.22 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.24 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.25 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CrmTaskService: CrmTaskResource.list — 0.78 ms | thread executor-thread-4
+        Caller->>CrmTaskResource: list(boolean, Long, Long, Integer, Integer)
+        activate CrmTaskResource
+            CrmTaskResource->>CrmTaskService: list(boolean, Long, Long, PageRequest)
+            activate CrmTaskService
+            CrmTaskService-->>CrmTaskResource: Paged [0.75 ms]
+            deactivate CrmTaskService
+        CrmTaskResource-->>Caller: Response [0.78 ms]
+        deactivate CrmTaskResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: CrmTaskResource.create — 1.23 ms | thread executor-thread-4
+        Caller->>CrmTaskResource: create(CrmTaskDto)
+        activate CrmTaskResource
+            CrmTaskResource->>CrmTaskService: create(CrmTaskDto)
+            activate CrmTaskService
+                CrmTaskService->>ReferenceResolver: contact(Long)
+                activate ReferenceResolver
+                ReferenceResolver-->>CrmTaskService: Contact [0.00 ms]
+                deactivate ReferenceResolver
+                CrmTaskService->>ReferenceResolver: deal(Long)
+                activate ReferenceResolver
+                ReferenceResolver-->>CrmTaskService: Deal [0.00 ms]
+                deactivate ReferenceResolver
+                CrmTaskService->>CurrentUser: find()
+                activate CurrentUser
+                CurrentUser-->>CrmTaskService: Optional [0.27 ms]
+                deactivate CurrentUser
+            CrmTaskService-->>CrmTaskResource: CrmTaskDto [0.86 ms]
+            deactivate CrmTaskService
+        CrmTaskResource-->>Caller: Response [1.23 ms]
+        deactivate CrmTaskResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,AutoBackupTrigger: AutoBackupTrigger.dataChanged — 0.00 ms | thread executor-thread-4
+        Caller->>AutoBackupTrigger: dataChanged()
+        activate AutoBackupTrigger
+        AutoBackupTrigger-->>Caller: void [0.00 ms]
+        deactivate AutoBackupTrigger
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CrmTaskService: CrmTaskResource.list — 0.76 ms | thread executor-thread-4
+        Caller->>CrmTaskResource: list(boolean, Long, Long, Integer, Integer)
+        activate CrmTaskResource
+            CrmTaskResource->>CrmTaskService: list(boolean, Long, Long, PageRequest)
+            activate CrmTaskService
+            CrmTaskService-->>CrmTaskResource: Paged [0.74 ms]
+            deactivate CrmTaskService
+        CrmTaskResource-->>Caller: Response [0.76 ms]
+        deactivate CrmTaskResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.16 ms | thread executor-thread-4
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.14 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.15 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.16 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.16 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,InteractionService: DashboardResource.summary — 3.63 ms | thread executor-thread-4
+        Caller->>DashboardResource: summary()
+        activate DashboardResource
+            DashboardResource->>DashboardService: summary()
+            activate DashboardService
+                DashboardService->>CrmTaskService: overdue()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [0.50 ms]
+                deactivate CrmTaskService
+                DashboardService->>CrmTaskService: dueToday()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [0.26 ms]
+                deactivate CrmTaskService
+                DashboardService->>AppointmentService: upcoming(int)
+                activate AppointmentService
+                AppointmentService-->>DashboardService: List [0.25 ms]
+                deactivate AppointmentService
+                DashboardService->>InteractionService: recent(int)
+                activate InteractionService
+                InteractionService-->>DashboardService: List [0.27 ms]
+                deactivate InteractionService
+            DashboardService-->>DashboardResource: DashboardDto [3.63 ms]
+            deactivate DashboardService
+        DashboardResource-->>Caller: DashboardDto [3.63 ms]
+        deactivate DashboardResource
+    end

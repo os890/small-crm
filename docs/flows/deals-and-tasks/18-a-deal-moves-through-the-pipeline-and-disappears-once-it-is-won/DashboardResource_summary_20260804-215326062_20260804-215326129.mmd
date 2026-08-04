@@ -1,0 +1,33 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant DashboardResource
+    participant DashboardService
+    participant CrmTaskService
+    participant AppointmentService
+    participant InteractionService
+    Note over Caller,InteractionService: 2026-08-04 21:53:26.062 - 21:53:26.129<br/>66.8 ms | thread executor-thread-1
+    Caller->>DashboardResource: summary()
+    activate DashboardResource
+        DashboardResource->>DashboardService: summary()
+        activate DashboardService
+            DashboardService->>CrmTaskService: overdue()
+            activate CrmTaskService
+            CrmTaskService-->>DashboardService: List [3.92 ms]
+            deactivate CrmTaskService
+            DashboardService->>CrmTaskService: dueToday()
+            activate CrmTaskService
+            CrmTaskService-->>DashboardService: List [1.14 ms]
+            deactivate CrmTaskService
+            DashboardService->>AppointmentService: upcoming(int)
+            activate AppointmentService
+            AppointmentService-->>DashboardService: List [2.60 ms]
+            deactivate AppointmentService
+            DashboardService->>InteractionService: recent(int)
+            activate InteractionService
+            InteractionService-->>DashboardService: List [1.28 ms]
+            deactivate InteractionService
+        DashboardService-->>DashboardResource: DashboardDto [66.6 ms]
+        deactivate DashboardService
+    DashboardResource-->>Caller: DashboardDto [66.8 ms]
+    deactivate DashboardResource

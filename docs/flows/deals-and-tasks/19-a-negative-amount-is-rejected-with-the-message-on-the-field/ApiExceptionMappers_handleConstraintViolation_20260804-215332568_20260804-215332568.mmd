@@ -1,0 +1,9 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant ApiExceptionMappers
+    Note over Caller,ApiExceptionMappers: 2026-08-04 21:53:32.568 - 21:53:32.568<br/>0.13 ms | thread executor-thread-3
+    Caller->>ApiExceptionMappers: handleConstraintViolation(ConstraintViolationException)
+    activate ApiExceptionMappers
+    ApiExceptionMappers-->>Caller: Response [0.13 ms]
+    deactivate ApiExceptionMappers

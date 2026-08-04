@@ -1,0 +1,9 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant ContactResource
+    Note over Caller,ContactResource: 2026-08-04 21:54:10.109 - 21:54:10.116<br/>7.59 ms | thread executor-thread-3
+    Caller->>ContactResource: create(ContactDto)
+    activate ContactResource
+    ContactResource--xCaller: throws ResteasyReactiveViolationException [7.59 ms]
+    deactivate ContactResource

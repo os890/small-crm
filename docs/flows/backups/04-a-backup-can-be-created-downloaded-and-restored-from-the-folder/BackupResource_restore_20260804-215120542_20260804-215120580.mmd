@@ -1,0 +1,88 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant BackupResource
+    participant BackupService
+    participant BackupXml
+    participant CurrentUser
+    participant DatabaseSnapshot
+    participant BackupSettingsService
+    Note over Caller,BackupSettingsService: 2026-08-04 21:51:20.542 - 21:51:20.580<br/>38.5 ms | thread executor-thread-1
+    Caller->>BackupResource: restore(String)
+    activate BackupResource
+        BackupResource->>BackupService: restoreFromFolder(String)
+        activate BackupService
+            BackupService->>BackupService: resolve(String)
+            activate BackupService
+                loop 2 times
+                    BackupService->>BackupService: directory()
+                    activate BackupService
+                    BackupService-->>BackupService: Path [0.01 ms]
+                    deactivate BackupService
+                end
+            BackupService-->>BackupService: Path [0.04 ms]
+            deactivate BackupService
+            BackupService->>BackupService: restore(byte[])
+            activate BackupService
+                BackupService->>BackupService: parse(byte[])
+                activate BackupService
+                    BackupService->>BackupXml: read(byte[])
+                    activate BackupXml
+                    BackupXml-->>BackupService: BackupModel.Backup [17.9 ms]
+                    deactivate BackupXml
+                BackupService-->>BackupService: BackupModel.Backup [18.2 ms]
+                deactivate BackupService
+                BackupService->>BackupService: export()
+                activate BackupService
+                    BackupService->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>BackupService: Optional [0.55 ms]
+                    deactivate CurrentUser
+                BackupService-->>BackupService: BackupModel.Backup [2.16 ms]
+                deactivate BackupService
+                BackupService->>BackupService: directory()
+                activate BackupService
+                BackupService-->>BackupService: Path [0.01 ms]
+                deactivate BackupService
+                BackupService->>BackupXml: writeDurably(BackupModel.Backup, Path)
+                activate BackupXml
+                    BackupXml->>BackupXml: toXml(BackupModel.Backup)
+                    activate BackupXml
+                    BackupXml-->>BackupXml: String [0.32 ms]
+                    deactivate BackupXml
+                BackupXml-->>BackupService: void [6.77 ms]
+                deactivate BackupXml
+                BackupService->>DatabaseSnapshot: writeBeside(Path)
+                activate DatabaseSnapshot
+                    DatabaseSnapshot->>DatabaseSnapshot: list(Path)
+                    activate DatabaseSnapshot
+                    DatabaseSnapshot-->>DatabaseSnapshot: List [0.08 ms]
+                    deactivate DatabaseSnapshot
+                DatabaseSnapshot-->>BackupService: void [1.49 ms]
+                deactivate DatabaseSnapshot
+                BackupService->>BackupService: applyRetention()
+                activate BackupService
+                    BackupService->>BackupSettingsService: retentionDays()
+                    activate BackupSettingsService
+                    BackupSettingsService-->>BackupService: int [0.37 ms]
+                    deactivate BackupSettingsService
+                    BackupService->>BackupService: list()
+                    activate BackupService
+                        BackupService->>BackupService: directory()
+                        activate BackupService
+                        BackupService-->>BackupService: Path [0.00 ms]
+                        deactivate BackupService
+                    BackupService-->>BackupService: List [0.10 ms]
+                    deactivate BackupService
+                BackupService-->>BackupService: int [0.49 ms]
+                deactivate BackupService
+                BackupService->>BackupService: replaceAll(BackupModel.Backup)
+                activate BackupService
+                BackupService-->>BackupService: BackupService.RestoreOutcome [3.02 ms]
+                deactivate BackupService
+            BackupService-->>BackupService: BackupService.RestoreResult [38.3 ms]
+            deactivate BackupService
+        BackupService-->>BackupResource: BackupService.RestoreResult [38.4 ms]
+        deactivate BackupService
+    BackupResource-->>Caller: Map [38.5 ms]
+    deactivate BackupResource

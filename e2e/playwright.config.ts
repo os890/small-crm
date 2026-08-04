@@ -101,6 +101,15 @@ export default defineConfig({
         stderr: 'pipe',
         env: {
           QUARKUS_HTTP_PORT: String(PORT),
+          // Handed on when scripts/record-flows.mjs drives the suite: the recorder writes one
+          // sequence diagram per call chain into the directory of the use-case being recorded.
+          // Absent in an ordinary run, and then the application starts with recording off.
+          ...(process.env['CDI_FLOW_ENABLED']
+            ? {
+                CDI_FLOW_ENABLED: process.env['CDI_FLOW_ENABLED'],
+                CDI_FLOW_OUTPUT_DIRECTORY: process.env['CDI_FLOW_OUTPUT_DIRECTORY'] ?? '',
+              }
+            : {}),
           SMALLCRM_DATA_DIR: dataDir,
           SMALLCRM_BACKUP_DIR: join(dataDir, 'backup'),
           SMALLCRM_BOOTSTRAP_ADMIN_USERNAME: 'admin',

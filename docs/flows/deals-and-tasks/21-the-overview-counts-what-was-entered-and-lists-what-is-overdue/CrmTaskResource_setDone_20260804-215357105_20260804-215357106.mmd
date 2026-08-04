@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant CrmTaskResource
+    participant CrmTaskService
+    Note over Caller,CrmTaskService: 2026-08-04 21:53:57.105 - 21:53:57.106<br/>1.47 ms | thread executor-thread-5
+    Caller->>CrmTaskResource: setDone(Long, boolean)
+    activate CrmTaskResource
+        CrmTaskResource->>CrmTaskService: setDone(Long, boolean)
+        activate CrmTaskService
+        CrmTaskService-->>CrmTaskResource: CrmTaskDto [0.69 ms]
+        deactivate CrmTaskService
+    CrmTaskResource-->>Caller: CrmTaskDto [1.47 ms]
+    deactivate CrmTaskResource

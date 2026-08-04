@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant ContactResource
+    participant ContactService
+    Note over Caller,ContactService: 2026-08-04 21:53:02.686 - 21:53:02.691<br/>4.35 ms | thread executor-thread-3
+    Caller->>ContactResource: list(String, Long, Integer, Integer)
+    activate ContactResource
+        ContactResource->>ContactService: list(String, Long, PageRequest)
+        activate ContactService
+        ContactService-->>ContactResource: Paged [3.92 ms]
+        deactivate ContactService
+    ContactResource-->>Caller: Response [4.35 ms]
+    deactivate ContactResource

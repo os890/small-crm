@@ -1,0 +1,9 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant BootstrapAdminService
+    Note over Caller,BootstrapAdminService: 2026-08-04 21:51:16.311 - 21:51:16.661<br/>350.5 ms | thread main
+    Caller->>BootstrapAdminService: createAdminIfNoUsersExist()
+    activate BootstrapAdminService
+    BootstrapAdminService-->>Caller: AppUser [350.5 ms]
+    deactivate BootstrapAdminService

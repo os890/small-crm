@@ -43,6 +43,10 @@ e2e/logs/**
 **/package-lock.json
 **/pnpm-lock.yaml
 **/pnpm-workspace.yaml
+# Recorded by cdi-flow while the end-to-end suite drove the application: Mermaid diagrams and the
+# index of what was recorded. A comment in a diagram would end up drawn.
+docs/flows/**/*.mmd
+docs/flows/recorded.json
 
 # Documentation and the licence itself
 **/*.md

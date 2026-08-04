@@ -1,0 +1,327 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant AuthResource
+    participant LoginService
+    participant SessionService
+    participant SessionCookie
+    participant UserService
+    participant CurrentUser
+    participant DashboardResource
+    participant DashboardService
+    participant CrmTaskService
+    participant AppointmentService
+    participant InteractionService
+    participant BackupResource
+    participant BackupService
+    participant BackupSettingsService
+    rect rgb(244, 244, 244)
+        Note over Caller,SessionCookie: AuthResource.login — 271.2 ms | thread executor-thread-1
+        Caller->>AuthResource: login(String, String)
+        activate AuthResource
+            AuthResource->>LoginService: attempt(String, String)
+            activate LoginService
+            LoginService-->>AuthResource: LoginService.Attempt [253.3 ms]
+            deactivate LoginService
+            AuthResource->>SessionService: issue(AppUser)
+            activate SessionService
+                SessionService->>SessionService: purgeExpired()
+                activate SessionService
+                SessionService-->>SessionService: long [10.6 ms]
+                deactivate SessionService
+            SessionService-->>AuthResource: SessionService.IssuedSession [12.6 ms]
+            deactivate SessionService
+            AuthResource->>SessionCookie: write(RoutingContext, String, long)
+            activate SessionCookie
+            SessionCookie-->>AuthResource: void [0.73 ms]
+            deactivate SessionCookie
+        AuthResource-->>Caller: Response [271.2 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.79 ms | thread executor-thread-1
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.26 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.33 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.39 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.79 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,SessionCookie: AuthResource.changePassword — 716.6 ms | thread executor-thread-1
+        Caller->>AuthResource: changePassword(ChangePasswordRequest)
+        activate AuthResource
+            AuthResource->>UserService: changeOwnPassword(ChangePasswordRequest)
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.87 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.88 ms]
+                deactivate CurrentUser
+                UserService->>SessionService: revokeAllFor(AppUser)
+                activate SessionService
+                SessionService-->>UserService: long [2.38 ms]
+                deactivate SessionService
+            UserService-->>AuthResource: UserDto [707.5 ms]
+            deactivate UserService
+            AuthResource->>UserService: currentAccount()
+            activate UserService
+                UserService->>CurrentUser: find()
+                activate CurrentUser
+                CurrentUser-->>UserService: Optional [0.35 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: Optional [0.37 ms]
+            deactivate UserService
+            AuthResource->>SessionService: issue(AppUser)
+            activate SessionService
+                SessionService->>SessionService: purgeExpired()
+                activate SessionService
+                SessionService-->>SessionService: long [0.52 ms]
+                deactivate SessionService
+            SessionService-->>AuthResource: SessionService.IssuedSession [0.74 ms]
+            deactivate SessionService
+            AuthResource->>SessionCookie: write(RoutingContext, String, long)
+            activate SessionCookie
+            SessionCookie-->>AuthResource: void [0.03 ms]
+            deactivate SessionCookie
+        AuthResource-->>Caller: UserDto [716.6 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,InteractionService: DashboardResource.summary — 68.2 ms | thread executor-thread-2
+        Caller->>DashboardResource: summary()
+        activate DashboardResource
+            DashboardResource->>DashboardService: summary()
+            activate DashboardService
+                DashboardService->>CrmTaskService: overdue()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [3.67 ms]
+                deactivate CrmTaskService
+                DashboardService->>CrmTaskService: dueToday()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [1.24 ms]
+                deactivate CrmTaskService
+                DashboardService->>AppointmentService: upcoming(int)
+                activate AppointmentService
+                AppointmentService-->>DashboardService: List [4.11 ms]
+                deactivate AppointmentService
+                DashboardService->>InteractionService: recent(int)
+                activate InteractionService
+                InteractionService-->>DashboardService: List [1.66 ms]
+                deactivate InteractionService
+            DashboardService-->>DashboardResource: DashboardDto [68.0 ms]
+            deactivate DashboardService
+        DashboardResource-->>Caller: DashboardDto [68.2 ms]
+        deactivate DashboardResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.49 ms | thread executor-thread-1
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.45 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.47 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.48 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.49 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,BackupService: BackupResource.list — 0.25 ms | thread executor-thread-1
+        Caller->>BackupResource: list()
+        activate BackupResource
+            BackupResource->>BackupService: list()
+            activate BackupService
+                BackupService->>BackupService: directory()
+                activate BackupService
+                BackupService-->>BackupService: Path [0.01 ms]
+                deactivate BackupService
+            BackupService-->>BackupResource: List [0.03 ms]
+            deactivate BackupService
+        BackupResource-->>Caller: List [0.25 ms]
+        deactivate BackupResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,BackupService: BackupResource.settings — 0.46 ms | thread executor-thread-2
+        Caller->>BackupResource: settings()
+        activate BackupResource
+            BackupResource->>BackupSettingsService: retentionDays()
+            activate BackupSettingsService
+            BackupSettingsService-->>BackupResource: int [0.42 ms]
+            deactivate BackupSettingsService
+            BackupResource->>BackupService: directory()
+            activate BackupService
+            BackupService-->>BackupResource: Path [0.01 ms]
+            deactivate BackupService
+        BackupResource-->>Caller: BackupSettingsDto [0.46 ms]
+        deactivate BackupResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,BackupService: BackupResource.updateSettings — 3.35 ms | thread executor-thread-1
+        Caller->>BackupResource: updateSettings(BackupSettingsDto)
+        activate BackupResource
+            BackupResource->>BackupSettingsService: updateRetentionDays(int)
+            activate BackupSettingsService
+            BackupSettingsService-->>BackupResource: int [0.22 ms]
+            deactivate BackupSettingsService
+            BackupResource->>BackupService: applyRetention()
+            activate BackupService
+                BackupService->>BackupSettingsService: retentionDays()
+                activate BackupSettingsService
+                BackupSettingsService-->>BackupService: int [0.19 ms]
+                deactivate BackupSettingsService
+                BackupService->>BackupService: list()
+                activate BackupService
+                    BackupService->>BackupService: directory()
+                    activate BackupService
+                    BackupService-->>BackupService: Path [0.01 ms]
+                    deactivate BackupService
+                BackupService-->>BackupService: List [0.03 ms]
+                deactivate BackupService
+            BackupService-->>BackupResource: int [0.24 ms]
+            deactivate BackupService
+            BackupResource->>BackupSettingsService: retentionDays()
+            activate BackupSettingsService
+            BackupSettingsService-->>BackupResource: int [1.86 ms]
+            deactivate BackupSettingsService
+            BackupResource->>BackupService: directory()
+            activate BackupService
+            BackupService-->>BackupResource: Path [0.01 ms]
+            deactivate BackupService
+        BackupResource-->>Caller: BackupSettingsDto [3.35 ms]
+        deactivate BackupResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.42 ms | thread executor-thread-1
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.39 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.39 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.41 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.42 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,BackupService: BackupResource.list — 0.04 ms | thread executor-thread-3
+        Caller->>BackupResource: list()
+        activate BackupResource
+            BackupResource->>BackupService: list()
+            activate BackupService
+                BackupService->>BackupService: directory()
+                activate BackupService
+                BackupService-->>BackupService: Path [0.01 ms]
+                deactivate BackupService
+            BackupService-->>BackupResource: List [0.02 ms]
+            deactivate BackupService
+        BackupResource-->>Caller: List [0.04 ms]
+        deactivate BackupResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,BackupService: BackupResource.settings — 0.20 ms | thread executor-thread-1
+        Caller->>BackupResource: settings()
+        activate BackupResource
+            BackupResource->>BackupSettingsService: retentionDays()
+            activate BackupSettingsService
+            BackupSettingsService-->>BackupResource: int [0.18 ms]
+            deactivate BackupSettingsService
+            BackupResource->>BackupService: directory()
+            activate BackupService
+            BackupService-->>BackupResource: Path [0.01 ms]
+            deactivate BackupService
+        BackupResource-->>Caller: BackupSettingsDto [0.20 ms]
+        deactivate BackupResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,BackupService: BackupResource.updateSettings — 1.39 ms | thread executor-thread-1
+        Caller->>BackupResource: updateSettings(BackupSettingsDto)
+        activate BackupResource
+            BackupResource->>BackupSettingsService: updateRetentionDays(int)
+            activate BackupSettingsService
+            BackupSettingsService-->>BackupResource: int [0.28 ms]
+            deactivate BackupSettingsService
+            BackupResource->>BackupService: applyRetention()
+            activate BackupService
+                BackupService->>BackupSettingsService: retentionDays()
+                activate BackupSettingsService
+                BackupSettingsService-->>BackupService: int [0.23 ms]
+                deactivate BackupSettingsService
+                BackupService->>BackupService: list()
+                activate BackupService
+                    BackupService->>BackupService: directory()
+                    activate BackupService
+                    BackupService-->>BackupService: Path [0.01 ms]
+                    deactivate BackupService
+                BackupService-->>BackupService: List [0.03 ms]
+                deactivate BackupService
+            BackupService-->>BackupResource: int [0.28 ms]
+            deactivate BackupService
+            BackupResource->>BackupSettingsService: retentionDays()
+            activate BackupSettingsService
+            BackupSettingsService-->>BackupResource: int [0.03 ms]
+            deactivate BackupSettingsService
+            BackupResource->>BackupService: directory()
+            activate BackupService
+            BackupService-->>BackupResource: Path [0.00 ms]
+            deactivate BackupService
+        BackupResource-->>Caller: BackupSettingsDto [1.39 ms]
+        deactivate BackupResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,BackupService: BackupResource.list — 0.04 ms | thread executor-thread-3
+        Caller->>BackupResource: list()
+        activate BackupResource
+            BackupResource->>BackupService: list()
+            activate BackupService
+                BackupService->>BackupService: directory()
+                activate BackupService
+                BackupService-->>BackupService: Path [0.01 ms]
+                deactivate BackupService
+            BackupService-->>BackupResource: List [0.02 ms]
+            deactivate BackupService
+        BackupResource-->>Caller: List [0.04 ms]
+        deactivate BackupResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,BackupService: BackupResource.settings — 0.22 ms | thread executor-thread-1
+        Caller->>BackupResource: settings()
+        activate BackupResource
+            BackupResource->>BackupSettingsService: retentionDays()
+            activate BackupSettingsService
+            BackupSettingsService-->>BackupResource: int [0.20 ms]
+            deactivate BackupSettingsService
+            BackupResource->>BackupService: directory()
+            activate BackupService
+            BackupService-->>BackupResource: Path [0.01 ms]
+            deactivate BackupService
+        BackupResource-->>Caller: BackupSettingsDto [0.22 ms]
+        deactivate BackupResource
+    end

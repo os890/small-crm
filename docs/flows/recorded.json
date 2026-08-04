@@ -1,0 +1,2790 @@
+[
+  {
+    "spec": "auth.setup.ts",
+    "title": "first start forces the administrator to pick a new password",
+    "project": "setup",
+    "number": "01",
+    "directory": "auth/01-first-start-forces-the-administrator-to-pick-a-new-password",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215102474_20260804-215103188.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215101815_20260804-215102087.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215102101_20260804-215102102.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215100540_20260804-215100545.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215100185_20260804-215100530.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215102099_20260804-215102101.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 3
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215103208_20260804-215103301.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215101041_20260804-215101042.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 15
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215102098_20260804-215102098.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 7
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215101040_20260804-215101040.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215101474_20260804-215101474.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215102093_20260804-215102097.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 7
+      }
+    ]
+  },
+  {
+    "spec": "appearance.spec.ts",
+    "title": "the stylesheet is applied, not merely served",
+    "project": "chromium",
+    "number": "02",
+    "directory": "appearance/02-the-stylesheet-is-applied-not-merely-served",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215107532_20260804-215108245.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215106880_20260804-215107152.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215107165_20260804-215107166.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215105591_20260804-215105596.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215105230_20260804-215105580.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215107164_20260804-215107165.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 3
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215108264_20260804-215108334.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215106108_20260804-215106109.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 22
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215107162_20260804-215107162.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 7
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215106108_20260804-215106108.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215106548_20260804-215106548.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 2
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215107157_20260804-215107161.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 7
+      }
+    ]
+  },
+  {
+    "spec": "appearance.spec.ts",
+    "title": "the styles survive into the signed-in application",
+    "project": "chromium",
+    "number": "03",
+    "directory": "appearance/03-the-styles-survive-into-the-signed-in-application",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215113048_20260804-215113763.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215112397_20260804-215112670.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215112684_20260804-215112685.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215111168_20260804-215111172.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215110792_20260804-215111157.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_list_20260804-215114281_20260804-215114285.mmd",
+        "entryPoint": "ContactResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215112682_20260804-215112684.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 5
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215113782_20260804-215113857.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215111618_20260804-215111619.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 26
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215112681_20260804-215112681.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 18
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215111617_20260804-215111617.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215112059_20260804-215112060.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215112676_20260804-215112680.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 18
+      }
+    ]
+  },
+  {
+    "spec": "backups.spec.ts",
+    "title": "a backup can be created, downloaded and restored from the folder",
+    "project": "chromium",
+    "number": "04",
+    "directory": "backups/04-a-backup-can-be-created-downloaded-and-restored-from-the-folder",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215118614_20260804-215119328.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215117965_20260804-215118238.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215118252_20260804-215118253.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 6
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215119996_20260804-215119997.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupResource_create_20260804-215120124_20260804-215120163.mmd",
+        "entryPoint": "BackupResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupResource_download_20260804-215120220_20260804-215120220.mmd",
+        "entryPoint": "BackupResource.download",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupResource_list_20260804-215120081_20260804-215120082.mmd",
+        "entryPoint": "BackupResource.list",
+        "application": true,
+        "occurrences": 4
+      },
+      {
+        "file": "BackupResource_restore_20260804-215120542_20260804-215120580.mmd",
+        "entryPoint": "BackupResource.restore",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupResource_settings_20260804-215120081_20260804-215120082.mmd",
+        "entryPoint": "BackupResource.settings",
+        "application": true,
+        "occurrences": 4
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215116671_20260804-215116676.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215116311_20260804-215116661.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CompanyResource_create_20260804-215119993_20260804-215119996.mmd",
+        "entryPoint": "CompanyResource.create",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "CompanyResource_list_20260804-215119855_20260804-215119857.mmd",
+        "entryPoint": "CompanyResource.list",
+        "application": true,
+        "occurrences": 5
+      },
+      {
+        "file": "CurrentUser_find_20260804-215118251_20260804-215118252.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 26
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215119347_20260804-215119418.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215117175_20260804-215117176.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 50
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215118249_20260804-215118249.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 42
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215117174_20260804-215117174.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215117636_20260804-215117636.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215118244_20260804-215118248.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 42
+      }
+    ]
+  },
+  {
+    "spec": "backups.spec.ts",
+    "title": "an unwanted restore can be undone with the before-restore file",
+    "project": "chromium",
+    "number": "05",
+    "directory": "backups/05-an-unwanted-restore-can-be-undone-with-the-before-restore-file",
+    "passed": true,
+    "wholeSpec": true,
+    "diagrams": [
+      {
+        "file": "ApiExceptionMappers_handleBusinessRule_20260804-215204012_20260804-215204012.mmd",
+        "entryPoint": "ApiExceptionMappers.handleBusinessRule",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_changePassword_20260804-215200432_20260804-215201148.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AuthResource_login_20260804-215159779_20260804-215200052.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AuthResource_me_20260804-215200066_20260804-215200066.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 19
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215201812_20260804-215201812.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 4
+      },
+      {
+        "file": "BackupResource_create_20260804-215201940_20260804-215201979.mmd",
+        "entryPoint": "BackupResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupResource_download_20260804-215202035_20260804-215202036.mmd",
+        "entryPoint": "BackupResource.download",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupResource_list_20260804-215201898_20260804-215201898.mmd",
+        "entryPoint": "BackupResource.list",
+        "application": true,
+        "occurrences": 10
+      },
+      {
+        "file": "BackupResource_restore_20260804-215202357_20260804-215202393.mmd",
+        "entryPoint": "BackupResource.restore",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "BackupResource_restoreUpload_20260804-215204010_20260804-215204011.mmd",
+        "entryPoint": "BackupResource.restoreUpload",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupResource_settings_20260804-215201898_20260804-215201898.mmd",
+        "entryPoint": "BackupResource.settings",
+        "application": true,
+        "occurrences": 10
+      },
+      {
+        "file": "BackupResource_updateSettings_20260804-215203442_20260804-215203446.mmd",
+        "entryPoint": "BackupResource.updateSettings",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215158490_20260804-215158495.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215158130_20260804-215158480.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CompanyResource_create_20260804-215201809_20260804-215201812.mmd",
+        "entryPoint": "CompanyResource.create",
+        "application": true,
+        "occurrences": 4
+      },
+      {
+        "file": "CompanyResource_list_20260804-215201660_20260804-215201662.mmd",
+        "entryPoint": "CompanyResource.list",
+        "application": true,
+        "occurrences": 12
+      },
+      {
+        "file": "CurrentUser_find_20260804-215200064_20260804-215200065.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 71
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215201167_20260804-215201236.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215158998_20260804-215158999.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 149
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215200062_20260804-215200062.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 134
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215158998_20260804-215158998.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215159435_20260804-215159435.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 2
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215200058_20260804-215200061.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 134
+      },
+      {
+        "file": "UserResource_create_20260804-215204359_20260804-215204596.mmd",
+        "entryPoint": "UserResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "UserResource_list_20260804-215204241_20260804-215204242.mmd",
+        "entryPoint": "UserResource.list",
+        "application": true,
+        "occurrences": 2
+      }
+    ]
+  },
+  {
+    "spec": "backups.spec.ts",
+    "title": "the retention period can be changed from the screen",
+    "project": "chromium",
+    "number": "06",
+    "directory": "backups/06-the-retention-period-can-be-changed-from-the-screen",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215209965_20260804-215210682.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215209297_20260804-215209568.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215209582_20260804-215209583.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "BackupResource_list_20260804-215211192_20260804-215211193.mmd",
+        "entryPoint": "BackupResource.list",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "BackupResource_settings_20260804-215211192_20260804-215211193.mmd",
+        "entryPoint": "BackupResource.settings",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "BackupResource_updateSettings_20260804-215211278_20260804-215211281.mmd",
+        "entryPoint": "BackupResource.updateSettings",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215208310_20260804-215208315.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215207951_20260804-215208299.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215209580_20260804-215209582.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 13
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215210702_20260804-215210771.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215208511_20260804-215208512.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 35
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215209578_20260804-215209579.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 27
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215208510_20260804-215208510.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215208964_20260804-215208964.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215209574_20260804-215209577.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 27
+      }
+    ]
+  },
+  {
+    "spec": "backups.spec.ts",
+    "title": "a file that is not a backup is refused without losing any data",
+    "project": "chromium",
+    "number": "07",
+    "directory": "backups/07-a-file-that-is-not-a-backup-is-refused-without-losing-any-data",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "ApiExceptionMappers_handleBusinessRule_20260804-215217303_20260804-215217303.mmd",
+        "entryPoint": "ApiExceptionMappers.handleBusinessRule",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_changePassword_20260804-215215715_20260804-215216429.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215215048_20260804-215215320.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215215334_20260804-215215334.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 4
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215217095_20260804-215217095.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupResource_list_20260804-215217185_20260804-215217185.mmd",
+        "entryPoint": "BackupResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupResource_restoreUpload_20260804-215217292_20260804-215217302.mmd",
+        "entryPoint": "BackupResource.restoreUpload",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupResource_settings_20260804-215217185_20260804-215217185.mmd",
+        "entryPoint": "BackupResource.settings",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215213746_20260804-215213751.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215213386_20260804-215213735.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CompanyResource_create_20260804-215217092_20260804-215217095.mmd",
+        "entryPoint": "CompanyResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "CompanyResource_list_20260804-215216952_20260804-215216954.mmd",
+        "entryPoint": "CompanyResource.list",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "CurrentUser_find_20260804-215215332_20260804-215215333.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 13
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215216448_20260804-215216522.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215214263_20260804-215214263.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 37
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215215330_20260804-215215331.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 29
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215214262_20260804-215214262.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215214707_20260804-215214707.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215215326_20260804-215215329.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 29
+      }
+    ]
+  },
+  {
+    "spec": "backups.spec.ts",
+    "title": "a plain user cannot reach the backup screen",
+    "project": "chromium",
+    "number": "08",
+    "directory": "backups/08-a-plain-user-cannot-reach-the-backup-screen",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215221682_20260804-215222395.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AuthResource_login_20260804-215221013_20260804-215221286.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AuthResource_me_20260804-215221299_20260804-215221300.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 4
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215219730_20260804-215219735.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215219372_20260804-215219718.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215221298_20260804-215221299.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 12
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215222414_20260804-215222481.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215220243_20260804-215220244.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 44
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215221296_20260804-215221296.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 29
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215220242_20260804-215220242.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215220683_20260804-215220683.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 2
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215221291_20260804-215221295.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 29
+      },
+      {
+        "file": "UserResource_create_20260804-215223057_20260804-215223292.mmd",
+        "entryPoint": "UserResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "UserResource_list_20260804-215222913_20260804-215222914.mmd",
+        "entryPoint": "UserResource.list",
+        "application": true,
+        "occurrences": 2
+      }
+    ]
+  },
+  {
+    "spec": "calendar.spec.ts",
+    "title": "the double booking guard blocks a taken slot and can be overridden",
+    "project": "chromium",
+    "number": "09",
+    "directory": "calendar/09-the-double-booking-guard-blocks-a-taken-slot-and-can-be-overridden",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "ApiExceptionMappers_handleAppointmentConflict_20260804-215231787_20260804-215231787.mmd",
+        "entryPoint": "ApiExceptionMappers.handleAppointmentConflict",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AppointmentResource_conflicts_20260804-215230277_20260804-215230282.mmd",
+        "entryPoint": "AppointmentResource.conflicts",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "AppointmentResource_create_20260804-215230829_20260804-215230838.mmd",
+        "entryPoint": "AppointmentResource.create",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "AppointmentResource_create_20260804-215231780_20260804-215231786.mmd",
+        "entryPoint": "AppointmentResource.create",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AppointmentResource_list_20260804-215229848_20260804-215229850.mmd",
+        "entryPoint": "AppointmentResource.list",
+        "application": true,
+        "occurrences": 4
+      },
+      {
+        "file": "AuthResource_changePassword_20260804-215228581_20260804-215229293.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215227929_20260804-215228200.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215228214_20260804-215228215.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215230838_20260804-215230838.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215226965_20260804-215226970.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215226609_20260804-215226955.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215228213_20260804-215228214.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 16
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215229312_20260804-215229386.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215227166_20260804-215227167.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 37
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215228211_20260804-215228211.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 29
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215227165_20260804-215227165.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215227606_20260804-215227606.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215228206_20260804-215228210.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 29
+      }
+    ]
+  },
+  {
+    "spec": "calendar.spec.ts",
+    "title": "back to back appointments are not treated as a clash",
+    "project": "chromium",
+    "number": "10",
+    "directory": "calendar/10-back-to-back-appointments-are-not-treated-as-a-clash",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AppointmentResource_conflicts_20260804-215238965_20260804-215238965.mmd",
+        "entryPoint": "AppointmentResource.conflicts",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AppointmentResource_create_20260804-215238564_20260804-215238577.mmd",
+        "entryPoint": "AppointmentResource.create",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AppointmentResource_list_20260804-215238398_20260804-215238399.mmd",
+        "entryPoint": "AppointmentResource.list",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "AuthResource_changePassword_20260804-215237163_20260804-215237877.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215236512_20260804-215236784.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215236799_20260804-215236799.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215238578_20260804-215238578.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215235220_20260804-215235225.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215234862_20260804-215235209.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215236797_20260804-215236798.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 10
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215237896_20260804-215237964.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215235746_20260804-215235747.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 31
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215236795_20260804-215236795.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 23
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215235745_20260804-215235745.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215236181_20260804-215236181.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215236790_20260804-215236794.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 23
+      }
+    ]
+  },
+  {
+    "spec": "calendar.spec.ts",
+    "title": "an end before the start is refused before the form can be sent",
+    "project": "chromium",
+    "number": "11",
+    "directory": "calendar/11-an-end-before-the-start-is-refused-before-the-form-can-be-sent",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AppointmentResource_list_20260804-215244741_20260804-215244742.mmd",
+        "entryPoint": "AppointmentResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_changePassword_20260804-215243497_20260804-215244212.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215242845_20260804-215243118.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215243133_20260804-215243134.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215241872_20260804-215241877.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215241513_20260804-215241862.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215243131_20260804-215243132.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 5
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215244230_20260804-215244314.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215242081_20260804-215242082.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 26
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215243129_20260804-215243129.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 18
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215242080_20260804-215242080.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215242521_20260804-215242521.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215243124_20260804-215243128.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 18
+      }
+    ]
+  },
+  {
+    "spec": "calendar.spec.ts",
+    "title": "an existing appointment can be edited without clashing with itself",
+    "project": "chromium",
+    "number": "12",
+    "directory": "calendar/12-an-existing-appointment-can-be-edited-without-clashing-with-itself",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AppointmentResource_conflicts_20260804-215250885_20260804-215250893.mmd",
+        "entryPoint": "AppointmentResource.conflicts",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AppointmentResource_create_20260804-215250514_20260804-215250525.mmd",
+        "entryPoint": "AppointmentResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AppointmentResource_list_20260804-215250368_20260804-215250370.mmd",
+        "entryPoint": "AppointmentResource.list",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "AppointmentResource_update_20260804-215251443_20260804-215251447.mmd",
+        "entryPoint": "AppointmentResource.update",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_changePassword_20260804-215249114_20260804-215249829.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215248445_20260804-215248717.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215248732_20260804-215248732.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215250525_20260804-215250525.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215247188_20260804-215247193.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215246827_20260804-215247177.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215248730_20260804-215248731.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 10
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215249847_20260804-215249918.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215247683_20260804-215247684.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 31
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215248728_20260804-215248728.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 23
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215247682_20260804-215247682.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215248118_20260804-215248118.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215248724_20260804-215248727.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 23
+      }
+    ]
+  },
+  {
+    "spec": "contacts.spec.ts",
+    "title": "a company and a contact can be created and linked",
+    "project": "chromium",
+    "number": "13",
+    "directory": "contacts/13-a-company-and-a-contact-can-be-created-and-linked",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215255746_20260804-215256460.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215255096_20260804-215255367.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215255381_20260804-215255381.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215257128_20260804-215257128.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215253812_20260804-215253817.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215253454_20260804-215253801.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CompanyResource_create_20260804-215257125_20260804-215257128.mmd",
+        "entryPoint": "CompanyResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "CompanyResource_list_20260804-215256989_20260804-215256991.mmd",
+        "entryPoint": "CompanyResource.list",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "ContactResource_create_20260804-215257393_20260804-215257408.mmd",
+        "entryPoint": "ContactResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_list_20260804-215257217_20260804-215257222.mmd",
+        "entryPoint": "ContactResource.list",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "CurrentUser_find_20260804-215255379_20260804-215255380.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 12
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215256479_20260804-215256566.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215254321_20260804-215254322.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 36
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215255377_20260804-215255377.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 28
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215254320_20260804-215254320.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215254763_20260804-215254763.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215255373_20260804-215255376.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 28
+      }
+    ]
+  },
+  {
+    "spec": "contacts.spec.ts",
+    "title": "a contact with no name is refused with the message on the field",
+    "project": "chromium",
+    "number": "14",
+    "directory": "contacts/14-a-contact-with-no-name-is-refused-with-the-message-on-the-field",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "ApiExceptionMappers_handleConstraintViolation_20260804-215302835_20260804-215302836.mmd",
+        "entryPoint": "ApiExceptionMappers.handleConstraintViolation",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_changePassword_20260804-215301446_20260804-215302161.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215300778_20260804-215301054.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215301069_20260804-215301070.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215259782_20260804-215259787.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215259424_20260804-215259771.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_create_20260804-215302826_20260804-215302835.mmd",
+        "entryPoint": "ContactResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_list_20260804-215302686_20260804-215302691.mmd",
+        "entryPoint": "ContactResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215301067_20260804-215301068.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 6
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215302180_20260804-215302261.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215300002_20260804-215300003.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 27
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215301065_20260804-215301065.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 19
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215300001_20260804-215300001.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215300443_20260804-215300443.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215301060_20260804-215301064.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 19
+      }
+    ]
+  },
+  {
+    "spec": "contacts.spec.ts",
+    "title": "search narrows the list down to the matching contact",
+    "project": "chromium",
+    "number": "15",
+    "directory": "contacts/15-search-narrows-the-list-down-to-the-matching-contact",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215307147_20260804-215307860.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215306479_20260804-215306752.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215306766_20260804-215306767.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215308535_20260804-215308535.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215305222_20260804-215305227.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215304864_20260804-215305212.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_create_20260804-215308526_20260804-215308535.mmd",
+        "entryPoint": "ContactResource.create",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "ContactResource_list_20260804-215308376_20260804-215308380.mmd",
+        "entryPoint": "ContactResource.list",
+        "application": true,
+        "occurrences": 4
+      },
+      {
+        "file": "CurrentUser_find_20260804-215306764_20260804-215306766.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 10
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215307879_20260804-215307951.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215305703_20260804-215305704.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 31
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215306762_20260804-215306762.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 23
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215305703_20260804-215305703.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215306141_20260804-215306141.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215306758_20260804-215306761.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 23
+      }
+    ]
+  },
+  {
+    "spec": "contacts.spec.ts",
+    "title": "an activity logged on a contact appears in its history",
+    "project": "chromium",
+    "number": "16",
+    "directory": "contacts/16-an-activity-logged-on-a-contact-appears-in-its-history",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215313780_20260804-215314493.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215313128_20260804-215313400.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215313414_20260804-215313415.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215315168_20260804-215315168.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215311823_20260804-215311828.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215311465_20260804-215311812.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_create_20260804-215315159_20260804-215315167.mmd",
+        "entryPoint": "ContactResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_get_20260804-215315279_20260804-215315281.mmd",
+        "entryPoint": "ContactResource.get",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_list_20260804-215315024_20260804-215315029.mmd",
+        "entryPoint": "ContactResource.list",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "CrmTaskResource_list_20260804-215315279_20260804-215315281.mmd",
+        "entryPoint": "CrmTaskResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215313412_20260804-215313414.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 13
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215314512_20260804-215314582.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "DealResource_list_20260804-215315279_20260804-215315290.mmd",
+        "entryPoint": "DealResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "InteractionResource_create_20260804-215315427_20260804-215315430.mmd",
+        "entryPoint": "InteractionResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "InteractionResource_list_20260804-215315278_20260804-215315282.mmd",
+        "entryPoint": "InteractionResource.list",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215312345_20260804-215312346.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 37
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215313410_20260804-215313410.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 29
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215312344_20260804-215312344.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215312788_20260804-215312788.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215313406_20260804-215313409.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 29
+      }
+    ]
+  },
+  {
+    "spec": "contacts.spec.ts",
+    "title": "deleting a contact asks first and then removes it",
+    "project": "chromium",
+    "number": "17",
+    "directory": "contacts/17-deleting-a-contact-asks-first-and-then-removes-it",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215319763_20260804-215320475.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215319113_20260804-215319386.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215319399_20260804-215319400.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215321164_20260804-215321165.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215317805_20260804-215317810.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215317448_20260804-215317795.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_create_20260804-215321157_20260804-215321164.mmd",
+        "entryPoint": "ContactResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_delete_20260804-215321324_20260804-215321339.mmd",
+        "entryPoint": "ContactResource.delete",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_list_20260804-215321013_20260804-215321018.mmd",
+        "entryPoint": "ContactResource.list",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "CurrentUser_find_20260804-215319398_20260804-215319399.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 9
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215320494_20260804-215320563.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215318321_20260804-215318324.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 30
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215319396_20260804-215319396.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 22
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215318320_20260804-215318320.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215318774_20260804-215318774.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215319391_20260804-215319395.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 22
+      }
+    ]
+  },
+  {
+    "spec": "deals-and-tasks.spec.ts",
+    "title": "a deal moves through the pipeline and disappears once it is won",
+    "project": "chromium",
+    "number": "18",
+    "directory": "deals-and-tasks/18-a-deal-moves-through-the-pipeline-and-disappears-once-it-is-won",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215325328_20260804-215326043.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215324661_20260804-215324933.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215324948_20260804-215324949.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215326714_20260804-215326714.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215323668_20260804-215323672.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215323311_20260804-215323657.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215324946_20260804-215324947.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 12
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215326062_20260804-215326129.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "DealResource_changeStage_20260804-215326744_20260804-215326745.mmd",
+        "entryPoint": "DealResource.changeStage",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "DealResource_create_20260804-215326709_20260804-215326713.mmd",
+        "entryPoint": "DealResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "DealResource_list_20260804-215326571_20260804-215326581.mmd",
+        "entryPoint": "DealResource.list",
+        "application": true,
+        "occurrences": 5
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215323878_20260804-215323878.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 34
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215324944_20260804-215324944.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 26
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215323877_20260804-215323877.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215324321_20260804-215324321.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215324939_20260804-215324943.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 26
+      }
+    ]
+  },
+  {
+    "spec": "deals-and-tasks.spec.ts",
+    "title": "a negative amount is rejected with the message on the field",
+    "project": "chromium",
+    "number": "19",
+    "directory": "deals-and-tasks/19-a-negative-amount-is-rejected-with-the-message-on-the-field",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "ApiExceptionMappers_handleConstraintViolation_20260804-215332568_20260804-215332568.mmd",
+        "entryPoint": "ApiExceptionMappers.handleConstraintViolation",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_changePassword_20260804-215331162_20260804-215331877.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215330494_20260804-215330765.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215330779_20260804-215330780.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215329195_20260804-215329200.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215328836_20260804-215329185.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215330778_20260804-215330779.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 6
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215331895_20260804-215331965.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "DealResource_create_20260804-215332559_20260804-215332567.mmd",
+        "entryPoint": "DealResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "DealResource_list_20260804-215332417_20260804-215332427.mmd",
+        "entryPoint": "DealResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215329725_20260804-215329726.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 28
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215330776_20260804-215330776.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 20
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215329725_20260804-215329725.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215330159_20260804-215330159.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215330771_20260804-215330775.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 20
+      }
+    ]
+  },
+  {
+    "spec": "deals-and-tasks.spec.ts",
+    "title": "an overdue to-do is flagged and can be ticked off",
+    "project": "chromium",
+    "number": "20",
+    "directory": "deals-and-tasks/20-an-overdue-to-do-is-flagged-and-can-be-ticked-off",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215336562_20260804-215337277.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215335895_20260804-215336166.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215336180_20260804-215336181.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215337947_20260804-215337947.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215334889_20260804-215334894.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215334533_20260804-215334879.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CrmTaskResource_create_20260804-215337943_20260804-215337946.mmd",
+        "entryPoint": "CrmTaskResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "CrmTaskResource_list_20260804-215337798_20260804-215337802.mmd",
+        "entryPoint": "CrmTaskResource.list",
+        "application": true,
+        "occurrences": 4
+      },
+      {
+        "file": "CrmTaskResource_setDone_20260804-215338005_20260804-215338007.mmd",
+        "entryPoint": "CrmTaskResource.setDone",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215336178_20260804-215336180.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 10
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215337295_20260804-215337371.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215335119_20260804-215335120.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 33
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215336176_20260804-215336177.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 25
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215335118_20260804-215335118.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215335554_20260804-215335555.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215336172_20260804-215336175.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 25
+      }
+    ]
+  },
+  {
+    "spec": "deals-and-tasks.spec.ts",
+    "title": "the overview counts what was entered and lists what is overdue",
+    "project": "chromium",
+    "number": "21",
+    "directory": "deals-and-tasks/21-the-overview-counts-what-was-entered-and-lists-what-is-overdue",
+    "passed": false,
+    "wholeSpec": true,
+    "diagrams": [
+      {
+        "file": "ApiExceptionMappers_handleConstraintViolation_20260804-215356729_20260804-215356729.mmd",
+        "entryPoint": "ApiExceptionMappers.handleConstraintViolation",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_changePassword_20260804-215354912_20260804-215355626.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215354242_20260804-215354514.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215354527_20260804-215354528.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 6
+      },
+      {
+        "file": "AutoBackupTrigger_dataChanged_20260804-215356296_20260804-215356296.mmd",
+        "entryPoint": "AutoBackupTrigger.dataChanged",
+        "application": true,
+        "occurrences": 6
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215352954_20260804-215352958.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215352596_20260804-215352944.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CrmTaskResource_create_20260804-215357041_20260804-215357043.mmd",
+        "entryPoint": "CrmTaskResource.create",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "CrmTaskResource_list_20260804-215356896_20260804-215356898.mmd",
+        "entryPoint": "CrmTaskResource.list",
+        "application": true,
+        "occurrences": 6
+      },
+      {
+        "file": "CrmTaskResource_setDone_20260804-215357105_20260804-215357106.mmd",
+        "entryPoint": "CrmTaskResource.setDone",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215354526_20260804-215354527.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 28
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215355645_20260804-215355731.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "DealResource_changeStage_20260804-215356328_20260804-215356330.mmd",
+        "entryPoint": "DealResource.changeStage",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "DealResource_create_20260804-215356292_20260804-215356295.mmd",
+        "entryPoint": "DealResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "DealResource_create_20260804-215356721_20260804-215356728.mmd",
+        "entryPoint": "DealResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "DealResource_list_20260804-215356150_20260804-215356161.mmd",
+        "entryPoint": "DealResource.list",
+        "application": true,
+        "occurrences": 6
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215353472_20260804-215353472.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 84
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215354524_20260804-215354524.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 76
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215353471_20260804-215353471.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215353905_20260804-215353905.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215354519_20260804-215354523.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 76
+      }
+    ]
+  },
+  {
+    "spec": "i18n-and-users.spec.ts",
+    "title": "the interface switches to German and stays there after a reload",
+    "project": "chromium",
+    "number": "22",
+    "directory": "i18n-and-users/22-the-interface-switches-to-german-and-stays-there-after-a-reload",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "ApiExceptionMappers_handleConstraintViolation_20260804-215410117_20260804-215410117.mmd",
+        "entryPoint": "ApiExceptionMappers.handleConstraintViolation",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_changePassword_20260804-215408611_20260804-215409325.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215407960_20260804-215408231.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215408245_20260804-215408246.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 4
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215406975_20260804-215406980.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215406619_20260804-215406965.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_create_20260804-215410109_20260804-215410116.mmd",
+        "entryPoint": "ContactResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_list_20260804-215410002_20260804-215410008.mmd",
+        "entryPoint": "ContactResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215408243_20260804-215408244.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 10
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215409344_20260804-215409410.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215407199_20260804-215407199.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 35
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215408241_20260804-215408241.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 27
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215407198_20260804-215407198.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215407632_20260804-215407632.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215408237_20260804-215408240.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 27
+      }
+    ]
+  },
+  {
+    "spec": "i18n-and-users.spec.ts",
+    "title": "an administrator adds a user who then has to choose their own password",
+    "project": "chromium",
+    "number": "23",
+    "directory": "i18n-and-users/23-an-administrator-adds-a-user-who-then-has-to-choose-their-own-password",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215414111_20260804-215414826.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AuthResource_login_20260804-215413443_20260804-215413713.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "AuthResource_me_20260804-215413726_20260804-215413727.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 4
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215412450_20260804-215412454.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215412094_20260804-215412439.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215413724_20260804-215413726.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 12
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215414844_20260804-215414913.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 3
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215412670_20260804-215412671.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 44
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215413723_20260804-215413723.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 29
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215412669_20260804-215412669.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215413103_20260804-215413104.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 2
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215413718_20260804-215413722.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 29
+      },
+      {
+        "file": "UserResource_create_20260804-215415488_20260804-215415724.mmd",
+        "entryPoint": "UserResource.create",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "UserResource_list_20260804-215415346_20260804-215415347.mmd",
+        "entryPoint": "UserResource.list",
+        "application": true,
+        "occurrences": 2
+      }
+    ]
+  },
+  {
+    "spec": "i18n-and-users.spec.ts",
+    "title": "a bookmarked page opens the application instead of a blank 404",
+    "project": "chromium",
+    "number": "24",
+    "directory": "i18n-and-users/24-a-bookmarked-page-opens-the-application-instead-of-a-blank-404",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AppointmentResource_list_20260804-215422799_20260804-215422802.mmd",
+        "entryPoint": "AppointmentResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_changePassword_20260804-215421395_20260804-215422110.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215420726_20260804-215420999.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215421013_20260804-215421014.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 6
+      },
+      {
+        "file": "BackupResource_list_20260804-215422849_20260804-215422850.mmd",
+        "entryPoint": "BackupResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupResource_settings_20260804-215422849_20260804-215422850.mmd",
+        "entryPoint": "BackupResource.settings",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215419455_20260804-215419460.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215419097_20260804-215419445.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "ContactResource_list_20260804-215422654_20260804-215422658.mmd",
+        "entryPoint": "ContactResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215421011_20260804-215421013.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 14
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215422128_20260804-215422197.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "DealResource_list_20260804-215422736_20260804-215422745.mmd",
+        "entryPoint": "DealResource.list",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215419944_20260804-215419945.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 49
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215421010_20260804-215421010.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 41
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215419943_20260804-215419943.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215420393_20260804-215420393.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215421005_20260804-215421009.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 41
+      }
+    ]
+  },
+  {
+    "spec": "i18n-and-users.spec.ts",
+    "title": "a wrong password is refused and the session stays signed out",
+    "project": "chromium",
+    "number": "25",
+    "directory": "i18n-and-users/25-a-wrong-password-is-refused-and-the-session-stays-signed-out",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215426861_20260804-215427574.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215426208_20260804-215426479.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215428152_20260804-215428387.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215426492_20260804-215426493.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215425209_20260804-215425214.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215424852_20260804-215425199.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215426491_20260804-215426492.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 3
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215427593_20260804-215427675.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215425434_20260804-215425435.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 22
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215426489_20260804-215426489.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 7
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215425433_20260804-215425433.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215425875_20260804-215425875.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 2
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215426484_20260804-215426488.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 7
+      }
+    ]
+  },
+  {
+    "spec": "i18n-and-users.spec.ts",
+    "title": "signing out returns to the login screen and protects the pages again",
+    "project": "chromium",
+    "number": "26",
+    "directory": "i18n-and-users/26-signing-out-returns-to-the-login-screen-and-protects-the-pages-again",
+    "passed": true,
+    "wholeSpec": false,
+    "diagrams": [
+      {
+        "file": "AuthResource_changePassword_20260804-215432411_20260804-215433125.mmd",
+        "entryPoint": "AuthResource.changePassword",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_login_20260804-215431742_20260804-215432015.mmd",
+        "entryPoint": "AuthResource.login",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_logout_20260804-215433720_20260804-215433723.mmd",
+        "entryPoint": "AuthResource.logout",
+        "application": true,
+        "occurrences": 1
+      },
+      {
+        "file": "AuthResource_me_20260804-215432029_20260804-215432029.mmd",
+        "entryPoint": "AuthResource.me",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "BackupService_applyRetention_20260804-215430747_20260804-215430752.mmd",
+        "entryPoint": "BackupService.applyRetention",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "BootstrapAdminService_createAdminIfNoUsersExist_20260804-215430392_20260804-215430737.mmd",
+        "entryPoint": "BootstrapAdminService.createAdminIfNoUsersExist",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "CurrentUser_find_20260804-215432027_20260804-215432028.mmd",
+        "entryPoint": "CurrentUser.find",
+        "application": false,
+        "occurrences": 6
+      },
+      {
+        "file": "DashboardResource_summary_20260804-215433143_20260804-215433225.mmd",
+        "entryPoint": "DashboardResource.summary",
+        "application": true,
+        "occurrences": 2
+      },
+      {
+        "file": "SessionAuthenticationMechanism_authenticate_20260804-215430967_20260804-215430968.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.authenticate",
+        "application": false,
+        "occurrences": 29
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTransport_20260804-215432025_20260804-215432025.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTransport",
+        "application": false,
+        "occurrences": 16
+      },
+      {
+        "file": "SessionAuthenticationMechanism_getCredentialTypes_20260804-215430967_20260804-215430967.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.getCredentialTypes",
+        "application": false,
+        "occurrences": 1
+      },
+      {
+        "file": "SessionAuthenticationMechanism_sendChallenge_20260804-215431405_20260804-215431405.mmd",
+        "entryPoint": "SessionAuthenticationMechanism.sendChallenge",
+        "application": false,
+        "occurrences": 2
+      },
+      {
+        "file": "SessionService_authenticate_20260804-215432020_20260804-215432024.mmd",
+        "entryPoint": "SessionService.authenticate",
+        "application": false,
+        "occurrences": 16
+      }
+    ]
+  }
+]

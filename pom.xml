@@ -51,6 +51,7 @@
     <rat-plugin.version>0.18</rat-plugin.version>
     <exec-plugin.version>3.5.1</exec-plugin.version>
     <assertj.version>3.27.6</assertj.version>
+    <cdi-flow.version>1.0.0-SNAPSHOT</cdi-flow.version>
 
     <!-- Minimum coverage enforced by JaCoCo on the hand written backend code. -->
     <jacoco.line.coverage>0.80</jacoco.line.coverage>
@@ -137,6 +138,17 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-openapi</artifactId>
+    </dependency>
+
+    <!--
+      Development tool: records the call chain of a request as a sequence diagram. Switched off
+      unless cdi-flow.enabled=true is set at build time, in which case nothing is instrumented
+      and the interceptor never enters a call chain — see org.os890.smallcrm.flow.
+    -->
+    <dependency>
+      <groupId>org.os890.cdi.uml</groupId>
+      <artifactId>dynamic-cdi-flow-renderer</artifactId>
+      <version>${cdi-flow.version}</version>
     </dependency>
 
     <!-- Test -->
@@ -237,6 +249,17 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>${jacoco-plugin.version}</version>
+        <configuration>
+          <excludes>
+            <!--
+              The cdi-flow recorder plumbing is a development tool, not application behaviour: an
+              ordinary build never instruments a bean and never arms the recorder, so there is
+              nothing here for the suite to exercise. Counting it would only dilute the figure the
+              thresholds are meant to protect.
+            -->
+            <exclude>org/os890/smallcrm/flow/**</exclude>
+          </excludes>
+        </configuration>
         <executions>
           <execution>
             <id>prepare-agent</id>

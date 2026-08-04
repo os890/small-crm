@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant UserResource
+    participant UserService
+    Note over Caller,UserService: 2026-08-04 21:54:15.488 - 21:54:15.724<br/>236.3 ms | thread executor-thread-2
+    Caller->>UserResource: create(CreateUserRequest)
+    activate UserResource
+        UserResource->>UserService: create(CreateUserRequest)
+        activate UserService
+        UserService-->>UserResource: UserDto [235.1 ms]
+        deactivate UserService
+    UserResource-->>Caller: Response [236.3 ms]
+    deactivate UserResource

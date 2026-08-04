@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant DealResource
+    participant DealService
+    Note over Caller,DealService: 2026-08-04 21:54:22.736 - 21:54:22.745<br/>8.95 ms | thread executor-thread-3
+    Caller->>DealResource: list(DealStage, boolean, Long, Integer, Integer)
+    activate DealResource
+        DealResource->>DealService: list(DealStage, boolean, Long, PageRequest)
+        activate DealService
+        DealService-->>DealResource: Paged [8.66 ms]
+        deactivate DealService
+    DealResource-->>Caller: Response [8.95 ms]
+    deactivate DealResource

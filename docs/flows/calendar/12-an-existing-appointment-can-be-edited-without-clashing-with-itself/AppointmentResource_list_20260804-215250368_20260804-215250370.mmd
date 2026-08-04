@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant AppointmentResource
+    participant AppointmentService
+    Note over Caller,AppointmentService: 2026-08-04 21:52:50.368 - 21:52:50.370<br/>1.76 ms | thread executor-thread-3
+    Caller->>AppointmentResource: list(Instant, Instant)
+    activate AppointmentResource
+        AppointmentResource->>AppointmentService: list(Instant, Instant)
+        activate AppointmentService
+        AppointmentService-->>AppointmentResource: List [1.74 ms]
+        deactivate AppointmentService
+    AppointmentResource-->>Caller: List [1.76 ms]
+    deactivate AppointmentResource

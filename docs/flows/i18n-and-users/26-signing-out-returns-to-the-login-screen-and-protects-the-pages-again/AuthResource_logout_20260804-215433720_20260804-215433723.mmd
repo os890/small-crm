@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant AuthResource
+    participant SessionCookie
+    participant SessionService
+    Note over Caller,SessionService: 2026-08-04 21:54:33.720 - 21:54:33.723<br/>2.32 ms | thread executor-thread-1
+    Caller->>AuthResource: logout()
+    activate AuthResource
+        AuthResource->>SessionCookie: read(RoutingContext)
+        activate SessionCookie
+        SessionCookie-->>AuthResource: String [0.01 ms]
+        deactivate SessionCookie
+        AuthResource->>SessionService: revoke(String)
+        activate SessionService
+        SessionService-->>AuthResource: void [1.16 ms]
+        deactivate SessionService
+        AuthResource->>SessionCookie: clear(RoutingContext)
+        activate SessionCookie
+        SessionCookie-->>AuthResource: void [0.02 ms]
+        deactivate SessionCookie
+    AuthResource-->>Caller: Response [2.32 ms]
+    deactivate AuthResource

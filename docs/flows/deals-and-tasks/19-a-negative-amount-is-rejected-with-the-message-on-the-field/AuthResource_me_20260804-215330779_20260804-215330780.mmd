@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant AuthResource
+    participant UserService
+    participant CurrentUser
+    Note over Caller,CurrentUser: 2026-08-04 21:53:30.779 - 21:53:30.780<br/>0.75 ms | thread executor-thread-1
+    Caller->>AuthResource: me()
+    activate AuthResource
+        AuthResource->>UserService: me()
+        activate UserService
+            UserService->>CurrentUser: get()
+            activate CurrentUser
+                CurrentUser->>CurrentUser: find()
+                activate CurrentUser
+                CurrentUser-->>CurrentUser: Optional [0.26 ms]
+                deactivate CurrentUser
+            CurrentUser-->>UserService: AppUser [0.33 ms]
+            deactivate CurrentUser
+        UserService-->>AuthResource: UserDto [0.40 ms]
+        deactivate UserService
+    AuthResource-->>Caller: UserDto [0.75 ms]
+    deactivate AuthResource

@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant BackupResource
+    participant BackupSettingsService
+    participant BackupService
+    Note over Caller,BackupService: 2026-08-04 21:52:17.185 - 21:52:17.185<br/>0.66 ms | thread executor-thread-2
+    Caller->>BackupResource: settings()
+    activate BackupResource
+        BackupResource->>BackupSettingsService: retentionDays()
+        activate BackupSettingsService
+        BackupSettingsService-->>BackupResource: int [0.62 ms]
+        deactivate BackupSettingsService
+        BackupResource->>BackupService: directory()
+        activate BackupService
+        BackupService-->>BackupResource: Path [0.01 ms]
+        deactivate BackupService
+    BackupResource-->>Caller: BackupSettingsDto [0.66 ms]
+    deactivate BackupResource

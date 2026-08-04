@@ -1,0 +1,28 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant CrmTaskResource
+    participant CrmTaskService
+    participant ReferenceResolver
+    participant CurrentUser
+    Note over Caller,CurrentUser: 2026-08-04 21:53:37.943 - 21:53:37.946<br/>3.42 ms | thread executor-thread-5
+    Caller->>CrmTaskResource: create(CrmTaskDto)
+    activate CrmTaskResource
+        CrmTaskResource->>CrmTaskService: create(CrmTaskDto)
+        activate CrmTaskService
+            CrmTaskService->>ReferenceResolver: contact(Long)
+            activate ReferenceResolver
+            ReferenceResolver-->>CrmTaskService: Contact [0.00 ms]
+            deactivate ReferenceResolver
+            CrmTaskService->>ReferenceResolver: deal(Long)
+            activate ReferenceResolver
+            ReferenceResolver-->>CrmTaskService: Deal [0.00 ms]
+            deactivate ReferenceResolver
+            CrmTaskService->>CurrentUser: find()
+            activate CurrentUser
+            CurrentUser-->>CrmTaskService: Optional [0.81 ms]
+            deactivate CurrentUser
+        CrmTaskService-->>CrmTaskResource: CrmTaskDto [2.20 ms]
+        deactivate CrmTaskService
+    CrmTaskResource-->>Caller: Response [3.42 ms]
+    deactivate CrmTaskResource

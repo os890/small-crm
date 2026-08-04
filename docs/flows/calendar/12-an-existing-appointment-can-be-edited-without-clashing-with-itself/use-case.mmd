@@ -1,0 +1,252 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant AuthResource
+    participant LoginService
+    participant SessionService
+    participant SessionCookie
+    participant UserService
+    participant CurrentUser
+    participant DashboardResource
+    participant DashboardService
+    participant CrmTaskService
+    participant AppointmentService
+    participant InteractionService
+    participant AppointmentResource
+    participant ReferenceResolver
+    participant AutoBackupTrigger
+    rect rgb(244, 244, 244)
+        Note over Caller,SessionCookie: AuthResource.login — 272.1 ms | thread executor-thread-1
+        Caller->>AuthResource: login(String, String)
+        activate AuthResource
+            AuthResource->>LoginService: attempt(String, String)
+            activate LoginService
+            LoginService-->>AuthResource: LoginService.Attempt [253.3 ms]
+            deactivate LoginService
+            AuthResource->>SessionService: issue(AppUser)
+            activate SessionService
+                SessionService->>SessionService: purgeExpired()
+                activate SessionService
+                SessionService-->>SessionService: long [11.1 ms]
+                deactivate SessionService
+            SessionService-->>AuthResource: SessionService.IssuedSession [13.0 ms]
+            deactivate SessionService
+            AuthResource->>SessionCookie: write(RoutingContext, String, long)
+            activate SessionCookie
+            SessionCookie-->>AuthResource: void [0.76 ms]
+            deactivate SessionCookie
+        AuthResource-->>Caller: Response [272.1 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.68 ms | thread executor-thread-1
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.25 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.31 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.37 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.68 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,SessionCookie: AuthResource.changePassword — 715.0 ms | thread executor-thread-1
+        Caller->>AuthResource: changePassword(ChangePasswordRequest)
+        activate AuthResource
+            AuthResource->>UserService: changeOwnPassword(ChangePasswordRequest)
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.88 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.89 ms]
+                deactivate CurrentUser
+                UserService->>SessionService: revokeAllFor(AppUser)
+                activate SessionService
+                SessionService-->>UserService: long [2.42 ms]
+                deactivate SessionService
+            UserService-->>AuthResource: UserDto [705.5 ms]
+            deactivate UserService
+            AuthResource->>UserService: currentAccount()
+            activate UserService
+                UserService->>CurrentUser: find()
+                activate CurrentUser
+                CurrentUser-->>UserService: Optional [0.35 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: Optional [0.37 ms]
+            deactivate UserService
+            AuthResource->>SessionService: issue(AppUser)
+            activate SessionService
+                SessionService->>SessionService: purgeExpired()
+                activate SessionService
+                SessionService-->>SessionService: long [0.55 ms]
+                deactivate SessionService
+            SessionService-->>AuthResource: SessionService.IssuedSession [0.78 ms]
+            deactivate SessionService
+            AuthResource->>SessionCookie: write(RoutingContext, String, long)
+            activate SessionCookie
+            SessionCookie-->>AuthResource: void [0.03 ms]
+            deactivate SessionCookie
+        AuthResource-->>Caller: UserDto [715.0 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,InteractionService: DashboardResource.summary — 70.5 ms | thread executor-thread-2
+        Caller->>DashboardResource: summary()
+        activate DashboardResource
+            DashboardResource->>DashboardService: summary()
+            activate DashboardService
+                DashboardService->>CrmTaskService: overdue()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [4.27 ms]
+                deactivate CrmTaskService
+                DashboardService->>CrmTaskService: dueToday()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [1.55 ms]
+                deactivate CrmTaskService
+                DashboardService->>AppointmentService: upcoming(int)
+                activate AppointmentService
+                AppointmentService-->>DashboardService: List [3.13 ms]
+                deactivate AppointmentService
+                DashboardService->>InteractionService: recent(int)
+                activate InteractionService
+                InteractionService-->>DashboardService: List [1.81 ms]
+                deactivate InteractionService
+            DashboardService-->>DashboardResource: DashboardDto [70.2 ms]
+            deactivate DashboardService
+        DashboardResource-->>Caller: DashboardDto [70.5 ms]
+        deactivate DashboardResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.35 ms | thread executor-thread-2
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.31 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.32 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.34 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.35 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,AppointmentService: AppointmentResource.list — 1.76 ms | thread executor-thread-3
+        Caller->>AppointmentResource: list(Instant, Instant)
+        activate AppointmentResource
+            AppointmentResource->>AppointmentService: list(Instant, Instant)
+            activate AppointmentService
+            AppointmentService-->>AppointmentResource: List [1.74 ms]
+            deactivate AppointmentService
+        AppointmentResource-->>Caller: List [1.76 ms]
+        deactivate AppointmentResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,ReferenceResolver: AppointmentResource.create — 11.2 ms | thread executor-thread-3
+        Caller->>AppointmentResource: create(AppointmentDto, boolean)
+        activate AppointmentResource
+            AppointmentResource->>AppointmentService: create(AppointmentDto, boolean)
+            activate AppointmentService
+                AppointmentService->>CurrentUser: find()
+                activate CurrentUser
+                CurrentUser-->>AppointmentService: Optional [0.59 ms]
+                deactivate CurrentUser
+                AppointmentService->>ReferenceResolver: contact(Long)
+                activate ReferenceResolver
+                ReferenceResolver-->>AppointmentService: Contact [0.00 ms]
+                deactivate ReferenceResolver
+                AppointmentService->>ReferenceResolver: deal(Long)
+                activate ReferenceResolver
+                ReferenceResolver-->>AppointmentService: Deal [0.00 ms]
+                deactivate ReferenceResolver
+            AppointmentService-->>AppointmentResource: AppointmentDto [10.1 ms]
+            deactivate AppointmentService
+        AppointmentResource-->>Caller: Response [11.2 ms]
+        deactivate AppointmentResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,AutoBackupTrigger: AutoBackupTrigger.dataChanged — 0.20 ms | thread executor-thread-3
+        Caller->>AutoBackupTrigger: dataChanged()
+        activate AutoBackupTrigger
+        AutoBackupTrigger-->>Caller: void [0.20 ms]
+        deactivate AutoBackupTrigger
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,AppointmentService: AppointmentResource.list — 0.37 ms | thread executor-thread-3
+        Caller->>AppointmentResource: list(Instant, Instant)
+        activate AppointmentResource
+            AppointmentResource->>AppointmentService: list(Instant, Instant)
+            activate AppointmentService
+            AppointmentService-->>AppointmentResource: List [0.36 ms]
+            deactivate AppointmentService
+        AppointmentResource-->>Caller: List [0.37 ms]
+        deactivate AppointmentResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AppointmentResource.conflicts — 7.40 ms | thread executor-thread-3
+        Caller->>AppointmentResource: conflicts(Instant, Instant, Long)
+        activate AppointmentResource
+            AppointmentResource->>AppointmentService: conflicts(Long, Instant, Instant)
+            activate AppointmentService
+                AppointmentService->>CurrentUser: find()
+                activate CurrentUser
+                CurrentUser-->>AppointmentService: Optional [0.56 ms]
+                deactivate CurrentUser
+            AppointmentService-->>AppointmentResource: List [7.36 ms]
+            deactivate AppointmentService
+        AppointmentResource-->>Caller: List [7.40 ms]
+        deactivate AppointmentResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,ReferenceResolver: AppointmentResource.update — 4.05 ms | thread executor-thread-3
+        Caller->>AppointmentResource: update(Long, AppointmentDto, boolean)
+        activate AppointmentResource
+            AppointmentResource->>AppointmentService: update(Long, AppointmentDto, boolean)
+            activate AppointmentService
+                AppointmentService->>ReferenceResolver: contact(Long)
+                activate ReferenceResolver
+                ReferenceResolver-->>AppointmentService: Contact [0.01 ms]
+                deactivate ReferenceResolver
+                AppointmentService->>ReferenceResolver: deal(Long)
+                activate ReferenceResolver
+                ReferenceResolver-->>AppointmentService: Deal [0.00 ms]
+                deactivate ReferenceResolver
+            AppointmentService-->>AppointmentResource: AppointmentDto [3.39 ms]
+            deactivate AppointmentService
+        AppointmentResource-->>Caller: AppointmentDto [4.05 ms]
+        deactivate AppointmentResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,AutoBackupTrigger: AutoBackupTrigger.dataChanged — 0.01 ms | thread executor-thread-3
+        Caller->>AutoBackupTrigger: dataChanged()
+        activate AutoBackupTrigger
+        AutoBackupTrigger-->>Caller: void [0.01 ms]
+        deactivate AutoBackupTrigger
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,AppointmentService: AppointmentResource.list — 0.41 ms | thread executor-thread-3
+        Caller->>AppointmentResource: list(Instant, Instant)
+        activate AppointmentResource
+            AppointmentResource->>AppointmentService: list(Instant, Instant)
+            activate AppointmentService
+            AppointmentService-->>AppointmentResource: List [0.40 ms]
+            deactivate AppointmentService
+        AppointmentResource-->>Caller: List [0.41 ms]
+        deactivate AppointmentResource
+    end

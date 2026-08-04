@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant AppointmentResource
+    participant AppointmentService
+    participant ReferenceResolver
+    Note over Caller,ReferenceResolver: 2026-08-04 21:52:51.443 - 21:52:51.447<br/>4.05 ms | thread executor-thread-3
+    Caller->>AppointmentResource: update(Long, AppointmentDto, boolean)
+    activate AppointmentResource
+        AppointmentResource->>AppointmentService: update(Long, AppointmentDto, boolean)
+        activate AppointmentService
+            AppointmentService->>ReferenceResolver: contact(Long)
+            activate ReferenceResolver
+            ReferenceResolver-->>AppointmentService: Contact [0.01 ms]
+            deactivate ReferenceResolver
+            AppointmentService->>ReferenceResolver: deal(Long)
+            activate ReferenceResolver
+            ReferenceResolver-->>AppointmentService: Deal [0.00 ms]
+            deactivate ReferenceResolver
+        AppointmentService-->>AppointmentResource: AppointmentDto [3.39 ms]
+        deactivate AppointmentService
+    AppointmentResource-->>Caller: AppointmentDto [4.05 ms]
+    deactivate AppointmentResource

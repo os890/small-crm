@@ -1,0 +1,27 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant BackupService
+    participant BackupSettingsService
+    participant ClockProducer
+    Note over Caller,ClockProducer: 2026-08-04 21:54:30.747 - 21:54:30.752<br/>4.76 ms | thread main
+    Caller->>BackupService: applyRetention()
+    activate BackupService
+        BackupService->>BackupSettingsService: retentionDays()
+        activate BackupSettingsService
+        BackupSettingsService-->>BackupService: int [4.45 ms]
+        deactivate BackupSettingsService
+        BackupService->>ClockProducer: systemClock()
+        activate ClockProducer
+        ClockProducer-->>BackupService: Clock [0.09 ms]
+        deactivate ClockProducer
+        BackupService->>BackupService: list()
+        activate BackupService
+            BackupService->>BackupService: directory()
+            activate BackupService
+            BackupService-->>BackupService: Path [0.01 ms]
+            deactivate BackupService
+        BackupService-->>BackupService: List [0.05 ms]
+        deactivate BackupService
+    BackupService-->>Caller: int [4.76 ms]
+    deactivate BackupService

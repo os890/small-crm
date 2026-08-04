@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant AuthResource
+    participant LoginService
+    Note over Caller,LoginService: 2026-08-04 21:54:28.152 - 21:54:28.387<br/>235.2 ms | thread executor-thread-2
+    Caller->>AuthResource: login(String, String)
+    activate AuthResource
+        AuthResource->>LoginService: attempt(String, String)
+        activate LoginService
+        LoginService-->>AuthResource: LoginService.Attempt [234.0 ms]
+        deactivate LoginService
+    AuthResource-->>Caller: Response [235.2 ms]
+    deactivate AuthResource

@@ -120,6 +120,44 @@ reload on save. Everything stays on <http://localhost:8080>. Dev mode — and on
 known first password, `dev-only-password`, so a fresh checkout can be signed into without reading
 the console.
 
+### Recording what a use-case actually does
+
+[cdi-flow](../java-flow) records every public method call of this application's beans and writes
+the chain out as a Mermaid sequence diagram. It is off unless a build asks for it:
+
+```bash
+mvn package -DskipTests -Dcdi-flow.enabled=true   # build with the recorder in
+node e2e/scripts/record-flows.mjs --render        # drive every use-case, render the diagrams
+```
+
+The script runs each Playwright test on its own, against a freshly started application whose
+recorder writes into that use-case's own directory below [`docs/flows/`](docs/flows) — which is
+what keeps one use-case's diagrams apart from the next without any labelling inside the
+application. Identical chains are collapsed to one file, with the number of occurrences in the
+index written beside them.
+
+A flow ends when its outermost call returns, and each request is its own outermost call on its own
+thread, so a use-case is a handful of chains rather than one. Every directory therefore also holds
+a `use-case.mmd` that stitches them back together in the order the application handled them, one
+block per request — the blocks are the recorded chains, unchanged.
+
+[`docs/flows/use-cases.md`](docs/flows/use-cases.md) is the one file to read: every use-case with a
+short description and its diagram inline. The prose lives in
+`e2e/scripts/use-case-descriptions.mjs`; everything else in it is recorded.
+
+`--render` turns each combined diagram into a PNG, borrowing the same `mermaid-cli` container image
+the architecture diagrams use, and `--render-chains` adds an image per single chain — dozens per
+use-case, worth a local look and not worth committing. Rendering is by far the slowest part, so
+`--render-only` finishes an interrupted one without driving the application again, and
+`--only <substring>` records a single use-case.
+
+cdi-flow ships as a portable CDI extension, which ArC never runs: Quarkus resolves beans,
+interceptors and bindings while the application is built. Its interceptor and its `@FlowRecorded`
+binding are ordinary CDI artefacts though, so `org.os890.smallcrm.flow` supplies the two pieces
+that were missing — a build compatible extension that attaches the binding during augmentation,
+and a startup observer that arms the recorder. Both check `cdi-flow.enabled` first, so an ordinary
+build instruments nothing at all and the shipped application carries no interceptor.
+
 ### Packaging it for someone else
 
 ```bash
@@ -284,6 +322,7 @@ src/main/java/org/os890/smallcrm/
   service/                  business logic, one service per aggregate
   api/                      REST resources, DTOs and the single error shape
   security/                 bootstrap administrator, current user, account state
+  flow/                     development only: arms the cdi-flow recorder, off unless asked for
 src/main/resources/         application.properties
   db/migration/             Flyway migrations, applied at startup
 src/main/webui/             Angular 22 application
@@ -296,6 +335,7 @@ e2e/                        Playwright suite against the packaged application
 docs/manual/                illustrated user manual, English and German, HTML and PDF
 docs/architecture.md        the diagrams, from the schema up to the deployment
 docs/diagrams/              the same diagrams as PNG, plus an index page to browse them
+docs/flows/                 recorded sequence diagrams, one directory per use-case
 ```
 
 [`docs/architecture.md`](docs/architecture.md) has the diagrams: the tables, the entities mapped

@@ -1,0 +1,13 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant SessionAuthenticationMechanism
+    Note over Caller,SessionAuthenticationMechanism: 2026-08-04 21:54:31.405 - 21:54:31.405<br/>0.15 ms | thread vert.x-eventloop-thread-9
+    Caller->>SessionAuthenticationMechanism: sendChallenge(RoutingContext)
+    activate SessionAuthenticationMechanism
+        SessionAuthenticationMechanism->>SessionAuthenticationMechanism: getChallenge(RoutingContext)
+        activate SessionAuthenticationMechanism
+        SessionAuthenticationMechanism-->>SessionAuthenticationMechanism: Uni [0.06 ms]
+        deactivate SessionAuthenticationMechanism
+    SessionAuthenticationMechanism-->>Caller: Uni [0.15 ms]
+    deactivate SessionAuthenticationMechanism

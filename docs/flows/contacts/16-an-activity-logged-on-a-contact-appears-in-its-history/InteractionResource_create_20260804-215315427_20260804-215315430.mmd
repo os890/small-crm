@@ -1,0 +1,28 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant InteractionResource
+    participant InteractionService
+    participant ReferenceResolver
+    participant CurrentUser
+    Note over Caller,CurrentUser: 2026-08-04 21:53:15.427 - 21:53:15.430<br/>2.47 ms | thread executor-thread-3
+    Caller->>InteractionResource: create(InteractionDto)
+    activate InteractionResource
+        InteractionResource->>InteractionService: create(InteractionDto)
+        activate InteractionService
+            InteractionService->>ReferenceResolver: contact(Long)
+            activate ReferenceResolver
+            ReferenceResolver-->>InteractionService: Contact [0.71 ms]
+            deactivate ReferenceResolver
+            InteractionService->>ReferenceResolver: deal(Long)
+            activate ReferenceResolver
+            ReferenceResolver-->>InteractionService: Deal [0.00 ms]
+            deactivate ReferenceResolver
+            InteractionService->>CurrentUser: find()
+            activate CurrentUser
+            CurrentUser-->>InteractionService: Optional [0.44 ms]
+            deactivate CurrentUser
+        InteractionService-->>InteractionResource: InteractionDto [1.81 ms]
+        deactivate InteractionService
+    InteractionResource-->>Caller: Response [2.47 ms]
+    deactivate InteractionResource

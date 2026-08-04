@@ -1,0 +1,28 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant AuthResource
+    participant LoginService
+    participant SessionService
+    participant SessionCookie
+    Note over Caller,SessionCookie: 2026-08-04 21:54:07.960 - 21:54:08.231<br/>271.3 ms | thread executor-thread-1
+    Caller->>AuthResource: login(String, String)
+    activate AuthResource
+        AuthResource->>LoginService: attempt(String, String)
+        activate LoginService
+        LoginService-->>AuthResource: LoginService.Attempt [251.8 ms]
+        deactivate LoginService
+        AuthResource->>SessionService: issue(AppUser)
+        activate SessionService
+            SessionService->>SessionService: purgeExpired()
+            activate SessionService
+            SessionService-->>SessionService: long [11.8 ms]
+            deactivate SessionService
+        SessionService-->>AuthResource: SessionService.IssuedSession [13.9 ms]
+        deactivate SessionService
+        AuthResource->>SessionCookie: write(RoutingContext, String, long)
+        activate SessionCookie
+        SessionCookie-->>AuthResource: void [0.72 ms]
+        deactivate SessionCookie
+    AuthResource-->>Caller: Response [271.3 ms]
+    deactivate AuthResource

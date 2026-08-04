@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant CompanyResource
+    participant CompanyService
+    Note over Caller,CompanyService: 2026-08-04 21:52:16.952 - 21:52:16.954<br/>2.08 ms | thread executor-thread-1
+    Caller->>CompanyResource: list(String, Integer, Integer)
+    activate CompanyResource
+        CompanyResource->>CompanyService: list(String, PageRequest)
+        activate CompanyService
+        CompanyService-->>CompanyResource: Paged [1.68 ms]
+        deactivate CompanyService
+    CompanyResource-->>Caller: Response [2.08 ms]
+    deactivate CompanyResource

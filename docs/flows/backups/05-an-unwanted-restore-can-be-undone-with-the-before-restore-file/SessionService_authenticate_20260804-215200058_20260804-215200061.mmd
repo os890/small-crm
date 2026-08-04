@@ -1,0 +1,9 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant SessionService
+    Note over Caller,SessionService: 2026-08-04 21:52:00.058 - 21:52:00.061<br/>3.59 ms | thread executor-thread-1
+    Caller->>SessionService: authenticate(String)
+    activate SessionService
+    SessionService-->>Caller: AppUser [3.59 ms]
+    deactivate SessionService

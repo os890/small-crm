@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant DealResource
+    participant DealService
+    Note over Caller,DealService: 2026-08-04 21:53:26.744 - 21:53:26.745<br/>1.46 ms | thread executor-thread-4
+    Caller->>DealResource: changeStage(Long, DealStage)
+    activate DealResource
+        DealResource->>DealService: changeStage(Long, DealStage)
+        activate DealService
+        DealService-->>DealResource: DealDto [0.65 ms]
+        deactivate DealService
+    DealResource-->>Caller: DealDto [1.46 ms]
+    deactivate DealResource

@@ -1,0 +1,9 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant AutoBackupTrigger
+    Note over Caller,AutoBackupTrigger: 2026-08-04 21:51:19.996 - 21:51:19.997<br/>0.22 ms | thread executor-thread-1
+    Caller->>AutoBackupTrigger: dataChanged()
+    activate AutoBackupTrigger
+    AutoBackupTrigger-->>Caller: void [0.22 ms]
+    deactivate AutoBackupTrigger

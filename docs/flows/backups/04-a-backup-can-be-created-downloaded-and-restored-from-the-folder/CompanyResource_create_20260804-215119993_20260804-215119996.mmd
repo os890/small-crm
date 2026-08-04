@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant CompanyResource
+    participant CompanyService
+    participant CurrentUser
+    Note over Caller,CurrentUser: 2026-08-04 21:51:19.993 - 21:51:19.996<br/>2.68 ms | thread executor-thread-1
+    Caller->>CompanyResource: create(CompanyDto)
+    activate CompanyResource
+        CompanyResource->>CompanyService: create(CompanyDto)
+        activate CompanyService
+            CompanyService->>CurrentUser: find()
+            activate CurrentUser
+            CurrentUser-->>CompanyService: Optional [0.49 ms]
+            deactivate CurrentUser
+        CompanyService-->>CompanyResource: CompanyDto [1.37 ms]
+        deactivate CompanyService
+    CompanyResource-->>Caller: Response [2.68 ms]
+    deactivate CompanyResource

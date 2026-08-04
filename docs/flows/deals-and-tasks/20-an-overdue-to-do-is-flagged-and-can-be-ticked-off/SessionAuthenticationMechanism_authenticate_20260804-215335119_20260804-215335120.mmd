@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant SessionAuthenticationMechanism
+    participant SessionCookie
+    Note over Caller,SessionCookie: 2026-08-04 21:53:35.119 - 21:53:35.120<br/>0.82 ms | thread vert.x-eventloop-thread-1
+    Caller->>SessionAuthenticationMechanism: authenticate(RoutingContext, IdentityProviderManager)
+    activate SessionAuthenticationMechanism
+        SessionAuthenticationMechanism->>SessionCookie: read(RoutingContext)
+        activate SessionCookie
+        SessionCookie-->>SessionAuthenticationMechanism: String [0.13 ms]
+        deactivate SessionCookie
+    SessionAuthenticationMechanism-->>Caller: Uni [0.82 ms]
+    deactivate SessionAuthenticationMechanism

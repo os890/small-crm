@@ -1,0 +1,9 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant CurrentUser
+    Note over Caller,CurrentUser: 2026-08-04 21:53:13.412 - 21:53:13.414<br/>1.54 ms | thread executor-thread-1
+    Caller->>CurrentUser: find()
+    activate CurrentUser
+    CurrentUser-->>Caller: Optional [1.54 ms]
+    deactivate CurrentUser

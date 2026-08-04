@@ -1,0 +1,337 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant AuthResource
+    participant LoginService
+    participant SessionService
+    participant SessionCookie
+    participant UserService
+    participant CurrentUser
+    participant DashboardResource
+    participant DashboardService
+    participant CrmTaskService
+    participant AppointmentService
+    participant InteractionService
+    participant UserResource
+    rect rgb(244, 244, 244)
+        Note over Caller,SessionCookie: AuthResource.login — 272.9 ms | thread executor-thread-1
+        Caller->>AuthResource: login(String, String)
+        activate AuthResource
+            AuthResource->>LoginService: attempt(String, String)
+            activate LoginService
+            LoginService-->>AuthResource: LoginService.Attempt [253.4 ms]
+            deactivate LoginService
+            AuthResource->>SessionService: issue(AppUser)
+            activate SessionService
+                SessionService->>SessionService: purgeExpired()
+                activate SessionService
+                SessionService-->>SessionService: long [12.1 ms]
+                deactivate SessionService
+            SessionService-->>AuthResource: SessionService.IssuedSession [14.1 ms]
+            deactivate SessionService
+            AuthResource->>SessionCookie: write(RoutingContext, String, long)
+            activate SessionCookie
+            SessionCookie-->>AuthResource: void [0.70 ms]
+            deactivate SessionCookie
+        AuthResource-->>Caller: Response [272.9 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.82 ms | thread executor-thread-1
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.31 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.41 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.48 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.82 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,SessionCookie: AuthResource.changePassword — 712.6 ms | thread executor-thread-1
+        Caller->>AuthResource: changePassword(ChangePasswordRequest)
+        activate AuthResource
+            AuthResource->>UserService: changeOwnPassword(ChangePasswordRequest)
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.79 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.80 ms]
+                deactivate CurrentUser
+                UserService->>SessionService: revokeAllFor(AppUser)
+                activate SessionService
+                SessionService-->>UserService: long [2.37 ms]
+                deactivate SessionService
+            UserService-->>AuthResource: UserDto [703.6 ms]
+            deactivate UserService
+            AuthResource->>UserService: currentAccount()
+            activate UserService
+                UserService->>CurrentUser: find()
+                activate CurrentUser
+                CurrentUser-->>UserService: Optional [0.34 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: Optional [0.36 ms]
+            deactivate UserService
+            AuthResource->>SessionService: issue(AppUser)
+            activate SessionService
+                SessionService->>SessionService: purgeExpired()
+                activate SessionService
+                SessionService-->>SessionService: long [0.54 ms]
+                deactivate SessionService
+            SessionService-->>AuthResource: SessionService.IssuedSession [0.77 ms]
+            deactivate SessionService
+            AuthResource->>SessionCookie: write(RoutingContext, String, long)
+            activate SessionCookie
+            SessionCookie-->>AuthResource: void [0.03 ms]
+            deactivate SessionCookie
+        AuthResource-->>Caller: UserDto [712.6 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,InteractionService: DashboardResource.summary — 66.5 ms | thread executor-thread-2
+        Caller->>DashboardResource: summary()
+        activate DashboardResource
+            DashboardResource->>DashboardService: summary()
+            activate DashboardService
+                DashboardService->>CrmTaskService: overdue()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [3.56 ms]
+                deactivate CrmTaskService
+                DashboardService->>CrmTaskService: dueToday()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [1.81 ms]
+                deactivate CrmTaskService
+                DashboardService->>AppointmentService: upcoming(int)
+                activate AppointmentService
+                AppointmentService-->>DashboardService: List [3.32 ms]
+                deactivate AppointmentService
+                DashboardService->>InteractionService: recent(int)
+                activate InteractionService
+                InteractionService-->>DashboardService: List [1.62 ms]
+                deactivate InteractionService
+            DashboardService-->>DashboardResource: DashboardDto [66.3 ms]
+            deactivate DashboardService
+        DashboardResource-->>Caller: DashboardDto [66.5 ms]
+        deactivate DashboardResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.30 ms | thread executor-thread-2
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.26 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.27 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.29 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.30 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,UserService: UserResource.list — 1.08 ms | thread executor-thread-1
+        Caller->>UserResource: list()
+        activate UserResource
+            UserResource->>UserService: list()
+            activate UserService
+            UserService-->>UserResource: List [1.07 ms]
+            deactivate UserService
+        UserResource-->>Caller: List [1.08 ms]
+        deactivate UserResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,UserService: UserResource.create — 235.8 ms | thread executor-thread-1
+        Caller->>UserResource: create(CreateUserRequest)
+        activate UserResource
+            UserResource->>UserService: create(CreateUserRequest)
+            activate UserService
+            UserService-->>UserResource: UserDto [234.6 ms]
+            deactivate UserService
+        UserResource-->>Caller: Response [235.8 ms]
+        deactivate UserResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,UserService: UserResource.list — 0.34 ms | thread executor-thread-1
+        Caller->>UserResource: list()
+        activate UserResource
+            UserResource->>UserService: list()
+            activate UserService
+            UserService-->>UserResource: List [0.33 ms]
+            deactivate UserService
+        UserResource-->>Caller: List [0.34 ms]
+        deactivate UserResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,SessionCookie: AuthResource.login — 236.0 ms | thread executor-thread-1
+        Caller->>AuthResource: login(String, String)
+        activate AuthResource
+            AuthResource->>LoginService: attempt(String, String)
+            activate LoginService
+            LoginService-->>AuthResource: LoginService.Attempt [234.3 ms]
+            deactivate LoginService
+            AuthResource->>SessionService: issue(AppUser)
+            activate SessionService
+                SessionService->>SessionService: purgeExpired()
+                activate SessionService
+                SessionService-->>SessionService: long [0.76 ms]
+                deactivate SessionService
+            SessionService-->>AuthResource: SessionService.IssuedSession [1.03 ms]
+            deactivate SessionService
+            AuthResource->>SessionCookie: write(RoutingContext, String, long)
+            activate SessionCookie
+            SessionCookie-->>AuthResource: void [0.03 ms]
+            deactivate SessionCookie
+        AuthResource-->>Caller: Response [236.0 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.20 ms | thread executor-thread-1
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.17 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.18 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.19 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.20 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,SessionCookie: AuthResource.changePassword — 704.1 ms | thread executor-thread-1
+        Caller->>AuthResource: changePassword(ChangePasswordRequest)
+        activate AuthResource
+            AuthResource->>UserService: changeOwnPassword(ChangePasswordRequest)
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.48 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.48 ms]
+                deactivate CurrentUser
+                UserService->>SessionService: revokeAllFor(AppUser)
+                activate SessionService
+                SessionService-->>UserService: long [0.94 ms]
+                deactivate SessionService
+            UserService-->>AuthResource: UserDto [701.8 ms]
+            deactivate UserService
+            AuthResource->>UserService: currentAccount()
+            activate UserService
+                UserService->>CurrentUser: find()
+                activate CurrentUser
+                CurrentUser-->>UserService: Optional [0.31 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: Optional [0.32 ms]
+            deactivate UserService
+            AuthResource->>SessionService: issue(AppUser)
+            activate SessionService
+                SessionService->>SessionService: purgeExpired()
+                activate SessionService
+                SessionService-->>SessionService: long [0.47 ms]
+                deactivate SessionService
+            SessionService-->>AuthResource: SessionService.IssuedSession [0.69 ms]
+            deactivate SessionService
+            AuthResource->>SessionCookie: write(RoutingContext, String, long)
+            activate SessionCookie
+            SessionCookie-->>AuthResource: void [0.02 ms]
+            deactivate SessionCookie
+        AuthResource-->>Caller: UserDto [704.1 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,InteractionService: DashboardResource.summary — 2.87 ms | thread executor-thread-2
+        Caller->>DashboardResource: summary()
+        activate DashboardResource
+            DashboardResource->>DashboardService: summary()
+            activate DashboardService
+                DashboardService->>CrmTaskService: overdue()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [0.34 ms]
+                deactivate CrmTaskService
+                DashboardService->>CrmTaskService: dueToday()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [0.27 ms]
+                deactivate CrmTaskService
+                DashboardService->>AppointmentService: upcoming(int)
+                activate AppointmentService
+                AppointmentService-->>DashboardService: List [0.28 ms]
+                deactivate AppointmentService
+                DashboardService->>InteractionService: recent(int)
+                activate InteractionService
+                InteractionService-->>DashboardService: List [0.22 ms]
+                deactivate InteractionService
+            DashboardService-->>DashboardResource: DashboardDto [2.86 ms]
+            deactivate DashboardService
+        DashboardResource-->>Caller: DashboardDto [2.87 ms]
+        deactivate DashboardResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,CurrentUser: AuthResource.me — 0.28 ms | thread executor-thread-1
+        Caller->>AuthResource: me()
+        activate AuthResource
+            AuthResource->>UserService: me()
+            activate UserService
+                UserService->>CurrentUser: get()
+                activate CurrentUser
+                    CurrentUser->>CurrentUser: find()
+                    activate CurrentUser
+                    CurrentUser-->>CurrentUser: Optional [0.25 ms]
+                    deactivate CurrentUser
+                CurrentUser-->>UserService: AppUser [0.26 ms]
+                deactivate CurrentUser
+            UserService-->>AuthResource: UserDto [0.27 ms]
+            deactivate UserService
+        AuthResource-->>Caller: UserDto [0.28 ms]
+        deactivate AuthResource
+    end
+    rect rgb(244, 244, 244)
+        Note over Caller,InteractionService: DashboardResource.summary — 2.60 ms | thread executor-thread-1
+        Caller->>DashboardResource: summary()
+        activate DashboardResource
+            DashboardResource->>DashboardService: summary()
+            activate DashboardService
+                DashboardService->>CrmTaskService: overdue()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [0.30 ms]
+                deactivate CrmTaskService
+                DashboardService->>CrmTaskService: dueToday()
+                activate CrmTaskService
+                CrmTaskService-->>DashboardService: List [0.28 ms]
+                deactivate CrmTaskService
+                DashboardService->>AppointmentService: upcoming(int)
+                activate AppointmentService
+                AppointmentService-->>DashboardService: List [0.29 ms]
+                deactivate AppointmentService
+                DashboardService->>InteractionService: recent(int)
+                activate InteractionService
+                InteractionService-->>DashboardService: List [0.22 ms]
+                deactivate InteractionService
+            DashboardService-->>DashboardResource: DashboardDto [2.59 ms]
+            deactivate DashboardService
+        DashboardResource-->>Caller: DashboardDto [2.60 ms]
+        deactivate DashboardResource
+    end

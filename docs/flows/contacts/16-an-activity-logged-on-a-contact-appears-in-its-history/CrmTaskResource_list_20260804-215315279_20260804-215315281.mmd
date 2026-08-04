@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant CrmTaskResource
+    participant CrmTaskService
+    Note over Caller,CrmTaskService: 2026-08-04 21:53:15.279 - 21:53:15.281<br/>2.56 ms | thread executor-thread-4
+    Caller->>CrmTaskResource: list(boolean, Long, Long, Integer, Integer)
+    activate CrmTaskResource
+        CrmTaskResource->>CrmTaskService: list(boolean, Long, Long, PageRequest)
+        activate CrmTaskService
+        CrmTaskService-->>CrmTaskResource: Paged [2.51 ms]
+        deactivate CrmTaskService
+    CrmTaskResource-->>Caller: Response [2.56 ms]
+    deactivate CrmTaskResource

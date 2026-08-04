@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant InteractionResource
+    participant InteractionService
+    Note over Caller,InteractionService: 2026-08-04 21:53:15.278 - 21:53:15.282<br/>4.21 ms | thread executor-thread-2
+    Caller->>InteractionResource: list(Long, Long, Integer, Integer)
+    activate InteractionResource
+        InteractionResource->>InteractionService: list(Long, Long, PageRequest)
+        activate InteractionService
+        InteractionService-->>InteractionResource: Paged [4.17 ms]
+        deactivate InteractionService
+    InteractionResource-->>Caller: Response [4.21 ms]
+    deactivate InteractionResource

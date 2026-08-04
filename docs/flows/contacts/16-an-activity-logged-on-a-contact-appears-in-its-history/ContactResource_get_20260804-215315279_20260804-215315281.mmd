@@ -1,0 +1,14 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant ContactResource
+    participant ContactService
+    Note over Caller,ContactService: 2026-08-04 21:53:15.279 - 21:53:15.281<br/>1.90 ms | thread executor-thread-1
+    Caller->>ContactResource: get(Long)
+    activate ContactResource
+        ContactResource->>ContactService: get(Long)
+        activate ContactService
+        ContactService-->>ContactResource: ContactDto [1.89 ms]
+        deactivate ContactService
+    ContactResource-->>Caller: ContactDto [1.90 ms]
+    deactivate ContactResource

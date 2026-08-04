@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant BackupResource
+    participant BackupService
+    participant BackupXml
+    Note over Caller,BackupXml: 2026-08-04 21:52:17.292 - 21:52:17.302<br/>9.32 ms | thread executor-thread-1
+    Caller->>BackupResource: restoreUpload(FileUpload)
+    activate BackupResource
+        BackupResource->>BackupService: restore(byte[])
+        activate BackupService
+            BackupService->>BackupService: parse(byte[])
+            activate BackupService
+                BackupService->>BackupXml: read(byte[])
+                activate BackupXml
+                BackupXml--xBackupService: throws BusinessRuleException [8.33 ms]
+                deactivate BackupXml
+            BackupService--xBackupService: throws BusinessRuleException [9.07 ms]
+            deactivate BackupService
+        BackupService--xBackupResource: throws BusinessRuleException [9.17 ms]
+        deactivate BackupService
+    BackupResource--xCaller: throws BusinessRuleException [9.32 ms]
+    deactivate BackupResource

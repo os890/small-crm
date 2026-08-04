@@ -1,0 +1,28 @@
+sequenceDiagram
+    autonumber
+    participant Caller as caller
+    participant DealResource
+    participant DealService
+    participant ReferenceResolver
+    participant CurrentUser
+    Note over Caller,CurrentUser: 2026-08-04 21:53:56.292 - 21:53:56.295<br/>3.54 ms | thread executor-thread-3
+    Caller->>DealResource: create(DealDto)
+    activate DealResource
+        DealResource->>DealService: create(DealDto)
+        activate DealService
+            DealService->>ReferenceResolver: contact(Long)
+            activate ReferenceResolver
+            ReferenceResolver-->>DealService: Contact [0.00 ms]
+            deactivate ReferenceResolver
+            DealService->>ReferenceResolver: company(Long)
+            activate ReferenceResolver
+            ReferenceResolver-->>DealService: Company [0.00 ms]
+            deactivate ReferenceResolver
+            DealService->>CurrentUser: find()
+            activate CurrentUser
+            CurrentUser-->>DealService: Optional [0.65 ms]
+            deactivate CurrentUser
+        DealService-->>DealResource: DealDto [2.09 ms]
+        deactivate DealService
+    DealResource-->>Caller: Response [3.54 ms]
+    deactivate DealResource
